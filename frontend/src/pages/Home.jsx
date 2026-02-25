@@ -105,8 +105,8 @@ export default function Home() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {categories.map((cat) => (
             <Link
-              key={cat._id}
-              to={`/search?category=${cat._id}`}
+              key={cat.id}
+              to={`/search?category=${cat.id}`}
               className="card text-center hover:scale-105 transition-transform"
             >
               <div className="text-4xl mb-3">{cat.icon || '🎵'}</div>
@@ -125,7 +125,7 @@ export default function Home() {
         <div className="grid md:grid-cols-3 gap-6">
           {featuredArtists.map((artist) => (
             <Link
-              key={artist._id}
+              key={artist.id}
               to={`/${artist.stageName}`}
               className="card group overflow-hidden"
             >

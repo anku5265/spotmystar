@@ -39,7 +39,7 @@ export default function ArtistProfile() {
       const userId = userInfo ? JSON.parse(userInfo).id : null;
 
       await axios.post('/api/bookings', {
-        artistId: artist._id,
+        artistId: artist.id,
         userId: userId,
         ...formData
       });

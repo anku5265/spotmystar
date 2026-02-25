@@ -71,7 +71,7 @@ export default function Search() {
                 >
                   <option value="">All Categories</option>
                   {categories.map(cat => (
-                    <option key={cat._id} value={cat._id}>{cat.name}</option>
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
               </div>
@@ -128,7 +128,7 @@ export default function Search() {
 
           <div className={viewMode === 'grid' ? 'grid md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
             {artists.map((artist) => (
-              <div key={artist._id} className="card group relative">
+              <div key={artist.id} className="card group relative">
                 <button className="absolute top-4 right-4 z-10 p-2 glass rounded-full hover:bg-primary transition">
                   <Heart size={20} />
                 </button>

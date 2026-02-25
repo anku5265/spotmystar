@@ -132,7 +132,7 @@ export default function ArtistDashboard() {
               <p className="text-center text-gray-400 py-8">No booking requests yet</p>
             ) : (
               bookings.map((booking) => (
-                <div key={booking._id} className="glass rounded-lg p-6">
+                <div key={booking.id} className="glass rounded-lg p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-xl font-bold mb-2">{booking.userName}</h3>
@@ -161,14 +161,14 @@ export default function ArtistDashboard() {
                   {booking.status === 'pending' && (
                     <div className="flex gap-3">
                       <button
-                        onClick={() => updateBookingStatus(booking._id, 'accepted')}
+                        onClick={() => updateBookingStatus(booking.id, 'accepted')}
                         className="flex-1 bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg transition"
                       >
                         <CheckCircle size={18} className="inline mr-2" />
                         Accept
                       </button>
                       <button
-                        onClick={() => updateBookingStatus(booking._id, 'rejected')}
+                        onClick={() => updateBookingStatus(booking.id, 'rejected')}
                         className="flex-1 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition"
                       >
                         <XCircle size={18} className="inline mr-2" />

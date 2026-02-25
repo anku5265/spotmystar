@@ -267,7 +267,7 @@ export default function AdminDashboard() {
               </thead>
               <tbody>
                 {artists.map((artist) => (
-                  <tr key={artist._id} className="border-b border-white/5">
+                  <tr key={artist.id} className="border-b border-white/5">
                     <td className="py-3 px-4">
                       <div>
                         <p className="font-semibold">{artist.stageName}</p>
@@ -289,13 +289,13 @@ export default function AdminDashboard() {
                       {artist.status === 'pending' && (
                         <div className="flex gap-2">
                           <button
-                            onClick={() => approveArtist(artist._id)}
+                            onClick={() => approveArtist(artist.id)}
                             className="bg-green-500 hover:bg-green-600 px-3 py-1 rounded text-sm transition"
                           >
                             Approve
                           </button>
                           <button
-                            onClick={() => rejectArtist(artist._id)}
+                            onClick={() => rejectArtist(artist.id)}
                             className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm transition"
                           >
                             Reject
@@ -313,7 +313,7 @@ export default function AdminDashboard() {
         {activeTab === 'bookings' && (
           <div className="space-y-4">
             {bookings.map((booking) => (
-              <div key={booking._id} className="glass rounded-lg p-6">
+              <div key={booking.id} className="glass rounded-lg p-6">
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="text-xl font-bold mb-2">{booking.artist?.stageName}</h3>
