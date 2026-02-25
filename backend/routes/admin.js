@@ -6,16 +6,56 @@ const router = express.Router();
 // Dashboard stats
 router.get('/stats', async (req, res) => {
   try {
-    const totalArtists = await pool.query("SELECT COUNT(*) FROM artists WHERE status = 'active'");
-    const pendingApprovals = await pool.query("SELECT COUNT(*) FROM artists WHERE status = 'pending'");
+    // Artist stats
+    const totalArtists = await pool.query("SELECT COUNT(*) FROM artists");
+    const activeArtists = await pool.query("SELECT COUNT(*) FROM artists WHERE status = 'active'");
+    const pendingArtists = await pool.query("SELECT COUNT(*) FROM artists WHERE status = 'pending'");
+    const verifiedArtists = await pool.query("SELECT COUNT(*) FROM artists WHERE is_verified = true");
+    
+    // User stats
+    const totalUsers = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'user'");
+    
+    // Booking stats
     const totalBookings = await pool.query('SELECT COUNT(*) FROM bookings');
     const todayBookings = await pool.query(
       "SELECT COUNT(*) FROM bookings WHERE DATE(created_at) = CURRENT_DATE"
     );
+    const pendingBookings = await pool.query(
+      "SELECT COUNT(*) FROM bookings WHERE status = 'pending'"
+    );
+    const completedBookings = await pool.query(
+      "SELECT COUNT(*) FROM bookings WHERE status = 'completed'"
+    );
+
+    // Category-wise artist count
+    const artistsByCategory = await pool.query(`
+      SELECT c.name, COUNT(a.id) as count 
+      FROM categories c 
+      LEFT JOIN artists a ON c.id = a.category_id AND a.status = 'active'
+      GROUP BY c.name 
+      ORDER BY count DESC
+    `);
 
     res.json({
-      totalArtists: parseInt(totalArtists.rows[0].count),
-      pendingApprovals: parseInt(pendingApprovals.rows[0].count),
+      artists: {
+        total: parseInt(totalArtists.rows[0].count),
+        active: parseInt(activeArtists.rows[0].count),
+        pending: parseInt(pendingArtists.rows[0].count),
+        verified: parseInt(verifiedArtists.rows[0].count)
+      },
+      users: {
+        total: parseInt(totalUsers.rows[0].count)
+      },
+      bookings: {
+        total: parseInt(totalBookings.rows[0].count),
+        today: parseInt(todayBookings.rows[0].count),
+        pending: parseInt(pendingBookings.rows[0].count),
+        completed: parseInt(completedBookings.rows[0].count)
+      },
+      categoryBreakdown: artistsByCategory.rows,
+      // Legacy fields for backward compatibility
+      totalArtists: parseInt(activeArtists.rows[0].count),
+      pendingApprovals: parseInt(pendingArtists.rows[0].count),
       totalBookings: parseInt(totalBookings.rows[0].count),
       todayBookings: parseInt(todayBookings.rows[0].count)
     });
@@ -81,6 +121,21 @@ router.get('/bookings', async (req, res) => {
       FROM bookings b 
       LEFT JOIN artists a ON b.artist_id = a.id 
       ORDER BY b.created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get all users
+router.get('/users', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT id, name, email, phone, created_at 
+      FROM users 
+      WHERE role = 'user' 
+      ORDER BY created_at DESC
     `);
     res.json(result.rows);
   } catch (error) {
