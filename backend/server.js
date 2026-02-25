@@ -11,16 +11,6 @@ import adminRoutes from './routes/admin.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Test database connection
-pool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    console.error('Database connection error:', err);
-  } else {
-    console.log('✓ Database connected at:', res.rows[0].now);
-  }
-});
 
 // Middleware
 app.use(cors());
@@ -38,6 +28,17 @@ app.get('/', (req, res) => {
   res.json({ message: 'SpotMyStar API - PostgreSQL/Supabase' });
 });
 
-app.listen(PORT, () => {
-  console.log(`✓ Server running on port ${PORT}`);
+app.get('/api', (req, res) => {
+  res.json({ message: 'SpotMyStar API is running!' });
 });
+
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`✓ Server running on port ${PORT}`);
+  });
+}
+
+// Export for Vercel serverless
+export default app;
