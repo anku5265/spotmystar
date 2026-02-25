@@ -1,184 +1,95 @@
-# Quick Setup Guide
+# 🚀 SpotMyStar - Setup Guide
 
-## Installation
+## Step 1: Clone Repository
 
-### 1. Backend Setup
+```bash
+git clone https://github.com/anku5265/spotmystar.git
+cd spotmystar
+```
+
+## Step 2: Setup Supabase Database
+
+1. Go to [supabase.com](https://supabase.com) and create account
+2. Create new project (save your database password!)
+3. Go to SQL Editor and run `backend/database/schema.sql`
+4. Go to Settings > Database > Connection String
+5. Select "Session Pooler" and copy the connection string
+6. Go to Settings > API and copy:
+   - Project URL
+   - anon public key
+
+## Step 3: Backend Setup
+
 ```bash
 cd backend
 npm install
-cp .env.example .env
 ```
 
-Edit `.env` file:
+Create `.env` file in backend folder:
+
 ```env
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/artist-discovery
-JWT_SECRET=your_secret_key_here
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-gmail-app-password
+NODE_ENV=development
+
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_ANON_KEY=your-anon-key-here
+DATABASE_URL=postgresql://postgres.xxxxx:YOUR_PASSWORD@aws-0-ap-south-1.pooler.supabase.com:6543/postgres
+
+JWT_SECRET=any_random_long_string_here
+
 FRONTEND_URL=http://localhost:5173
 ```
 
-Seed database:
+**Important:** Replace with your actual values from Supabase!
+
+Seed the database:
+
 ```bash
 npm run seed
 ```
 
 Start backend:
+
 ```bash
-npm run dev
+npm start
 ```
 
-Backend runs on: http://localhost:5000
+## Step 4: Frontend Setup (New Terminal)
 
-### 2. Frontend Setup
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Frontend runs on: http://localhost:5173
+## Step 5: Open Browser
 
-## Default Admin Credentials
-- Email: `admin@artisthub.com`
-- Password: `admin123`
+Go to: http://localhost:5173
 
-## Testing Flow
+## Default Admin Login
 
-1. **Register as Artist**
-   - Go to http://localhost:5173/artist/register
-   - Fill form and submit
-   - Status will be "Pending"
+- URL: http://localhost:5173/admin/login
+- Email: admin@spotmystar.com
+- Password: admin123
 
-2. **Admin Approval**
-   - Login at http://localhost:5173/admin/login
-   - Use admin credentials above
-   - Go to Artists Management
-   - Approve the pending artist
+## Troubleshooting
 
-3. **Artist Login**
-   - Go to http://localhost:5173/artist/dashboard
-   - Login with artist email/password
-   - View dashboard
+### Database connection error?
+- Check your DATABASE_URL in .env
+- Make sure you used "Session Pooler" connection string
+- Verify your database password is correct
 
-4. **User Booking**
-   - Search artists on homepage
-   - Click artist profile
-   - Send booking request
-   - Artist receives email
-
-## Project Structure
-
-```
-artist-discovery/
-├── backend/
-│   ├── config/
-│   │   └── db.js              # MongoDB connection
-│   ├── models/
-│   │   ├── Artist.js          # Artist schema
-│   │   ├── Booking.js         # Booking schema
-│   │   ├── Category.js        # Category schema
-│   │   └── User.js            # User/Admin schema
-│   ├── routes/
-│   │   ├── admin.js           # Admin APIs
-│   │   ├── artists.js         # Artist APIs
-│   │   ├── auth.js            # Authentication
-│   │   ├── bookings.js        # Booking APIs
-│   │   └── categories.js      # Category APIs
-│   ├── .env.example
-│   ├── package.json
-│   ├── seed.js                # Database seeder
-│   └── server.js              # Entry point
-│
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Footer.jsx
-│   │   │   └── Navbar.jsx
-│   │   ├── pages/
-│   │   │   ├── AdminDashboard.jsx
-│   │   │   ├── AdminLogin.jsx
-│   │   │   ├── ArtistDashboard.jsx
-│   │   │   ├── ArtistProfile.jsx
-│   │   │   ├── ArtistRegister.jsx
-│   │   │   ├── BookingSuccess.jsx
-│   │   │   ├── Home.jsx
-│   │   │   ├── Search.jsx
-│   │   │   └── Wishlist.jsx
-│   │   ├── App.jsx            # Routes
-│   │   ├── index.css          # Tailwind styles
-│   │   └── main.jsx           # Entry point
-│   ├── index.html
-│   ├── package.json
-│   ├── postcss.config.js
-│   ├── tailwind.config.js
-│   └── vite.config.js
-│
-├── .gitignore
-├── DEPLOYMENT.md              # Deployment guide
-├── FEATURES.md                # Feature list
-├── README.md                  # Overview
-└── SETUP.md                   # This file
+### Port 5000 already in use?
+```bash
+# Windows
+netstat -ano | findstr :5000
+taskkill /F /PID [PID_NUMBER]
 ```
 
-## API Endpoints
+### Module not found?
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
 
-### Public
-- `GET /api/categories` - Get all categories
-- `GET /api/artists/search?city=Delhi&category=...` - Search artists
-- `GET /api/artists/featured` - Featured artists
-- `GET /api/artists/:identifier` - Artist profile
-- `POST /api/artists/register` - Artist registration
-- `POST /api/bookings` - Create booking request
-
-### Artist (Auth Required)
-- `POST /api/auth/artist/login` - Artist login
-- `GET /api/bookings/artist/:artistId` - Get artist bookings
-- `PATCH /api/bookings/:id/status` - Update booking status
-
-### Admin (Auth Required)
-- `POST /api/auth/admin/login` - Admin login
-- `GET /api/admin/stats` - Dashboard stats
-- `GET /api/admin/artists` - All artists
-- `PATCH /api/admin/artists/:id/verify` - Approve/reject artist
-- `GET /api/admin/bookings` - All bookings
-
-## Tech Stack
-
-### Frontend
-- React 18
-- Vite
-- Tailwind CSS
-- React Router DOM
-- Axios
-- Framer Motion
-- Lucide React
-
-### Backend
-- Node.js
-- Express
-- MongoDB + Mongoose
-- JWT
-- Bcrypt
-- Nodemailer
-- CORS
-
-## Next Steps
-
-1. Add image upload (Cloudinary)
-2. Implement wishlist functionality
-3. Add reviews & ratings
-4. Payment integration
-5. Artist availability calendar
-6. Advanced filters
-7. Mobile app (React Native)
-
-## Support
-
-For issues or questions, check:
-- README.md for overview
-- FEATURES.md for feature details
-- DEPLOYMENT.md for production setup
+That's it! 🎉
