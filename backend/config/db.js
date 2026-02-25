@@ -4,6 +4,15 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Debug: Check if DATABASE_URL is loaded
+if (!process.env.DATABASE_URL) {
+  console.error('❌ ERROR: DATABASE_URL not found in .env file!');
+  console.error('Please make sure backend/.env file exists with DATABASE_URL');
+  process.exit(1);
+}
+
+console.log('✓ DATABASE_URL loaded from .env');
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
