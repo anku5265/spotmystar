@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://spotmystar-backend.vercel.app/api/:path*"
+      "destination": "https://spotmystar-backend-lq4iad5ru-anku5265s-projects.vercel.app/api/:path*"
     },
     {
       "source": "/(.*)",
