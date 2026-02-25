@@ -1,93 +1,61 @@
 # 🎵 SpotMyStar
 
-Artist Discovery & Booking Platform - Find and book DJs, Singers, Dancers, Bands, Anchors, and Comedians for your events.
+Artist Discovery & Booking Platform
 
-## ✨ Features
+## Setup
 
-- 🎭 Browse artists by category, city, and price
-- 📅 Easy booking system
-- ✅ Admin-verified artists with badges
-- 👤 User accounts and wishlists
-- 🎨 Artist profiles with photos/videos
-- 📊 Admin dashboard
-
-## 🚀 Quick Setup
-
-See [SETUP.md](./SETUP.md) for complete installation instructions.
-
-### Quick Start
-
+### 1. Clone
 ```bash
-# 1. Clone
 git clone https://github.com/anku5265/spotmystar.git
 cd spotmystar
+```
 
-# 2. Setup Supabase (see SETUP.md)
+### 2. Supabase Setup
+1. Create account at [supabase.com](https://supabase.com)
+2. Create new project (save database password!)
+3. SQL Editor → Run `backend/database/schema.sql`
+4. Settings → Database → Connection String → Select "Session Pooler"
+5. Settings → API → Copy Project URL and anon key
 
-# 3. Backend
+### 3. Backend
+```bash
 cd backend
 npm install
-# Create .env file (see SETUP.md)
+```
+
+Create `backend/.env`:
+```env
+PORT=5000
+NODE_ENV=development
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+DATABASE_URL=postgresql://postgres.xxxxx:YOUR_PASSWORD@aws-0-ap-south-1.pooler.supabase.com:6543/postgres
+JWT_SECRET=any_random_string
+FRONTEND_URL=http://localhost:5173
+```
+
+```bash
 npm run seed
 npm start
+```
 
-# 4. Frontend (new terminal)
+### 4. Frontend (new terminal)
+```bash
 cd frontend
 npm install
 npm run dev
-
-# 5. Open http://localhost:5173
 ```
 
-## 🔑 Default Admin
+### 5. Open
+http://localhost:5173
 
+## Admin Login
 - URL: http://localhost:5173/admin/login
 - Email: admin@spotmystar.com
 - Password: admin123
 
-## 🛠️ Tech Stack
+## Tech Stack
+React, Node.js, Express, PostgreSQL (Supabase), Tailwind CSS
 
-**Frontend:** React, Vite, Tailwind CSS, Framer Motion  
-**Backend:** Node.js, Express, PostgreSQL (Supabase)  
-**Auth:** JWT, Bcrypt
-
-## 📁 Structure
-
-```
-spotmystar/
-├── backend/          # Express API
-│   ├── config/      # Database config
-│   ├── database/    # SQL schema
-│   ├── routes/      # API endpoints
-│   └── .env         # Environment variables (create this!)
-├── frontend/         # React app
-│   └── src/
-└── SETUP.md         # Setup instructions
-```
-
-## 📝 Environment Variables
-
-Create `backend/.env`:
-
-```env
-PORT=5000
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_anon_key
-DATABASE_URL=your_database_connection_string
-JWT_SECRET=your_jwt_secret
-FRONTEND_URL=http://localhost:5173
-```
-
-See [SETUP.md](./SETUP.md) for details.
-
-## 🐛 Troubleshooting
-
-See [SETUP.md](./SETUP.md) troubleshooting section.
-
-## 👨‍💻 Author
-
+## Author
 Ankush Kumar - [@anku5265](https://github.com/anku5265)
-
----
-
-⭐ Star this repo if you find it helpful!
