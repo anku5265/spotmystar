@@ -35,8 +35,12 @@ export default function ArtistProfile() {
   const handleBooking = async (e) => {
     e.preventDefault();
     try {
+      const userInfo = localStorage.getItem('userInfo');
+      const userId = userInfo ? JSON.parse(userInfo).id : null;
+
       await axios.post('/api/bookings', {
         artistId: artist._id,
+        userId: userId,
         ...formData
       });
       window.location.href = '/booking-success';

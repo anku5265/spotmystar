@@ -11,6 +11,9 @@ import ArtistLogin from './pages/ArtistLogin';
 import ArtistDashboard from './pages/ArtistDashboard';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import UserRegister from './pages/UserRegister';
+import UserLogin from './pages/UserLogin';
+import UserDashboard from './pages/UserDashboard';
 
 function App() {
   return (
@@ -25,9 +28,18 @@ function App() {
             <Route path="/:stageName" element={<ArtistProfile />} />
             <Route path="/booking-success" element={<BookingSuccess />} />
             <Route path="/wishlist" element={<Wishlist />} />
+            
+            {/* User Routes */}
+            <Route path="/user/register" element={<UserRegister />} />
+            <Route path="/user/login" element={<UserLogin />} />
+            <Route path="/user/dashboard" element={<UserDashboard />} />
+            
+            {/* Artist Routes */}
             <Route path="/artist/register" element={<ArtistRegister />} />
             <Route path="/artist/login" element={<ArtistLogin />} />
             <Route path="/artist/dashboard" element={<ArtistDashboard />} />
+            
+            {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
           </Routes>

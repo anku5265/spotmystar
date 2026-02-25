@@ -1,9 +1,24 @@
 import { Link } from 'react-router-dom';
-import { Search, Heart, Menu, User } from 'lucide-react';
-import { useState } from 'react';
+import { Search, Heart, Menu, User, LogIn, UserPlus } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const userInfo = localStorage.getItem('userInfo');
+    if (userInfo) {
+      setUser(JSON.parse(userInfo));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('userInfo');
+    setUser(null);
+    window.location.href = '/';
+  };
 
   return (
     <nav className="glass sticky top-0 z-50 border-b border-white/10">
@@ -19,16 +34,37 @@ export default function Navbar() {
               <Search size={20} />
               <span>Search</span>
             </Link>
-            <Link to="/wishlist" className="flex items-center gap-2 hover:text-primary transition">
-              <Heart size={20} />
-              <span>Wishlist</span>
-            </Link>
-            <Link to="/artist/register" className="hover:text-primary transition">
+            
+            {user ? (
+              <>
+                <Link to="/user/dashboard" className="flex items-center gap-2 hover:text-primary transition">
+                  <User size={20} />
+                  <span>{user.name}</span>
+                </Link>
+                <button onClick={handleLogout} className="hover:text-primary transition">
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/user/login" className="flex items-center gap-2 hover:text-primary transition">
+                  <LogIn size={20} />
+                  <span>Login</span>
+                </Link>
+                <Link to="/user/register" className="btn-primary text-sm">
+                  <UserPlus size={18} className="inline mr-2" />
+                  Sign Up
+                </Link>
+              </>
+            )}
+            
+            <div className="h-6 w-px bg-white/20"></div>
+            
+            <Link to="/artist/register" className="hover:text-secondary transition text-sm">
               Join as Artist
             </Link>
-            <Link to="/artist/login" className="flex items-center gap-2 hover:text-primary transition">
-              <User size={20} />
-              <span>Login</span>
+            <Link to="/artist/login" className="hover:text-secondary transition text-sm">
+              Artist Login
             </Link>
           </div>
 
@@ -42,9 +78,24 @@ export default function Navbar() {
         {isOpen && (
           <div className="md:hidden py-4 space-y-3">
             <Link to="/search" className="block hover:text-primary transition">Search Artists</Link>
-            <Link to="/wishlist" className="block hover:text-primary transition">Wishlist</Link>
-            <Link to="/artist/register" className="block hover:text-primary transition">Join as Artist</Link>
-            <Link to="/artist/login" className="block hover:text-primary transition">Artist Login</Link>
+            
+            {user ? (
+              <>
+                <Link to="/user/dashboard" className="block hover:text-primary transition">My Dashboard</Link>
+                <button onClick={handleLogout} className="block hover:text-primary transition w-full text-left">
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/user/login" className="block hover:text-primary transition">User Login</Link>
+                <Link to="/user/register" className="block hover:text-primary transition">User Sign Up</Link>
+              </>
+            )}
+            
+            <div className="h-px bg-white/20 my-2"></div>
+            <Link to="/artist/register" className="block hover:text-secondary transition">Join as Artist</Link>
+            <Link to="/artist/login" className="block hover:text-secondary transition">Artist Login</Link>
           </div>
         )}
       </div>
