@@ -5,6 +5,7 @@ import axios from 'axios';
 export default function ArtistRegister() {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     fullName: '',
     stageName: '',
@@ -20,17 +21,23 @@ export default function ArtistRegister() {
   });
 
   useEffect(() => {
+    console.log('Component mounted, fetching categories...');
     fetchCategories();
   }, []);
 
   const fetchCategories = async () => {
     try {
+      console.log('Fetching categories from API...');
+      setLoading(true);
       const { data } = await axios.get('/api/categories');
-      console.log('Categories loaded:', data);
+      console.log('Categories received:', data);
+      console.log('Number of categories:', data.length);
       setCategories(data);
     } catch (error) {
       console.error('Error loading categories:', error);
       alert('Failed to load categories. Please refresh the page.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -78,8 +85,14 @@ export default function ArtistRegister() {
             value={formData.category}
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
             className="w-full bg-white/5 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-primary"
+            disabled={loading}
           >
-            <option value="">Select Category</option>
+            <option value="">
+              {loading ? 'Loading categories...' : 'Select Category'}
+            </option>
+            {categories.length === 0 && !loading && (
+              <option value="" disabled>No categories available</option>
+            )}
             {categories.map(cat => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
