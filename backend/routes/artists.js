@@ -104,6 +104,17 @@ router.post('/register', async (req, res) => {
   try {
     const { fullName, stageName, category, bio, city, priceMin, priceMax, email, whatsapp, instagram, password } = req.body;
 
+    // Validate category UUID
+    if (!category || category === '') {
+      return res.status(400).json({ message: 'Please select a category' });
+    }
+
+    // Check if category exists
+    const categoryCheck = await pool.query('SELECT id FROM categories WHERE id = $1', [category]);
+    if (categoryCheck.rows.length === 0) {
+      return res.status(400).json({ message: 'Invalid category selected. Please refresh and try again.' });
+    }
+
     // Check if artist exists
     const existing = await pool.query(
       'SELECT * FROM artists WHERE email = $1 OR stage_name = $2',
@@ -127,6 +138,7 @@ router.post('/register', async (req, res) => {
       artistId: result.rows[0].id 
     });
   } catch (error) {
+    console.error('Artist registration error:', error);
     res.status(500).json({ message: error.message });
   }
 });

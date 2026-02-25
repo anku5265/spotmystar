@@ -24,17 +24,25 @@ export default function ArtistRegister() {
   }, []);
 
   const fetchCategories = async () => {
-    const { data } = await axios.get('/api/categories');
-    setCategories(data);
+    try {
+      const { data } = await axios.get('/api/categories');
+      console.log('Categories loaded:', data);
+      setCategories(data);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+      alert('Failed to load categories. Please refresh the page.');
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Submitting artist registration:', formData);
     try {
       await axios.post('/api/artists/register', formData);
       alert('Registration successful! Awaiting admin approval.');
       navigate('/');
     } catch (error) {
+      console.error('Registration error:', error);
       alert(error.response?.data?.message || 'Registration failed');
     }
   };
