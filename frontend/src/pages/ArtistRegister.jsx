@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
 export default function ArtistRegister() {
@@ -154,6 +154,15 @@ export default function ArtistRegister() {
             Register
           </button>
         </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-gray-400">
+            Already have an account?{' '}
+            <Link to="/artist/login" className="text-secondary hover:underline font-semibold">
+              Login here
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
