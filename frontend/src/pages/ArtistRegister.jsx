@@ -8,6 +8,7 @@ export default function ArtistRegister() {
   const [loading, setLoading] = useState(true);
   const [showCategories, setShowCategories] = useState(true);
   const [showOtherCategory, setShowOtherCategory] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     stageName: '',
@@ -212,14 +213,23 @@ export default function ArtistRegister() {
             />
           </div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            required
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            className="w-full bg-white/5 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-primary"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              required
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className="w-full bg-white/5 rounded-lg px-4 py-3 pr-12 outline-none focus:ring-2 focus:ring-primary"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+            >
+              {showPassword ? '👁️' : '👁️‍🗨️'}
+            </button>
+          </div>
 
           <button type="submit" className="w-full btn-primary">
             Register
