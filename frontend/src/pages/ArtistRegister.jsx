@@ -86,7 +86,6 @@ export default function ArtistRegister() {
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
             className="w-full bg-white/5 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-primary"
             disabled={loading}
-            size={categories.length + 1 || 5}
           >
             <option value="">
               {loading ? 'Loading categories...' : 'Select Category'}
