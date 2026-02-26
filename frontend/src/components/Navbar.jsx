@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
-import { Search, Heart, Menu, User, LogIn, UserPlus } from 'lucide-react';
+import { Search, Heart, Menu, User, LogIn, UserPlus, ChevronDown } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -36,15 +37,42 @@ export default function Navbar() {
             </Link>
             
             {user ? (
-              <>
-                <Link to="/user/dashboard" className="flex items-center gap-2 hover:text-primary transition">
-                  <User size={20} />
-                  <span>{user.name}</span>
-                </Link>
-                <button onClick={handleLogout} className="hover:text-primary transition">
-                  Logout
+              <div className="relative">
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center gap-2 hover:text-primary transition"
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                    <User size={18} />
+                  </div>
+                  <ChevronDown size={16} />
                 </button>
-              </>
+                
+                {showProfileMenu && (
+                  <div className="absolute right-0 mt-2 w-48 glass rounded-lg shadow-lg py-2 border border-white/10">
+                    <div className="px-4 py-2 border-b border-white/10">
+                      <p className="font-semibold">{user.name}</p>
+                      <p className="text-sm text-gray-400">{user.email}</p>
+                    </div>
+                    <Link
+                      to="/user/dashboard"
+                      className="block px-4 py-2 hover:bg-white/5 transition"
+                      onClick={() => setShowProfileMenu(false)}
+                    >
+                      My Dashboard
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setShowProfileMenu(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-white/5 transition text-red-400"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <Link to="/user/login" className="btn-primary text-sm">
