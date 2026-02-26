@@ -46,17 +46,19 @@ export default function Navbar() {
                 </button>
               </>
             ) : (
-              <Link to="/user/login" className="btn-primary text-sm">
-                <Heart size={18} className="inline mr-2" />
-                Book Artists
-              </Link>
+              <>
+                <Link to="/user/login" className="btn-primary text-sm">
+                  <Heart size={18} className="inline mr-2" />
+                  Book Artists
+                </Link>
+                
+                <div className="h-6 w-px bg-white/20"></div>
+                
+                <Link to="/artist/login" className="glass px-4 py-2 rounded-lg hover:bg-white/10 transition text-sm">
+                  For Artists
+                </Link>
+              </>
             )}
-            
-            <div className="h-6 w-px bg-white/20"></div>
-            
-            <Link to="/artist/login" className="glass px-4 py-2 rounded-lg hover:bg-white/10 transition text-sm">
-              For Artists
-            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -78,11 +80,12 @@ export default function Navbar() {
                 </button>
               </>
             ) : (
-              <Link to="/user/login" className="block hover:text-primary transition">Book Artists</Link>
+              <>
+                <Link to="/user/login" className="block hover:text-primary transition">Book Artists</Link>
+                <div className="h-px bg-white/20 my-2"></div>
+                <Link to="/artist/login" className="block hover:text-secondary transition">For Artists</Link>
+              </>
             )}
-            
-            <div className="h-px bg-white/20 my-2"></div>
-            <Link to="/artist/login" className="block hover:text-secondary transition">For Artists</Link>
           </div>
         )}
       </div>
