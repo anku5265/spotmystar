@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Users, Calendar, CheckCircle, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Users, Calendar, CheckCircle, Clock, LogOut } from 'lucide-react';
 import axios from 'axios';
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({});
   const [artists, setArtists] = useState([]);
   const [bookings, setBookings] = useState([]);
@@ -10,11 +12,23 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
+    // Check if admin is logged in
+    const adminToken = localStorage.getItem('adminToken');
+    if (!adminToken) {
+      navigate('/admin-login');
+      return;
+    }
+    
     fetchStats();
     fetchArtists();
     fetchBookings();
     fetchUsers();
-  }, []);
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    navigate('/admin-login');
+  };
 
   const fetchStats = async () => {
     try {
@@ -80,7 +94,16 @@ export default function AdminDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded-lg transition"
+        >
+          <LogOut size={20} />
+          Logout
+        </button>
+      </div>
 
       {/* Stats */}
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
