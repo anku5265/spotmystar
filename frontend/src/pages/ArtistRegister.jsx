@@ -140,7 +140,7 @@ export default function ArtistRegister() {
                       value={formData.customCategory || ''}
                       onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })}
                       required={formData.category === 'other'}
-                      className="w-full bg-white/10 rounded-lg px-4 py-2 ml-7 outline-none focus:ring-2 focus:ring-primary"
+                      className="bg-white/10 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-primary"
                     />
                   )}
                 </div>
