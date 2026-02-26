@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Search, Heart, Menu, User, LogIn, UserPlus, ChevronDown } from 'lucide-react';
+import { Search, Heart, Menu, User, ChevronDown } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function Navbar() {
@@ -12,7 +12,17 @@ export default function Navbar() {
     if (userInfo) {
       setUser(JSON.parse(userInfo));
     }
-  }, []);
+    
+    // Close dropdown when clicking outside
+    const handleClickOutside = (e) => {
+      if (showProfileMenu && !e.target.closest('.profile-dropdown')) {
+        setShowProfileMenu(false);
+      }
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showProfileMenu]);
 
   const handleLogout = () => {
     localStorage.removeItem('userToken');
@@ -37,7 +47,7 @@ export default function Navbar() {
             </Link>
             
             {user ? (
-              <div className="relative">
+              <div className="relative profile-dropdown">
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
                   className="flex items-center gap-2 hover:text-primary transition"
@@ -49,10 +59,9 @@ export default function Navbar() {
                 </button>
                 
                 {showProfileMenu && (
-                  <div className="absolute right-0 mt-2 w-48 glass rounded-lg shadow-lg py-2 border border-white/10">
-                    <div className="px-4 py-2 border-b border-white/10">
-                      <p className="font-semibold">{user.name}</p>
-                      <p className="text-sm text-gray-400">{user.email}</p>
+                  <div className="absolute right-0 mt-2 w-48 glass rounded-lg shadow-xl py-2 border border-white/10 z-50">
+                    <div className="px-4 py-3 border-b border-white/10">
+                      <p className="text-lg font-semibold truncate">{user.name}</p>
                     </div>
                     <Link
                       to="/user/dashboard"

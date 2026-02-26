@@ -15,7 +15,7 @@ export default function AdminDashboard() {
     // Check if admin is logged in
     const adminToken = localStorage.getItem('adminToken');
     if (!adminToken) {
-      navigate('/admin-login');
+      navigate('/admin/login');
       return;
     }
     
@@ -27,7 +27,7 @@ export default function AdminDashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
-    navigate('/admin-login');
+    navigate('/admin/login');
   };
 
   const fetchStats = async () => {
