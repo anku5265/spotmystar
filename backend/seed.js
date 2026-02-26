@@ -13,7 +13,7 @@ const seedDatabase = async () => {
     
     // Check if admin exists
     const existingAdmin = await pool.query(
-      "SELECT * FROM users WHERE email = 'admin@artisthub.com'"
+      "SELECT * FROM users WHERE email = 'admin@spotmystar.com'"
     );
 
     if (existingAdmin.rows.length === 0) {

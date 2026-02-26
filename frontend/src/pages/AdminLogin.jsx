@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Toast from '../components/Toast';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
+  const [toast, setToast] = useState(null);
   const [formData, setFormData] = useState({ email: '', password: '' });
 
   const handleSubmit = async (e) => {
@@ -11,14 +13,16 @@ export default function AdminLogin() {
     try {
       const { data } = await axios.post('/api/auth/admin/login', formData);
       localStorage.setItem('adminToken', data.token);
-      navigate('/admin/dashboard');
+      setToast({ message: 'Login successful!', type: 'success' });
+      setTimeout(() => navigate('/admin/dashboard'), 1000);
     } catch (error) {
-      alert('Invalid credentials');
+      setToast({ message: error.response?.data?.message || 'Invalid credentials', type: 'error' });
     }
   };
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <div className="card max-w-md w-full">
         <h1 className="text-3xl font-bold mb-6 text-center">Admin Login</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
