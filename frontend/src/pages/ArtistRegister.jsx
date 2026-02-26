@@ -80,23 +80,31 @@ export default function ArtistRegister() {
             />
           </div>
 
-          <select
-            required
-            value={formData.category}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            className="w-full bg-white/5 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-primary"
-            disabled={loading}
-          >
-            <option value="">
-              {loading ? 'Loading categories...' : 'Select Category'}
-            </option>
-            {categories.length === 0 && !loading && (
-              <option value="" disabled>No categories available</option>
+          <div className="w-full bg-white/5 rounded-lg px-4 py-3">
+            <p className="text-gray-400 mb-3">Select Category *</p>
+            {loading ? (
+              <p className="text-gray-500">Loading categories...</p>
+            ) : categories.length === 0 ? (
+              <p className="text-gray-500">No categories available</p>
+            ) : (
+              <div className="space-y-2">
+                {categories.map(cat => (
+                  <label key={cat.id} className="flex items-center space-x-3 cursor-pointer hover:bg-white/5 p-2 rounded">
+                    <input
+                      type="radio"
+                      name="category"
+                      value={cat.id}
+                      checked={formData.category === cat.id}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      required
+                      className="w-4 h-4 text-primary focus:ring-2 focus:ring-primary"
+                    />
+                    <span className="text-white">{cat.name}</span>
+                  </label>
+                ))}
+              </div>
             )}
-            {categories.map(cat => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
-            ))}
-          </select>
+          </div>
 
           <textarea
             placeholder="Bio (Max 500 characters)"
