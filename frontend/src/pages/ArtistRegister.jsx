@@ -7,6 +7,7 @@ export default function ArtistRegister() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCategories, setShowCategories] = useState(true);
+  const [showOtherCategory, setShowOtherCategory] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     stageName: '',
@@ -18,7 +19,8 @@ export default function ArtistRegister() {
     email: '',
     whatsapp: '',
     instagram: '',
-    password: ''
+    password: '',
+    customCategory: ''
   });
 
   useEffect(() => {
@@ -106,13 +108,41 @@ export default function ArtistRegister() {
                         name="category"
                         value={cat.id}
                         checked={formData.category === cat.id}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        onChange={(e) => {
+                          setFormData({ ...formData, category: e.target.value });
+                          setShowOtherCategory(false);
+                        }}
                         required
                         className="w-4 h-4 text-primary focus:ring-2 focus:ring-primary"
                       />
                       <span className="text-white">{cat.name}</span>
                     </label>
                   ))}
+                  <label className="flex items-center space-x-3 cursor-pointer hover:bg-white/5 p-2 rounded">
+                    <input
+                      type="radio"
+                      name="category"
+                      value="other"
+                      checked={formData.category === 'other'}
+                      onChange={(e) => {
+                        setFormData({ ...formData, category: e.target.value });
+                        setShowOtherCategory(true);
+                      }}
+                      required
+                      className="w-4 h-4 text-primary focus:ring-2 focus:ring-primary"
+                    />
+                    <span className="text-white">Other (Specify)</span>
+                  </label>
+                  {showOtherCategory && (
+                    <input
+                      type="text"
+                      placeholder="Enter your category"
+                      value={formData.customCategory || ''}
+                      onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })}
+                      required={formData.category === 'other'}
+                      className="w-full bg-white/10 rounded-lg px-4 py-2 ml-7 outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  )}
                 </div>
               )
             )}
