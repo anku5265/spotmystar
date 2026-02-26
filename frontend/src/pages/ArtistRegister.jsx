@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import Toast from '../components/Toast';
 
 export default function ArtistRegister() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ export default function ArtistRegister() {
   const [showCategories, setShowCategories] = useState(true);
   const [showOtherCategory, setShowOtherCategory] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [toast, setToast] = useState(null);
   const [formData, setFormData] = useState({
     fullName: '',
     stageName: '',
@@ -39,7 +41,7 @@ export default function ArtistRegister() {
       setCategories(data);
     } catch (error) {
       console.error('Error loading categories:', error);
-      alert('Failed to load categories. Please refresh the page.');
+      setToast({ message: 'Failed to load categories. Please refresh the page.', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -50,16 +52,18 @@ export default function ArtistRegister() {
     console.log('Submitting artist registration:', formData);
     try {
       await axios.post('/api/artists/register', formData);
-      alert('Registration successful! Awaiting admin approval.');
-      navigate('/');
+      setToast({ message: 'Registration successful! Awaiting admin approval.', type: 'success' });
+      setTimeout(() => navigate('/'), 2000);
     } catch (error) {
       console.error('Registration error:', error);
-      alert(error.response?.data?.message || 'Registration failed');
+      setToast({ message: error.response?.data?.message || 'Registration failed', type: 'error' });
     }
   };
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      
       <div className="card">
         <h1 className="text-3xl font-bold mb-2">Join as Artist</h1>
         <p className="text-gray-400 mb-8">Register your profile and start receiving bookings</p>

@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserPlus, Mail, Lock, User, Phone } from 'lucide-react';
 import axios from 'axios';
+import Toast from '../components/Toast';
 
 export default function UserRegister() {
   const navigate = useNavigate();
+  const [toast, setToast] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -41,9 +43,10 @@ export default function UserRegister() {
 
       localStorage.setItem('userToken', data.token);
       localStorage.setItem('userInfo', JSON.stringify(data.user));
-      navigate('/');
+      setToast({ message: 'Account created successfully!', type: 'success' });
+      setTimeout(() => navigate('/'), 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setToast({ message: err.response?.data?.message || 'Registration failed', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -51,6 +54,7 @@ export default function UserRegister() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <div className="card max-w-md w-full">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/20 rounded-full mb-4">
