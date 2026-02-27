@@ -319,6 +319,12 @@ export default function ArtistRegisterNew() {
 
   const renderStep2 = () => (
     <div className="space-y-6">
+      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-4">
+        <p className="text-sm text-blue-200">
+          💡 Select one or more categories. Click the radio button to set your primary category.
+        </p>
+      </div>
+
       {Object.entries(categories).map(([groupKey, groupCategories]) => {
         if (!groupCategories || groupCategories.length === 0) return null;
         
@@ -331,73 +337,52 @@ export default function ArtistRegisterNew() {
         return (
           <div key={groupKey} className="bg-white/5 rounded-lg p-4">
             <h4 className="font-bold text-lg mb-3 text-primary">{groupTitles[groupKey]}</h4>
-            <div className="grid md:grid-cols-3 gap-3">
+            <div className="space-y-2">
               {groupCategories.map(cat => (
-                <label
+                <div
                   key={cat.id}
-                  className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition ${
+                  className={`flex items-center space-x-3 p-3 rounded-lg transition ${
                     selectedCategories.includes(cat.id)
                       ? 'bg-primary/20 border-2 border-primary'
                       : 'bg-white/5 border-2 border-transparent hover:bg-white/10'
                   }`}
                 >
-                  <input
-                    type="checkbox"
-                    checked={selectedCategories.includes(cat.id)}
-                    onChange={() => handleCategorySelect(cat.id)}
-                    className="w-5 h-5"
-                  />
-                  <span className="text-2xl">{cat.icon}</span>
-                  <div className="flex-1">
-                    <span className="font-medium block">{cat.name}</span>
-                    {selectedCategories.includes(cat.id) && primaryCategory === cat.id && (
-                      <span className="text-xs text-primary">Primary</span>
-                    )}
-                  </div>
-                </label>
+                  {/* Checkbox for category selection */}
+                  <label className="flex items-center space-x-3 flex-1 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.includes(cat.id)}
+                      onChange={() => handleCategorySelect(cat.id)}
+                      className="w-5 h-5"
+                    />
+                    <span className="text-2xl">{cat.icon}</span>
+                    <span className="font-medium">{cat.name}</span>
+                  </label>
+
+                  {/* Radio button for primary selection - only show if category is selected */}
+                  {selectedCategories.includes(cat.id) && (
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="primaryCategory"
+                        value={cat.id}
+                        checked={primaryCategory === cat.id}
+                        onChange={(e) => setPrimaryCategory(e.target.value)}
+                        className="w-5 h-5 text-primary"
+                      />
+                      <span className={`text-sm font-semibold ${
+                        primaryCategory === cat.id ? 'text-primary' : 'text-gray-400'
+                      }`}>
+                        {primaryCategory === cat.id ? 'Primary ⭐' : 'Set Primary'}
+                      </span>
+                    </label>
+                  )}
+                </div>
               ))}
             </div>
           </div>
         );
       })}
-
-      {selectedCategories.length > 0 && (
-        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-          <h4 className="font-bold mb-2 text-yellow-200">📌 Select Your Primary Category</h4>
-          <p className="text-sm text-gray-400 mb-3">Choose one category as your main specialization (this will be highlighted on your profile)</p>
-          <div className="space-y-2">
-            {selectedCategories.map(catId => {
-              const cat = Object.values(categories).flat().find(c => c.id === catId);
-              if (!cat) return null;
-              
-              return (
-                <label
-                  key={cat.id}
-                  className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition ${
-                    primaryCategory === cat.id
-                      ? 'bg-primary/30 border-2 border-primary'
-                      : 'bg-white/5 border-2 border-transparent hover:bg-white/10'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="primaryCategory"
-                    value={cat.id}
-                    checked={primaryCategory === cat.id}
-                    onChange={(e) => setPrimaryCategory(e.target.value)}
-                    className="w-5 h-5 text-primary focus:ring-2 focus:ring-primary"
-                  />
-                  <span className="text-2xl">{cat.icon}</span>
-                  <span className="font-medium flex-1">{cat.name}</span>
-                  {primaryCategory === cat.id && (
-                    <span className="px-3 py-1 bg-primary rounded-full text-sm font-semibold">Primary ⭐</span>
-                  )}
-                </label>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 
