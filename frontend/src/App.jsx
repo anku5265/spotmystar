@@ -6,7 +6,7 @@ import Search from './pages/Search';
 import ArtistProfile from './pages/ArtistProfile';
 import BookingSuccess from './pages/BookingSuccess';
 import Wishlist from './pages/Wishlist';
-import ArtistRegister from './pages/ArtistRegister';
+import ArtistRegisterNew from './pages/ArtistRegisterNew';
 import ArtistLogin from './pages/ArtistLogin';
 import ArtistDashboard from './pages/ArtistDashboard';
 import UserRegister from './pages/UserRegister';
@@ -33,7 +33,7 @@ function App() {
             <Route path="/user/dashboard" element={<UserDashboard />} />
             
             {/* Artist Routes */}
-            <Route path="/artist/register" element={<ArtistRegister />} />
+            <Route path="/artist/register" element={<ArtistRegisterNew />} />
             <Route path="/artist/login" element={<ArtistLogin />} />
             <Route path="/artist/dashboard" element={<ArtistDashboard />} />
           </Routes>

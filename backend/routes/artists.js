@@ -103,20 +103,35 @@ router.get('/:identifier', async (req, res) => {
   }
 });
 
-// Artist registration
+// Artist registration (supports both old and new multi-category format)
 router.post('/register', async (req, res) => {
   try {
-    const { fullName, stageName, category, bio, city, priceMin, priceMax, email, whatsapp, instagram, password } = req.body;
+    const {
+      // Old format fields
+      fullName, stageName, category, bio, city, priceMin, priceMax, email, whatsapp, instagram, password,
+      
+      // New format fields
+      phone, categories, primaryCategory, shortBio, detailedDescription, primaryCity, serviceLocations,
+      yearsOfExperience, pricingModel, youtube, facebook, twitter, linkedin, website,
+      dynamicAttributes, termsAccepted, privacyAccepted
+    } = req.body;
 
-    // Validate category UUID
-    if (!category || category === '') {
-      return res.status(400).json({ message: 'Please select a category' });
+    // Determine if this is old or new format
+    const isNewFormat = categories && Array.isArray(categories);
+
+    // Validate required fields
+    if (!fullName || !stageName || !email || !password) {
+      return res.status(400).json({ message: 'Please provide all required fields' });
     }
 
-    // Check if category exists
-    const categoryCheck = await pool.query('SELECT id FROM categories WHERE id = $1', [category]);
-    if (categoryCheck.rows.length === 0) {
-      return res.status(400).json({ message: 'Invalid category selected. Please refresh and try again.' });
+    if (isNewFormat) {
+      if (!categories || categories.length === 0) {
+        return res.status(400).json({ message: 'Please select at least one category' });
+      }
+    } else {
+      if (!category) {
+        return res.status(400).json({ message: 'Please select a category' });
+      }
     }
 
     // Check if artist exists
@@ -131,29 +146,108 @@ router.post('/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const result = await pool.query(`
-      INSERT INTO artists (full_name, stage_name, category_id, bio, city, price_min, price_max, email, whatsapp, instagram, password, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending')
-      RETURNING id, full_name, stage_name, email, status, is_verified
-    `, [fullName, stageName, category, bio, city, priceMin, priceMax, email, whatsapp, instagram, hashedPassword]);
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
 
-    const artist = result.rows[0];
-    
-    // Generate JWT token
-    const token = jwt.sign({ id: artist.id, role: 'artist' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+      let artistResult;
 
-    res.status(201).json({ 
-      message: 'Registration successful! Awaiting admin approval.',
-      token,
-      artist: {
-        id: artist.id,
-        fullName: artist.full_name,
-        stageName: artist.stage_name,
-        email: artist.email,
-        status: artist.status,
-        isVerified: artist.is_verified
+      if (isNewFormat) {
+        // New multi-category registration
+        artistResult = await client.query(`
+          INSERT INTO artists (
+            full_name, stage_name, email, phone, password,
+            short_bio, detailed_description,
+            primary_city, service_locations,
+            years_of_experience,
+            pricing_model, price_min, price_max,
+            instagram, youtube, facebook, twitter, linkedin, website,
+            terms_accepted, privacy_accepted,
+            status
+          )
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, 'submitted')
+          RETURNING id, full_name, stage_name, email, status, is_verified
+        `, [
+          fullName, stageName, email, phone || whatsapp, hashedPassword,
+          shortBio, detailedDescription,
+          primaryCity || city, serviceLocations || [],
+          yearsOfExperience || 0,
+          pricingModel || 'per_event', priceMin || 0, priceMax || 0,
+          instagram, youtube, facebook, twitter, linkedin, website,
+          termsAccepted || false, privacyAccepted || false
+        ]);
+
+        const artist = artistResult.rows[0];
+
+        // Insert artist categories
+        for (const categoryId of categories) {
+          await client.query(`
+            INSERT INTO artist_categories (artist_id, category_id, is_primary)
+            VALUES ($1, $2, $3)
+          `, [artist.id, categoryId, categoryId === primaryCategory]);
+        }
+
+        // Insert dynamic attribute values
+        if (dynamicAttributes && Object.keys(dynamicAttributes).length > 0) {
+          for (const [attributeId, value] of Object.entries(dynamicAttributes)) {
+            if (value !== null && value !== undefined && value !== '') {
+              const valueStr = Array.isArray(value) ? JSON.stringify(value) : String(value);
+              await client.query(`
+                INSERT INTO artist_attribute_values (artist_id, attribute_id, value)
+                VALUES ($1, $2, $3)
+              `, [artist.id, attributeId, valueStr]);
+            }
+          }
+        }
+      } else {
+        // Old single-category registration (backward compatibility)
+        const categoryCheck = await client.query('SELECT id FROM categories WHERE id = $1', [category]);
+        if (categoryCheck.rows.length === 0) {
+          throw new Error('Invalid category selected');
+        }
+
+        artistResult = await client.query(`
+          INSERT INTO artists (
+            full_name, stage_name, category_id, bio, city, price_min, price_max, 
+            email, whatsapp, instagram, password, status,
+            phone, primary_city, short_bio
+          )
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'submitted', $9, $5, $4)
+          RETURNING id, full_name, stage_name, email, status, is_verified
+        `, [fullName, stageName, category, bio, city, priceMin, priceMax, email, whatsapp, instagram, hashedPassword]);
+
+        const artist = artistResult.rows[0];
+
+        // Also insert into artist_categories for consistency
+        await client.query(`
+          INSERT INTO artist_categories (artist_id, category_id, is_primary)
+          VALUES ($1, $2, true)
+        `, [artist.id, category]);
       }
-    });
+
+      await client.query('COMMIT');
+
+      const artist = artistResult.rows[0];
+      const token = jwt.sign({ id: artist.id, role: 'artist' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+      res.status(201).json({
+        message: 'Registration successful! Your profile is under review.',
+        token,
+        artist: {
+          id: artist.id,
+          fullName: artist.full_name,
+          stageName: artist.stage_name,
+          email: artist.email,
+          status: artist.status,
+          isVerified: artist.is_verified
+        }
+      });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   } catch (error) {
     console.error('Artist registration error:', error);
     res.status(500).json({ message: error.message });
