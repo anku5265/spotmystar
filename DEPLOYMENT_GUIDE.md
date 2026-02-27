@@ -125,9 +125,45 @@ Should load the website.
 ## URLs After Deployment
 
 - **Frontend:** https://spotmystar.vercel.app
-- **Backend:** https://spotmystar-backend.onrender.com
+- **Backend:** https://spotmystar-backend.vercel.app
+- **Admin Panel:** https://spotmystar-admin.vercel.app (separate deployment)
 - **Database:** Supabase (already setup)
-- **Admin:** https://spotmystar.vercel.app/admin/login
+
+---
+
+## Admin Panel Deployment (Separate)
+
+The admin panel is a completely separate application that shares the same backend and database.
+
+### Deploy Admin Panel on Vercel:
+
+1. **Create New Project on Vercel:**
+   - Import `anku5265/spotmystar` repository
+   - Project Name: `spotmystar-admin`
+   - Root Directory: `admin-panel`
+   - Framework Preset: Vite
+
+2. **Environment Variables:**
+   ```
+   VITE_API_URL=https://spotmystar-backend.vercel.app
+   ```
+
+3. **Deploy:**
+   - Click "Deploy"
+   - Wait 1-2 minutes
+   - Your admin panel will be live at: `https://spotmystar-admin.vercel.app`
+
+4. **Login:**
+   - Email: admin@spotmystar.com
+   - Password: admin123
+
+### Admin Panel Features:
+- View total users and artists
+- See pending artist registrations
+- Accept/Reject/Ignore artist applications
+- View all artists and their status
+- Monitor booking statistics
+- Manage platform data
 
 ---
 

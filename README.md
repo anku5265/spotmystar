@@ -19,14 +19,25 @@ cd frontend
 npm install
 npm run dev
 
-# 4. Open
-http://localhost:5173
+# 4. Admin Panel (new terminal)
+cd admin-panel
+npm install
+npm run dev
+
+# 5. Open
+Frontend: http://localhost:5173
+Admin Panel: http://localhost:5174
 ```
 
 ## 🔑 Admin Login
-- URL: http://localhost:5173/admin/login
+- URL: http://localhost:5174 (separate admin panel)
 - Email: admin@spotmystar.com
 - Password: admin123
+
+## 📁 Project Structure
+- `backend/` - Node.js/Express API server
+- `frontend/` - Main user/artist application (React + Vite)
+- `admin-panel/` - Separate admin dashboard (React + Vite)
 
 ## 🐛 Troubleshooting
 
