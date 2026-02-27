@@ -83,12 +83,13 @@ export default function ArtistDashboard() {
 
   const fetchBookings = async (token, artistId) => {
     try {
-      const { data } = await api.get(`/bookings/artist/${artistId}`, {
+      const { data } = await api.get(`/api/bookings/artist/${artistId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setBookings(data);
     } catch (error) {
       console.error('Error fetching bookings:', error);
+      setBookings([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -97,7 +98,7 @@ export default function ArtistDashboard() {
   const updateBookingStatus = async (bookingId, status) => {
     try {
       const token = localStorage.getItem('artistToken');
-      await api.patch(`/bookings/${bookingId}/status`, 
+      await api.patch(`/api/bookings/${bookingId}/status`, 
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -127,7 +128,26 @@ export default function ArtistDashboard() {
   };
 
   if (loading) {
-    return <div className="container mx-auto px-4 py-20 text-center">Loading...</div>;
+    return (
+      <div className="container mx-auto px-4 py-20 text-center">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+        <p className="text-gray-400">Loading your dashboard...</p>
+      </div>
+    );
+  }
+
+  if (!artist) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center">
+        <p className="text-gray-400">Unable to load artist data. Please try logging in again.</p>
+        <button 
+          onClick={() => navigate('/artist/login')}
+          className="btn-primary mt-4"
+        >
+          Back to Login
+        </button>
+      </div>
+    );
   }
 
   return (
