@@ -348,7 +348,12 @@ export default function ArtistRegisterNew() {
                     className="w-5 h-5"
                   />
                   <span className="text-2xl">{cat.icon}</span>
-                  <span className="font-medium">{cat.name}</span>
+                  <div className="flex-1">
+                    <span className="font-medium block">{cat.name}</span>
+                    {selectedCategories.includes(cat.id) && primaryCategory === cat.id && (
+                      <span className="text-xs text-primary">Primary</span>
+                    )}
+                  </div>
                 </label>
               ))}
             </div>
@@ -357,9 +362,9 @@ export default function ArtistRegisterNew() {
       })}
 
       {selectedCategories.length > 0 && (
-        <div className="bg-white/5 rounded-lg p-4">
-          <h4 className="font-bold mb-3">Select Primary Category *</h4>
-          <p className="text-sm text-gray-400 mb-3">Choose one category as your primary specialization</p>
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+          <h4 className="font-bold mb-2 text-yellow-200">📌 Select Your Primary Category</h4>
+          <p className="text-sm text-gray-400 mb-3">Choose one category as your main specialization (this will be highlighted on your profile)</p>
           <div className="space-y-2">
             {selectedCategories.map(catId => {
               const cat = Object.values(categories).flat().find(c => c.id === catId);
@@ -370,7 +375,7 @@ export default function ArtistRegisterNew() {
                   key={cat.id}
                   className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition ${
                     primaryCategory === cat.id
-                      ? 'bg-primary/20 border-2 border-primary'
+                      ? 'bg-primary/30 border-2 border-primary'
                       : 'bg-white/5 border-2 border-transparent hover:bg-white/10'
                   }`}
                 >
@@ -380,12 +385,12 @@ export default function ArtistRegisterNew() {
                     value={cat.id}
                     checked={primaryCategory === cat.id}
                     onChange={(e) => setPrimaryCategory(e.target.value)}
-                    className="w-5 h-5"
+                    className="w-5 h-5 text-primary focus:ring-2 focus:ring-primary"
                   />
                   <span className="text-2xl">{cat.icon}</span>
-                  <span className="font-medium">{cat.name}</span>
+                  <span className="font-medium flex-1">{cat.name}</span>
                   {primaryCategory === cat.id && (
-                    <span className="ml-auto text-primary text-sm font-semibold">Primary</span>
+                    <span className="px-3 py-1 bg-primary rounded-full text-sm font-semibold">Primary ⭐</span>
                   )}
                 </label>
               );
