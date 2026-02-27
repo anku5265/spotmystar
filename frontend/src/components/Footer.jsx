@@ -7,6 +7,17 @@ export default function Footer() {
   return (
     <footer className="glass border-t border-white/10 mt-20">
       <div className="container mx-auto px-4 py-12">
+        {/* Logo Section */}
+        <div className="flex items-center gap-3 mb-8">
+          <img src="/logo.svg" alt="SpotMyStar" className="w-12 h-12" />
+          <div>
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              SpotMyStar
+            </h3>
+            <p className="text-gray-400 text-sm">Discover and book talented artists across India</p>
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
           
           {/* Quick Links */}

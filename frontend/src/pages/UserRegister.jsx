@@ -64,7 +64,7 @@ export default function UserRegister() {
       <div className="card max-w-md w-full">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/20 rounded-full mb-4">
-            <UserPlus className="text-primary" size={32} />
+            <img src="/logo.svg" alt="SpotMyStar" className="w-10 h-10" />
           </div>
           <h1 className="text-3xl font-bold mb-2">Create Account</h1>
           <p className="text-gray-400">Join SpotMyStar to book amazing artists</p>

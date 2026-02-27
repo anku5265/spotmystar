@@ -60,9 +60,12 @@ export default function Navbar() {
           {/* Logo - Always visible, redirects to homepage */}
           <Link 
             to="/" 
-            className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent hover:opacity-80 transition"
+            className="flex items-center gap-2 hover:opacity-80 transition"
           >
-            SpotMyStar
+            <img src="/logo.svg" alt="SpotMyStar" className="w-8 h-8" />
+            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              SpotMyStar
+            </span>
           </Link>
 
           {/* Desktop Menu - 3-4 elements max */}

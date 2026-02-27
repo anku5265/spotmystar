@@ -37,6 +37,9 @@ export default function Login() {
       
       <div className="card max-w-md w-full">
         <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full mb-4">
+            <img src="/logo.svg" alt="SpotMyStar" className="w-12 h-12" />
+          </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent mb-2">
             SpotMyStar Admin
           </h1>
