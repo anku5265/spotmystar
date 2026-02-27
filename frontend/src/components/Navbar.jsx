@@ -42,8 +42,12 @@ export default function Navbar() {
 
   const checkUser = () => {
     const userInfo = localStorage.getItem('userInfo');
+    const artistData = localStorage.getItem('artistData');
+    
     if (userInfo) {
       setUser(JSON.parse(userInfo));
+    } else if (artistData) {
+      setUser(JSON.parse(artistData));
     } else {
       setUser(null);
     }
@@ -52,6 +56,8 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem('userToken');
     localStorage.removeItem('userInfo');
+    localStorage.removeItem('artistToken');
+    localStorage.removeItem('artistData');
     setUser(null);
     window.location.href = '/';
   };
@@ -86,10 +92,10 @@ export default function Navbar() {
                 {showProfileMenu && (
                   <div className="absolute right-0 mt-2 w-48 glass rounded-lg shadow-xl py-2 border border-white/10 z-50">
                     <div className="px-4 py-3 border-b border-white/10">
-                      <p className="text-lg font-semibold truncate">{user.name}</p>
+                      <p className="text-lg font-semibold truncate">{user.name || user.fullName || user.stageName}</p>
                     </div>
                     <Link
-                      to="/user/dashboard"
+                      to={user.stageName ? "/artist/dashboard" : "/user/dashboard"}
                       className="block px-4 py-2 hover:bg-white/5 transition"
                       onClick={() => setShowProfileMenu(false)}
                     >
@@ -136,7 +142,7 @@ export default function Navbar() {
             
             {user ? (
               <>
-                <Link to="/user/dashboard" className="block hover:text-primary transition">My Dashboard</Link>
+                <Link to={user.stageName ? "/artist/dashboard" : "/user/dashboard"} className="block hover:text-primary transition">My Dashboard</Link>
                 <button onClick={handleLogout} className="block hover:text-primary transition w-full text-left">
                   Logout
                 </button>

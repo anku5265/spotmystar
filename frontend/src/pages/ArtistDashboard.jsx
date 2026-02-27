@@ -1,58 +1,84 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, Calendar, CheckCircle, XCircle } from 'lucide-react';
-import axios from 'axios';
+import { Eye, Calendar, CheckCircle, XCircle, Clock, Music } from 'lucide-react';
+import api from '../config/api';
 
 export default function ArtistDashboard() {
   const navigate = useNavigate();
   const [artist, setArtist] = useState(null);
   const [bookings, setBookings] = useState([]);
-  const [activeTab, setActiveTab] = useState('bookings');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('artistToken');
-    if (!token) {
+    const artistData = localStorage.getItem('artistData');
+    
+    if (!token || !artistData) {
       navigate('/artist/login');
       return;
     }
-    fetchDashboardData();
-  }, []);
 
-  const fetchDashboardData = async () => {
+    setArtist(JSON.parse(artistData));
+    fetchBookings(token, JSON.parse(artistData).id);
+  }, [navigate]);
+
+  const fetchBookings = async (token, artistId) => {
     try {
-      const token = localStorage.getItem('artistToken');
-      const artistData = JSON.parse(localStorage.getItem('artistData'));
-      
-      const { data } = await axios.get(`/api/bookings/artist/${artistData.id}`, {
+      const { data } = await api.get(`/bookings/artist/${artistId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      setArtist(artistData);
       setBookings(data);
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error('Error fetching bookings:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const updateBookingStatus = async (bookingId, status) => {
     try {
-      await axios.patch(`/api/bookings/${bookingId}/status`, { status });
-      fetchDashboardData();
+      const token = localStorage.getItem('artistToken');
+      await api.patch(`/bookings/${bookingId}/status`, 
+        { status },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      // Refresh bookings
+      const artistData = JSON.parse(localStorage.getItem('artistData'));
+      fetchBookings(token, artistData.id);
     } catch (error) {
+      console.error('Failed to update booking status:', error);
       alert('Failed to update booking status');
     }
   };
 
-  if (!artist) return <div className="container mx-auto px-4 py-20 text-center">Loading...</div>;
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'pending':
+        return <Clock className="text-yellow-500" size={20} />;
+      case 'accepted':
+        return <CheckCircle className="text-green-500" size={20} />;
+      case 'rejected':
+        return <XCircle className="text-red-500" size={20} />;
+      case 'completed':
+        return <CheckCircle className="text-blue-500" size={20} />;
+      default:
+        return <Clock className="text-gray-500" size={20} />;
+    }
+  };
+
+  if (loading) {
+    return <div className="container mx-auto px-4 py-20 text-center">Loading...</div>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Status Notification Banner */}
-      {artist.status === 'pending' && (
+      {artist?.status === 'pending' && (
         <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
-              <Calendar className="text-yellow-500" size={20} />
+              <Clock className="text-yellow-500" size={20} />
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-yellow-500">Registration Pending</h3>
@@ -62,7 +88,7 @@ export default function ArtistDashboard() {
         </div>
       )}
 
-      {artist.status === 'active' && artist.isVerified && (
+      {artist?.status === 'active' && artist?.isVerified && (
         <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
@@ -76,7 +102,7 @@ export default function ArtistDashboard() {
         </div>
       )}
 
-      {artist.status === 'rejected' && (
+      {artist?.status === 'rejected' && (
         <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
@@ -84,44 +110,39 @@ export default function ArtistDashboard() {
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-red-500">Registration Rejected</h3>
-              <p className="text-sm text-gray-400">Your registration was not approved. Please contact support or register again with correct information.</p>
+              <p className="text-sm text-gray-400">Your registration was not approved. Please contact support for more information.</p>
             </div>
           </div>
         </div>
       )}
 
+      {/* Header */}
       <div className="card mb-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Welcome, {artist.stageName}!</h1>
-            <p className="text-gray-400">
-              Status: <span className={artist.isVerified ? 'text-green-500' : 'text-yellow-500'}>
-                {artist.isVerified ? '✓ Verified' : 'Pending Approval'}
-              </span>
-            </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 bg-secondary/20 rounded-full flex items-center justify-center">
+              <Music className="text-secondary" size={32} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">{artist?.stageName || artist?.fullName}</h1>
+              <p className="text-gray-400">{artist?.email}</p>
+              <p className={artist?.isVerified ? 'text-green-500' : 'text-yellow-500'}>
+                Status: {artist?.isVerified ? '✓ Verified' : 'Pending Approval'}
+              </p>
+            </div>
           </div>
-          <button
-            onClick={() => {
-              localStorage.removeItem('artistToken');
-              localStorage.removeItem('artistData');
-              navigate('/');
-            }}
-            className="glass px-6 py-2 rounded-lg hover:bg-white/10"
-          >
-            Logout
-          </button>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
+      <div className="grid md:grid-cols-4 gap-6 mb-8">
         <div className="card">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-primary/20 rounded-lg">
               <Eye className="text-primary" size={24} />
             </div>
             <div>
-              <p className="text-2xl font-bold">{artist.views || 0}</p>
+              <p className="text-2xl font-bold">{artist?.views || 0}</p>
               <p className="text-gray-400">Profile Views</p>
             </div>
           </div>
@@ -134,6 +155,19 @@ export default function ArtistDashboard() {
             <div>
               <p className="text-2xl font-bold">{bookings.length}</p>
               <p className="text-gray-400">Total Requests</p>
+            </div>
+          </div>
+        </div>
+        <div className="card">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-yellow-500/20 rounded-lg">
+              <Clock className="text-yellow-500" size={24} />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">
+                {bookings.filter(b => b.status === 'pending').length}
+              </p>
+              <p className="text-gray-400">Pending</p>
             </div>
           </div>
         </div>
@@ -152,83 +186,93 @@ export default function ArtistDashboard() {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Bookings List */}
       <div className="card">
-        <div className="flex gap-4 mb-6 border-b border-white/10">
-          <button
-            onClick={() => setActiveTab('bookings')}
-            className={`pb-3 px-4 ${activeTab === 'bookings' ? 'border-b-2 border-primary text-primary' : 'text-gray-400'}`}
-          >
-            Booking Requests
-          </button>
-          <button
-            onClick={() => setActiveTab('profile')}
-            className={`pb-3 px-4 ${activeTab === 'profile' ? 'border-b-2 border-primary text-primary' : 'text-gray-400'}`}
-          >
-            Edit Profile
-          </button>
-        </div>
-
-        {activeTab === 'bookings' && (
+        <h2 className="text-2xl font-bold mb-6">Booking Requests</h2>
+        
+        {bookings.length === 0 ? (
+          <div className="text-center py-12">
+            <Calendar className="mx-auto text-gray-600 mb-4" size={48} />
+            <p className="text-gray-400 text-lg">No booking requests yet</p>
+            <p className="text-gray-500 text-sm mt-2">Requests will appear here when users book you</p>
+          </div>
+        ) : (
           <div className="space-y-4">
-            {bookings.length === 0 ? (
-              <p className="text-center text-gray-400 py-8">No booking requests yet</p>
-            ) : (
-              bookings.map((booking) => (
-                <div key={booking.id} className="glass rounded-lg p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-xl font-bold mb-2">{booking.userName}</h3>
-                      <p className="text-gray-400">📞 {booking.phone}</p>
-                      <p className="text-gray-400">📧 {booking.email}</p>
-                    </div>
+            {bookings.map((booking) => (
+              <div key={booking.id} className="glass rounded-lg p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold mb-2">{booking.user_name || booking.userName}</h3>
+                    <p className="text-gray-400">📞 {booking.phone}</p>
+                    <p className="text-gray-400">📧 {booking.email}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {getStatusIcon(booking.status)}
                     <span className={`px-3 py-1 rounded-full text-sm ${
                       booking.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' :
                       booking.status === 'accepted' ? 'bg-green-500/20 text-green-500' :
-                      'bg-red-500/20 text-red-500'
+                      booking.status === 'rejected' ? 'bg-red-500/20 text-red-500' :
+                      'bg-blue-500/20 text-blue-500'
                     }`}>
-                      {booking.status}
+                      {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                     </span>
                   </div>
-
-                  <div className="grid md:grid-cols-3 gap-4 mb-4 text-sm">
-                    <p>📅 {new Date(booking.eventDate).toLocaleDateString()}</p>
-                    <p>📍 {booking.eventLocation}</p>
-                    <p>💰 ₹{(booking.budget || 0).toLocaleString()}</p>
-                  </div>
-
-                  {booking.message && (
-                    <p className="text-gray-400 mb-4">💬 {booking.message}</p>
-                  )}
-
-                  {booking.status === 'pending' && (
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => updateBookingStatus(booking.id, 'accepted')}
-                        className="flex-1 bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg transition"
-                      >
-                        <CheckCircle size={18} className="inline mr-2" />
-                        Accept
-                      </button>
-                      <button
-                        onClick={() => updateBookingStatus(booking.id, 'rejected')}
-                        className="flex-1 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition"
-                      >
-                        <XCircle size={18} className="inline mr-2" />
-                        Reject
-                      </button>
-                    </div>
-                  )}
                 </div>
-              ))
-            )}
-          </div>
-        )}
 
-        {activeTab === 'profile' && (
-          <div className="text-center py-8 text-gray-400">
-            <p>Profile editing coming soon!</p>
-            <p className="text-sm mt-2">Contact admin to update your profile</p>
+                <div className="grid md:grid-cols-2 gap-4 text-sm mb-4">
+                  <div>
+                    <p className="text-gray-400">Event Date</p>
+                    <p className="font-semibold">
+                      {new Date(booking.event_date || booking.eventDate).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400">Location</p>
+                    <p className="font-semibold">{booking.event_location || booking.eventLocation}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400">Budget</p>
+                    <p className="font-semibold text-primary">₹{(booking.budget || 0).toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400">Requested On</p>
+                    <p className="font-semibold">
+                      {new Date(booking.created_at || booking.createdAt).toLocaleDateString('en-IN')}
+                    </p>
+                  </div>
+                </div>
+
+                {booking.message && (
+                  <div className="mb-4 pt-4 border-t border-white/10">
+                    <p className="text-gray-400 text-sm">Message</p>
+                    <p className="text-sm">{booking.message}</p>
+                  </div>
+                )}
+
+                {booking.status === 'pending' && (
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => updateBookingStatus(booking.id, 'accepted')}
+                      className="flex-1 bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg transition flex items-center justify-center gap-2"
+                    >
+                      <CheckCircle size={18} />
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => updateBookingStatus(booking.id, 'rejected')}
+                      className="flex-1 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition flex items-center justify-center gap-2"
+                    >
+                      <XCircle size={18} />
+                      Reject
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>

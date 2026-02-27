@@ -51,9 +51,17 @@ export default function ArtistRegister() {
     e.preventDefault();
     console.log('Submitting artist registration:', formData);
     try {
-      await axios.post('/api/artists/register', formData);
+      const { data } = await axios.post('/api/artists/register', formData);
+      
+      // Save token and artist data
+      localStorage.setItem('artistToken', data.token);
+      localStorage.setItem('artistData', JSON.stringify(data.artist));
+      
+      // Dispatch custom event to notify Navbar
+      window.dispatchEvent(new Event('userLogin'));
+      
       setToast({ message: 'Registration successful! Awaiting admin approval.', type: 'success' });
-      setTimeout(() => navigate('/'), 2000);
+      setTimeout(() => navigate('/artist/dashboard'), 2000);
     } catch (error) {
       console.error('Registration error:', error);
       setToast({ message: error.response?.data?.message || 'Registration failed', type: 'error' });

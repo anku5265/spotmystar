@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../config/db.js';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 
@@ -128,14 +129,27 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await pool.query(`
-      INSERT INTO artists (full_name, stage_name, category_id, bio, city, price_min, price_max, email, whatsapp, instagram, password)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-      RETURNING id
+      INSERT INTO artists (full_name, stage_name, category_id, bio, city, price_min, price_max, email, whatsapp, instagram, password, status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending')
+      RETURNING id, full_name, stage_name, email, status, is_verified
     `, [fullName, stageName, category, bio, city, priceMin, priceMax, email, whatsapp, instagram, hashedPassword]);
 
+    const artist = result.rows[0];
+    
+    // Generate JWT token
+    const token = jwt.sign({ id: artist.id, role: 'artist' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
     res.status(201).json({ 
-      message: 'Registration successful! Awaiting admin approval.', 
-      artistId: result.rows[0].id 
+      message: 'Registration successful! Awaiting admin approval.',
+      token,
+      artist: {
+        id: artist.id,
+        fullName: artist.full_name,
+        stageName: artist.stage_name,
+        email: artist.email,
+        status: artist.status,
+        isVerified: artist.is_verified
+      }
     });
   } catch (error) {
     console.error('Artist registration error:', error);

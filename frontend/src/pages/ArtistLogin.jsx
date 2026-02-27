@@ -18,6 +18,10 @@ export default function ArtistLogin() {
       const { data } = await axios.post('/api/auth/artist/login', formData);
       localStorage.setItem('artistToken', data.token);
       localStorage.setItem('artistData', JSON.stringify(data.artist));
+      
+      // Dispatch custom event to notify Navbar
+      window.dispatchEvent(new Event('userLogin'));
+      
       navigate('/artist/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid credentials');
