@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, MapPin, Star, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
+import api from '../config/api';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ export default function Home() {
 
   const fetchCategories = async () => {
     try {
-      const { data } = await axios.get('/api/categories');
+      const { data } = await api.get('/api/categories');
       setCategories(data);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -28,7 +28,7 @@ export default function Home() {
 
   const fetchFeaturedArtists = async () => {
     try {
-      const { data } = await axios.get('/api/artists/featured');
+      const { data } = await api.get('/api/artists/featured');
       setFeaturedArtists(data);
     } catch (error) {
       console.error('Error fetching featured artists:', error);
