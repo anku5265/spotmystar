@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, Calendar, CheckCircle, XCircle, Clock, Music } from 'lucide-react';
+import { Eye, Calendar, CheckCircle, XCircle, Clock, Music, Camera, Edit } from 'lucide-react';
 import api from '../config/api';
 import Toast from '../components/Toast';
 
@@ -11,6 +11,8 @@ export default function ArtistDashboard() {
   const [loading, setLoading] = useState(true);
   const [showApprovalNotification, setShowApprovalNotification] = useState(false);
   const [toast, setToast] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('artistToken');
@@ -116,6 +118,52 @@ export default function ArtistDashboard() {
     }
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setToast({ message: 'Please select an image file', type: 'error' });
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setToast({ message: 'Image size should be less than 2MB', type: 'error' });
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Image = reader.result;
+        
+        const token = localStorage.getItem('artistToken');
+        const { data } = await api.patch(`/api/artists/${artist.id}/profile-image`, 
+          { profileImage: base64Image },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        // Update local state and localStorage
+        const updatedArtist = { ...artist, profileImage: data.profileImage };
+        setArtist(updatedArtist);
+        localStorage.setItem('artistData', JSON.stringify(updatedArtist));
+        
+        setToast({ message: 'Profile picture updated successfully!', type: 'success' });
+        setUploading(false);
+      };
+      
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Failed to upload image:', error);
+      setToast({ message: 'Failed to upload image', type: 'error' });
+      setUploading(false);
+    }
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
       case 'pending':
@@ -214,11 +262,45 @@ export default function ArtistDashboard() {
       <div className="card mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-secondary/20 rounded-full flex items-center justify-center">
-              <Music className="text-secondary" size={32} />
+            <div className="relative group">
+              <div className="w-16 h-16 bg-secondary/20 rounded-full flex items-center justify-center overflow-hidden">
+                {artist?.profileImage ? (
+                  <img src={artist.profileImage} alt={artist.stageName} className="w-full h-full object-cover" />
+                ) : (
+                  <Music className="text-secondary" size={32} />
+                )}
+              </div>
+              {artist?.isVerified && (
+                <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
+                  <CheckCircle size={16} className="text-white" />
+                </div>
+              )}
+              {/* Upload button */}
+              <label className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full">
+                <Camera size={24} className="text-white" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  disabled={uploading}
+                />
+              </label>
+              {uploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/70 rounded-full">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                </div>
+              )}
             </div>
             <div>
-              <h1 className="text-2xl font-bold">{artist?.stageName || artist?.fullName}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold">{artist?.stageName || artist?.fullName}</h1>
+                {artist?.isVerified && (
+                  <div className="bg-blue-500 rounded-full p-1" title="Verified Artist">
+                    <CheckCircle size={18} className="text-white" />
+                  </div>
+                )}
+              </div>
               <p className="text-gray-400">{artist?.email}</p>
               <p className={artist?.isVerified ? 'text-green-500' : 'text-yellow-500'}>
                 Status: {artist?.isVerified ? '✓ Verified' : 'Pending Approval'}

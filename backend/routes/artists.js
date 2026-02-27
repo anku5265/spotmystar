@@ -160,4 +160,30 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// Update artist profile image
+router.patch('/:id/profile-image', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { profileImage } = req.body;
+
+    if (!profileImage) {
+      return res.status(400).json({ message: 'Profile image is required' });
+    }
+
+    const result = await pool.query(
+      'UPDATE artists SET profile_image = $1, updated_at = NOW() WHERE id = $2 RETURNING profile_image',
+      [profileImage, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Artist not found' });
+    }
+
+    res.json({ profileImage: result.rows[0].profile_image });
+  } catch (error) {
+    console.error('Error updating profile image:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;
