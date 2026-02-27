@@ -116,11 +116,14 @@ export default function Dashboard() {
       {/* Header with Profile Dropdown */}
       <div className="bg-gray-800/50 backdrop-blur-lg border-b border-gray-700/50 px-6 py-4 sticky top-0 z-50">
         <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-              SpotMyStar Admin
-            </h1>
-            <p className="text-gray-400 text-sm mt-1">Manage your platform</p>
+          <div className="flex items-center gap-3">
+            <img src="/logo.svg" alt="SpotMyStar" className="w-10 h-10" />
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                SpotMyStar Admin
+              </h1>
+              <p className="text-gray-400 text-sm mt-1">Manage your platform</p>
+            </div>
           </div>
           
           {/* Profile Dropdown */}
