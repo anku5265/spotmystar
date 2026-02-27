@@ -8,6 +8,7 @@ export default function ArtistDashboard() {
   const [artist, setArtist] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showApprovalNotification, setShowApprovalNotification] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('artistToken');
@@ -18,8 +19,21 @@ export default function ArtistDashboard() {
       return;
     }
 
-    setArtist(JSON.parse(artistData));
-    fetchBookings(token, JSON.parse(artistData).id);
+    const parsedArtist = JSON.parse(artistData);
+    setArtist(parsedArtist);
+    
+    // Check if status changed from pending to active
+    const lastStatus = localStorage.getItem('artistLastStatus');
+    if (lastStatus === 'pending' && parsedArtist.status === 'active' && parsedArtist.isVerified) {
+      setShowApprovalNotification(true);
+      // Auto-hide after 10 seconds
+      setTimeout(() => setShowApprovalNotification(false), 10000);
+    }
+    
+    // Save current status
+    localStorage.setItem('artistLastStatus', parsedArtist.status);
+    
+    fetchBookings(token, parsedArtist.id);
   }, [navigate]);
 
   const fetchBookings = async (token, artistId) => {
@@ -73,7 +87,30 @@ export default function ArtistDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Status Notification Banner */}
+      {/* Approval Notification - Only shows when status changes from pending to active */}
+      {showApprovalNotification && (
+        <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg animate-pulse">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                <CheckCircle className="text-green-500" size={20} />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-green-500">🎉 Registration Approved!</h3>
+                <p className="text-sm text-gray-400">Congratulations! Your profile is now live and visible to users.</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setShowApprovalNotification(false)}
+              className="text-gray-400 hover:text-white"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Status Notification Banner - Always visible based on current status */}
       {artist?.status === 'pending' && (
         <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
           <div className="flex items-center gap-3">
@@ -83,20 +120,6 @@ export default function ArtistDashboard() {
             <div className="flex-1">
               <h3 className="font-semibold text-yellow-500">Registration Pending</h3>
               <p className="text-sm text-gray-400">Your registration is under review by admin. You'll be notified once approved.</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {artist?.status === 'active' && artist?.isVerified && (
-        <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-              <CheckCircle className="text-green-500" size={20} />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-green-500">Registration Approved! 🎉</h3>
-              <p className="text-sm text-gray-400">Congratulations! Your profile is now live and visible to users.</p>
             </div>
           </div>
         </div>
