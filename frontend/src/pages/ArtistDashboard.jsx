@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, Calendar, CheckCircle, XCircle, Clock, Music } from 'lucide-react';
 import api from '../config/api';
+import Toast from '../components/Toast';
 
 export default function ArtistDashboard() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ export default function ArtistDashboard() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showApprovalNotification, setShowApprovalNotification] = useState(false);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('artistToken');
@@ -46,7 +48,8 @@ export default function ArtistDashboard() {
         localStorage.removeItem('artistToken');
         localStorage.removeItem('artistData');
         localStorage.removeItem('artistLastStatus');
-        navigate('/', { state: { message: 'Your registration was rejected. Please contact support or register again.' } });
+        setToast({ message: 'Your registration was rejected. Please contact support or register again.', type: 'error' });
+        setTimeout(() => navigate('/'), 2000);
         return;
       }
       
@@ -58,6 +61,7 @@ export default function ArtistDashboard() {
       const lastStatus = localStorage.getItem('artistLastStatus');
       if (lastStatus === 'pending' && artistInfo.status === 'active' && artistInfo.isVerified) {
         setShowApprovalNotification(true);
+        setToast({ message: '🎉 Congratulations! Your registration has been approved!', type: 'success' });
         setTimeout(() => setShowApprovalNotification(false), 10000);
       }
       
@@ -152,6 +156,8 @@ export default function ArtistDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      
       {/* Approval Notification - Only shows when status changes from pending to active */}
       {showApprovalNotification && (
         <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg animate-pulse">
