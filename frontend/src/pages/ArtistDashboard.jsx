@@ -28,9 +28,7 @@ export default function ArtistDashboard() {
   const fetchArtistData = async (token, artistId) => {
     try {
       // Fetch fresh artist data from backend
-      const { data: freshArtistData } = await api.get(`/artists/${artistId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const { data: freshArtistData } = await api.get(`/api/artists/${artistId}`);
       
       // Convert snake_case to camelCase
       const artistInfo = {
@@ -40,7 +38,7 @@ export default function ArtistDashboard() {
         email: freshArtistData.email,
         status: freshArtistData.status,
         isVerified: freshArtistData.is_verified,
-        views: freshArtistData.views
+        views: freshArtistData.views || 0
       };
       
       // Check if rejected - logout and redirect
@@ -70,12 +68,16 @@ export default function ArtistDashboard() {
       fetchBookings(token, artistId);
     } catch (error) {
       console.error('Error fetching artist data:', error);
-      if (error.response?.status === 401 || error.response?.status === 404) {
+      // If artist not found or any error, just use localStorage data
+      const artistData = localStorage.getItem('artistData');
+      if (artistData) {
+        setArtist(JSON.parse(artistData));
+        fetchBookings(token, artistId);
+      } else {
         localStorage.removeItem('artistToken');
         localStorage.removeItem('artistData');
         navigate('/artist/login');
       }
-      setLoading(false);
     }
   };
 
