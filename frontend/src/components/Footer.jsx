@@ -68,9 +68,9 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* How It Works & Trust Building */}
+          {/* Company (previously How It Works) */}
           <div>
-            <h4 className="font-semibold mb-4 text-white">How It Works</h4>
+            <h4 className="font-semibold mb-4 text-white">Company</h4>
             <div className="space-y-2">
               <Link to="/about" className="block text-gray-400 hover:text-primary transition text-sm">About Us</Link>
               <Link to="/contact" className="block text-gray-400 hover:text-primary transition text-sm">Contact Us</Link>
