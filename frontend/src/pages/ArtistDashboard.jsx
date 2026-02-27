@@ -29,8 +29,8 @@ export default function ArtistDashboard() {
 
   const fetchArtistData = async (token, artistId) => {
     try {
-      // Fetch fresh artist data from backend
-      const { data: freshArtistData } = await api.get(`/api/artists/${artistId}`);
+      // Fetch fresh artist data from backend (skip view count for own dashboard)
+      const { data: freshArtistData } = await api.get(`/api/artists/${artistId}?skipViewCount=true`);
       
       // Convert snake_case to camelCase
       const artistInfo = {

@@ -75,10 +75,11 @@ router.get('/featured', async (req, res) => {
   }
 });
 
-// Get artist by stage name or ID
+// Get artist by stage name or ID (public - increments views)
 router.get('/:identifier', async (req, res) => {
   try {
     const { identifier } = req.params;
+    const { skipViewCount } = req.query; // Add query parameter to skip view increment
     
     const result = await pool.query(`
       SELECT a.*, c.name as category_name 
@@ -91,8 +92,10 @@ router.get('/:identifier', async (req, res) => {
       return res.status(404).json({ message: 'Artist not found' });
     }
 
-    // Increment views
-    await pool.query('UPDATE artists SET views = views + 1 WHERE id = $1', [result.rows[0].id]);
+    // Increment views only if skipViewCount is not true
+    if (skipViewCount !== 'true') {
+      await pool.query('UPDATE artists SET views = views + 1 WHERE id = $1', [result.rows[0].id]);
+    }
 
     res.json(result.rows[0]);
   } catch (error) {
