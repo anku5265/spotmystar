@@ -22,6 +22,10 @@ export default function UserLogin() {
       
       localStorage.setItem('userToken', data.token);
       localStorage.setItem('userInfo', JSON.stringify(data.user));
+      
+      // Dispatch custom event to notify Navbar
+      window.dispatchEvent(new Event('userLogin'));
+      
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');

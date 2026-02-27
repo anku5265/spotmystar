@@ -8,10 +8,21 @@ export default function Navbar() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const userInfo = localStorage.getItem('userInfo');
-    if (userInfo) {
-      setUser(JSON.parse(userInfo));
-    }
+    // Check user on mount
+    checkUser();
+    
+    // Listen for storage changes (login/logout from other tabs)
+    const handleStorageChange = () => {
+      checkUser();
+    };
+    
+    // Listen for custom login event
+    const handleLoginEvent = () => {
+      checkUser();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('userLogin', handleLoginEvent);
     
     // Close dropdown when clicking outside
     const handleClickOutside = (e) => {
@@ -21,8 +32,22 @@ export default function Navbar() {
     };
     
     document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('userLogin', handleLoginEvent);
+      document.removeEventListener('click', handleClickOutside);
+    };
   }, [showProfileMenu]);
+
+  const checkUser = () => {
+    const userInfo = localStorage.getItem('userInfo');
+    if (userInfo) {
+      setUser(JSON.parse(userInfo));
+    } else {
+      setUser(null);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('userToken');

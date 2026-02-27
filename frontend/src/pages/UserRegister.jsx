@@ -43,6 +43,10 @@ export default function UserRegister() {
 
       localStorage.setItem('userToken', data.token);
       localStorage.setItem('userInfo', JSON.stringify(data.user));
+      
+      // Dispatch custom event to notify Navbar
+      window.dispatchEvent(new Event('userLogin'));
+      
       setToast({ message: 'Account created successfully!', type: 'success' });
       setTimeout(() => navigate('/'), 2000);
     } catch (err) {
