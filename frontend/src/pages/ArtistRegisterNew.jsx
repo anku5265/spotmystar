@@ -135,6 +135,10 @@ export default function ArtistRegisterNew() {
         setToast({ message: 'Please select at least one category', type: 'error' });
         return;
       }
+      if (!primaryCategory) {
+        setToast({ message: 'Please select a primary category', type: 'error' });
+        return;
+      }
     }
     
     if (currentStep === 3) {
@@ -354,18 +358,39 @@ export default function ArtistRegisterNew() {
 
       {selectedCategories.length > 0 && (
         <div className="bg-white/5 rounded-lg p-4">
-          <h4 className="font-bold mb-3">Select Primary Category</h4>
-          <select
-            value={primaryCategory}
-            onChange={(e) => setPrimaryCategory(e.target.value)}
-            className="w-full bg-white/10 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="">Choose primary category</option>
+          <h4 className="font-bold mb-3">Select Primary Category *</h4>
+          <p className="text-sm text-gray-400 mb-3">Choose one category as your primary specialization</p>
+          <div className="space-y-2">
             {selectedCategories.map(catId => {
               const cat = Object.values(categories).flat().find(c => c.id === catId);
-              return cat ? <option key={cat.id} value={cat.id}>{cat.name}</option> : null;
+              if (!cat) return null;
+              
+              return (
+                <label
+                  key={cat.id}
+                  className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition ${
+                    primaryCategory === cat.id
+                      ? 'bg-primary/20 border-2 border-primary'
+                      : 'bg-white/5 border-2 border-transparent hover:bg-white/10'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="primaryCategory"
+                    value={cat.id}
+                    checked={primaryCategory === cat.id}
+                    onChange={(e) => setPrimaryCategory(e.target.value)}
+                    className="w-5 h-5"
+                  />
+                  <span className="text-2xl">{cat.icon}</span>
+                  <span className="font-medium">{cat.name}</span>
+                  {primaryCategory === cat.id && (
+                    <span className="ml-auto text-primary text-sm font-semibold">Primary</span>
+                  )}
+                </label>
+              );
             })}
-          </select>
+          </div>
         </div>
       )}
     </div>
