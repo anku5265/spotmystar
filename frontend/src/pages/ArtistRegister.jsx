@@ -52,12 +52,17 @@ export default function ArtistRegister() {
     console.log('Submitting artist registration:', formData);
     try {
       const { data } = await axios.post('/api/artists/register', formData);
+      console.log('Artist registration response:', data);
       
       // Save token and artist data
       localStorage.setItem('artistToken', data.token);
       localStorage.setItem('artistData', JSON.stringify(data.artist));
       
+      console.log('Saved to localStorage - artistToken:', data.token);
+      console.log('Saved to localStorage - artistData:', JSON.stringify(data.artist));
+      
       // Dispatch custom event to notify Navbar
+      console.log('Dispatching userLogin event');
       window.dispatchEvent(new Event('userLogin'));
       
       setToast({ message: 'Registration successful! Awaiting admin approval.', type: 'success' });

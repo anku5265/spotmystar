@@ -16,10 +16,16 @@ export default function ArtistLogin() {
 
     try {
       const { data } = await axios.post('/api/auth/artist/login', formData);
+      console.log('Artist login response:', data);
+      
       localStorage.setItem('artistToken', data.token);
       localStorage.setItem('artistData', JSON.stringify(data.artist));
       
+      console.log('Saved to localStorage - artistToken:', data.token);
+      console.log('Saved to localStorage - artistData:', JSON.stringify(data.artist));
+      
       // Dispatch custom event to notify Navbar
+      console.log('Dispatching userLogin event');
       window.dispatchEvent(new Event('userLogin'));
       
       navigate('/artist/dashboard');

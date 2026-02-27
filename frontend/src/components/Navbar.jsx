@@ -44,11 +44,19 @@ export default function Navbar() {
     const userInfo = localStorage.getItem('userInfo');
     const artistData = localStorage.getItem('artistData');
     
+    console.log('Navbar checkUser - userInfo:', userInfo);
+    console.log('Navbar checkUser - artistData:', artistData);
+    
     if (userInfo) {
-      setUser(JSON.parse(userInfo));
+      const parsed = JSON.parse(userInfo);
+      console.log('Setting user from userInfo:', parsed);
+      setUser(parsed);
     } else if (artistData) {
-      setUser(JSON.parse(artistData));
+      const parsed = JSON.parse(artistData);
+      console.log('Setting user from artistData:', parsed);
+      setUser(parsed);
     } else {
+      console.log('No user data found, setting null');
       setUser(null);
     }
   };
