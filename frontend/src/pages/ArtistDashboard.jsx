@@ -47,6 +47,49 @@ export default function ArtistDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Status Notification Banner */}
+      {artist.status === 'pending' && (
+        <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
+              <Calendar className="text-yellow-500" size={20} />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-yellow-500">Registration Pending</h3>
+              <p className="text-sm text-gray-400">Your registration is under review by admin. You'll be notified once approved.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {artist.status === 'active' && artist.isVerified && (
+        <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+              <CheckCircle className="text-green-500" size={20} />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-green-500">Registration Approved! 🎉</h3>
+              <p className="text-sm text-gray-400">Congratulations! Your profile is now live and visible to users.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {artist.status === 'rejected' && (
+        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+              <XCircle className="text-red-500" size={20} />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-red-500">Registration Rejected</h3>
+              <p className="text-sm text-gray-400">Your registration was not approved. Please contact support or register again with correct information.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="card mb-8">
         <div className="flex justify-between items-center">
           <div>
