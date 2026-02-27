@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Search, Heart, Menu, User, ChevronDown } from 'lucide-react';
+import { Menu, User, ChevronDown, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function Navbar() {
@@ -8,23 +8,14 @@ export default function Navbar() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Check user on mount
     checkUser();
     
-    // Listen for storage changes (login/logout from other tabs)
-    const handleStorageChange = () => {
-      checkUser();
-    };
-    
-    // Listen for custom login event
-    const handleLoginEvent = () => {
-      checkUser();
-    };
+    const handleStorageChange = () => checkUser();
+    const handleLoginEvent = () => checkUser();
     
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('userLogin', handleLoginEvent);
     
-    // Close dropdown when clicking outside
     const handleClickOutside = (e) => {
       if (showProfileMenu && !e.target.closest('.profile-dropdown')) {
         setShowProfileMenu(false);
@@ -44,19 +35,11 @@ export default function Navbar() {
     const userInfo = localStorage.getItem('userInfo');
     const artistData = localStorage.getItem('artistData');
     
-    console.log('Navbar checkUser - userInfo:', userInfo);
-    console.log('Navbar checkUser - artistData:', artistData);
-    
     if (userInfo) {
-      const parsed = JSON.parse(userInfo);
-      console.log('Setting user from userInfo:', parsed);
-      setUser(parsed);
+      setUser(JSON.parse(userInfo));
     } else if (artistData) {
-      const parsed = JSON.parse(artistData);
-      console.log('Setting user from artistData:', parsed);
-      setUser(parsed);
+      setUser(JSON.parse(artistData));
     } else {
-      console.log('No user data found, setting null');
       setUser(null);
     }
   };
@@ -74,18 +57,18 @@ export default function Navbar() {
     <nav className="glass sticky top-0 z-50 border-b border-white/10">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          {/* Logo - Always visible, redirects to homepage */}
+          <Link 
+            to="/" 
+            className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent hover:opacity-80 transition"
+          >
             SpotMyStar
           </Link>
 
-          {/* Desktop Menu */}
+          {/* Desktop Menu - 3-4 elements max */}
           <div className="hidden md:flex items-center gap-6">
-            <Link to="/search" className="flex items-center gap-2 hover:text-primary transition">
-              <Search size={20} />
-              <span>Search</span>
-            </Link>
-            
             {user ? (
+              /* After Login - Profile Dropdown */
               <div className="relative profile-dropdown">
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
@@ -122,44 +105,93 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
+              /* Before Login - 3 Elements */
               <>
-                <Link to="/user/login" className="btn-primary text-sm">
-                  <Heart size={18} className="inline mr-2" />
-                  Book Artists
+                {/* Explore Artists - Normal link */}
+                <Link 
+                  to="/search" 
+                  className="text-white hover:text-primary transition"
+                >
+                  Explore Artists
                 </Link>
                 
-                <div className="h-6 w-px bg-white/20"></div>
+                {/* Join as Artist - Primary CTA (highlighted) */}
+                <Link 
+                  to="/artist/register" 
+                  className="bg-secondary hover:bg-secondary/80 text-white px-4 py-2 rounded-lg font-semibold transition"
+                >
+                  Join as Artist
+                </Link>
                 
-                <Link to="/artist/login" className="glass px-4 py-2 rounded-lg hover:bg-white/10 transition text-sm">
-                  For Artists
+                {/* Login - Simple text link */}
+                <Link 
+                  to="/user/login" 
+                  className="text-gray-300 hover:text-white transition"
+                >
+                  Login
                 </Link>
               </>
             )}
           </div>
 
           {/* Mobile Menu Button */}
-          <button onClick={() => setIsOpen(!isOpen)} className="md:hidden">
-            <Menu size={24} />
+          <button 
+            onClick={() => setIsOpen(!isOpen)} 
+            className="md:hidden p-2 hover:bg-white/10 rounded-lg transition"
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - Vertical stacked */}
         {isOpen && (
-          <div className="md:hidden py-4 space-y-3">
-            <Link to="/search" className="block hover:text-primary transition">Search Artists</Link>
-            
+          <div className="md:hidden py-4 space-y-3 border-t border-white/10">
             {user ? (
               <>
-                <Link to={user.stageName ? "/artist/dashboard" : "/user/dashboard"} className="block hover:text-primary transition">My Dashboard</Link>
-                <button onClick={handleLogout} className="block hover:text-primary transition w-full text-left">
+                <Link 
+                  to={user.stageName ? "/artist/dashboard" : "/user/dashboard"} 
+                  className="block py-2 hover:text-primary transition"
+                  onClick={() => setIsOpen(false)}
+                >
+                  My Dashboard
+                </Link>
+                <button 
+                  onClick={() => {
+                    handleLogout();
+                    setIsOpen(false);
+                  }} 
+                  className="block w-full text-left py-2 hover:text-primary transition text-red-400"
+                >
                   Logout
                 </button>
               </>
             ) : (
               <>
-                <Link to="/user/login" className="block hover:text-primary transition">Book Artists</Link>
-                <div className="h-px bg-white/20 my-2"></div>
-                <Link to="/artist/login" className="block hover:text-secondary transition">For Artists</Link>
+                <Link 
+                  to="/search" 
+                  className="block py-2 hover:text-primary transition"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Explore Artists
+                </Link>
+                
+                {/* Join as Artist - Primary button in mobile */}
+                <Link 
+                  to="/artist/register" 
+                  className="block bg-secondary hover:bg-secondary/80 text-white px-4 py-3 rounded-lg font-semibold text-center transition"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Join as Artist
+                </Link>
+                
+                <Link 
+                  to="/user/login" 
+                  className="block py-2 text-gray-300 hover:text-white transition"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Login
+                </Link>
               </>
             )}
           </div>
