@@ -94,7 +94,7 @@ export default function ArtistProfile() {
                   {artist.city}
                 </p>
                 <p className="text-2xl font-bold text-primary text-center">
-                  ₹{artist.priceMin.toLocaleString()} - ₹{artist.priceMax.toLocaleString()}
+                  ₹{(artist.priceMin || artist.price_min || 0).toLocaleString()} - ₹{(artist.priceMax || artist.price_max || 0).toLocaleString()}
                 </p>
               </div>
 

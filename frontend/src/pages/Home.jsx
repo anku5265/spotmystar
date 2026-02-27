@@ -142,9 +142,11 @@ export default function Home() {
                   </div>
                 )}
               </div>
-              <h3 className="text-xl font-bold mb-2">{artist.stageName}</h3>
-              <p className="text-gray-400 mb-2">{artist.category?.name} • {artist.city}</p>
-              <p className="text-primary font-semibold">₹{artist.priceMin.toLocaleString()} - ₹{artist.priceMax.toLocaleString()}</p>
+              <h3 className="text-xl font-bold mb-2">{artist.stageName || artist.stage_name}</h3>
+              <p className="text-gray-400 mb-2">{artist.category?.name || artist.category_name} • {artist.city}</p>
+              <p className="text-primary font-semibold">
+                ₹{(artist.priceMin || artist.price_min || 0).toLocaleString()} - ₹{(artist.priceMax || artist.price_max || 0).toLocaleString()}
+              </p>
             </Link>
           ))}
         </div>

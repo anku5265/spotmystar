@@ -151,7 +151,7 @@ export default function ArtistDashboard() {
                   <div className="grid md:grid-cols-3 gap-4 mb-4 text-sm">
                     <p>📅 {new Date(booking.eventDate).toLocaleDateString()}</p>
                     <p>📍 {booking.eventLocation}</p>
-                    <p>💰 ₹{booking.budget.toLocaleString()}</p>
+                    <p>💰 ₹{(booking.budget || 0).toLocaleString()}</p>
                   </div>
 
                   {booking.message && (
