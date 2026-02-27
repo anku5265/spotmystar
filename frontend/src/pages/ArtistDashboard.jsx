@@ -20,21 +20,64 @@ export default function ArtistDashboard() {
     }
 
     const parsedArtist = JSON.parse(artistData);
-    setArtist(parsedArtist);
     
-    // Check if status changed from pending to active
-    const lastStatus = localStorage.getItem('artistLastStatus');
-    if (lastStatus === 'pending' && parsedArtist.status === 'active' && parsedArtist.isVerified) {
-      setShowApprovalNotification(true);
-      // Auto-hide after 10 seconds
-      setTimeout(() => setShowApprovalNotification(false), 10000);
-    }
-    
-    // Save current status
-    localStorage.setItem('artistLastStatus', parsedArtist.status);
-    
-    fetchBookings(token, parsedArtist.id);
+    // Fetch fresh artist data from database
+    fetchArtistData(token, parsedArtist.id);
   }, [navigate]);
+
+  const fetchArtistData = async (token, artistId) => {
+    try {
+      // Fetch fresh artist data from backend
+      const { data: freshArtistData } = await api.get(`/artists/${artistId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Convert snake_case to camelCase
+      const artistInfo = {
+        id: freshArtistData.id,
+        fullName: freshArtistData.full_name,
+        stageName: freshArtistData.stage_name,
+        email: freshArtistData.email,
+        status: freshArtistData.status,
+        isVerified: freshArtistData.is_verified,
+        views: freshArtistData.views
+      };
+      
+      // Check if rejected - logout and redirect
+      if (artistInfo.status === 'rejected') {
+        localStorage.removeItem('artistToken');
+        localStorage.removeItem('artistData');
+        localStorage.removeItem('artistLastStatus');
+        navigate('/', { state: { message: 'Your registration was rejected. Please contact support or register again.' } });
+        return;
+      }
+      
+      // Update localStorage with fresh data
+      localStorage.setItem('artistData', JSON.stringify(artistInfo));
+      setArtist(artistInfo);
+      
+      // Check if status changed from pending to active
+      const lastStatus = localStorage.getItem('artistLastStatus');
+      if (lastStatus === 'pending' && artistInfo.status === 'active' && artistInfo.isVerified) {
+        setShowApprovalNotification(true);
+        setTimeout(() => setShowApprovalNotification(false), 10000);
+      }
+      
+      // Save current status
+      localStorage.setItem('artistLastStatus', artistInfo.status);
+      
+      // Fetch bookings
+      fetchBookings(token, artistId);
+    } catch (error) {
+      console.error('Error fetching artist data:', error);
+      if (error.response?.status === 401 || error.response?.status === 404) {
+        localStorage.removeItem('artistToken');
+        localStorage.removeItem('artistData');
+        navigate('/artist/login');
+      }
+      setLoading(false);
+    }
+  };
 
   const fetchBookings = async (token, artistId) => {
     try {

@@ -1,21 +1,31 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, MapPin, Star, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../config/api';
+import Toast from '../components/Toast';
 
 export default function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [categories, setCategories] = useState([]);
   const [featuredArtists, setFeaturedArtists] = useState([]);
   const [searchCity, setSearchCity] = useState('');
+  const [toast, setToast] = useState(null);
 
   const cities = ['Delhi', 'Mumbai', 'Bangalore', 'Pune', 'Hyderabad', 'Chennai', 'Kolkata', 'Ahmedabad'];
 
   useEffect(() => {
     fetchCategories();
     fetchFeaturedArtists();
-  }, []);
+    
+    // Check for rejection message from navigation state
+    if (location.state?.message) {
+      setToast({ message: location.state.message, type: 'error' });
+      // Clear the state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const fetchCategories = async () => {
     try {
@@ -53,6 +63,8 @@ export default function Home() {
 
   return (
     <div>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      
       {/* Hero Section */}
       <section className="relative py-20 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 blur-3xl"></div>
