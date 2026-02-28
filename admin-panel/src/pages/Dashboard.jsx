@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [showSuspensionModal, setShowSuspensionModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedUserType, setSelectedUserType] = useState(null);
+  const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -39,11 +40,6 @@ export default function Dashboard() {
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     fetchData();
 
-    // Auto-refresh every 30 seconds
-    const refreshInterval = setInterval(() => {
-      fetchData();
-    }, 30000);
-
     const handleClickOutside = (event) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
         setShowProfileMenu(false);
@@ -54,12 +50,18 @@ export default function Dashboard() {
     
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      clearInterval(refreshInterval);
     };
   }, [navigate]);
 
   const fetchData = async () => {
+    // Prevent overlapping fetches
+    if (isFetching) {
+      console.log('Fetch already in progress, skipping...');
+      return;
+    }
+    
     try {
+      setIsFetching(true);
       setLoading(true);
       const [statsRes, artistsRes, usersRes, bookingsRes, managedUsersRes, managedArtistsRes] = await Promise.all([
         api.get('/api/admin/stats'),
@@ -93,6 +95,7 @@ export default function Dashboard() {
       }
     } finally {
       setLoading(false);
+      setIsFetching(false);
     }
   };
 
@@ -111,13 +114,31 @@ export default function Dashboard() {
       
       await api.patch(`/api/admin/artists/${artistId}/verify`, { isVerified, status });
       
+      // Update local state instead of fetching all data
+      setAllArtists(prev => prev.map(a => 
+        a.id === artistId ? { ...a, is_verified: isVerified, status } : a
+      ));
+      setPendingArtists(prev => prev.filter(a => a.id !== artistId));
+      
+      // Update stats locally
+      if (stats) {
+        setStats(prev => ({
+          ...prev,
+          artists: {
+            ...prev.artists,
+            pending: Math.max(0, prev.artists.pending - 1),
+            active: action === 'accept' ? prev.artists.active + 1 : prev.artists.active,
+            verified: action === 'accept' ? prev.artists.verified + 1 : prev.artists.verified
+          }
+        }));
+      }
+      
       setToast({ 
         message: action === 'accept' ? 'Artist approved successfully!' : action === 'reject' ? 'Artist rejected' : 'Action completed', 
         type: 'success' 
       });
-      
-      fetchData();
     } catch (error) {
+      console.error('Artist action error:', error);
       setToast({ message: 'Action failed', type: 'error' });
     }
   };
@@ -141,15 +162,25 @@ export default function Dashboard() {
         ? `/api/user-management/users/${selectedUser.id}/status`
         : `/api/user-management/artists/${selectedUser.id}/status`;
       
-      await api.patch(endpoint, data);
+      const response = await api.patch(endpoint, data);
+      
+      // Update local state instead of fetching all data
+      if (selectedUserType === 'user') {
+        setManagedUsers(prev => prev.map(u => 
+          u.id === selectedUser.id ? { ...u, ...response.data } : u
+        ));
+      } else {
+        setManagedArtists(prev => prev.map(a => 
+          a.id === selectedUser.id ? { ...a, ...response.data } : a
+        ));
+      }
       
       setToast({ 
         message: `Account ${data.status === 'active' ? 'reactivated' : data.status === 'terminated' ? 'terminated' : data.status === 'inactive' ? 'deactivated' : 'suspended'} successfully!`, 
         type: 'success' 
       });
-      
-      fetchData();
     } catch (error) {
+      console.error('Status update error:', error);
       setToast({ message: 'Failed to update account status', type: 'error' });
     }
   };
