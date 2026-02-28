@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, User, LogOut, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, User, LogOut, Clock, CheckCircle, XCircle, Settings } from 'lucide-react';
 import api from '../config/api';
 import NotificationBell from '../components/NotificationBell';
+import EditProfileModal from '../components/EditProfileModal';
+import Toast from '../components/Toast';
 
 export default function UserDashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     const userInfo = localStorage.getItem('userInfo');
@@ -69,6 +73,27 @@ export default function UserDashboard() {
     navigate('/');
   };
 
+  const handleProfileUpdate = async (formData) => {
+    try {
+      const token = localStorage.getItem('userToken');
+      const { data } = await api.patch('/api/auth/user/profile', formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // Update local storage and state
+      const updatedUser = data.user;
+      localStorage.setItem('userInfo', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      setShowEditModal(false);
+      setToast({ message: 'Profile updated successfully!', type: 'success' });
+    } catch (error) {
+      setToast({ 
+        message: error.response?.data?.message || 'Failed to update profile', 
+        type: 'error' 
+      });
+    }
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
       case 'pending':
@@ -90,6 +115,8 @@ export default function UserDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      
       {/* Header */}
       <div className="card mb-8">
         <div className="flex items-center justify-between">
@@ -103,14 +130,22 @@ export default function UserDashboard() {
               <p className="text-gray-400">{user?.phone}</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="flex items-center gap-2 glass px-4 py-2 rounded-lg hover:bg-white/10 transition"
+              title="Edit Profile"
+            >
+              <Settings size={20} />
+              <span className="hidden md:inline">Edit Profile</span>
+            </button>
             {user && <NotificationBell userType="user" userId={user.id} />}
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 glass px-4 py-2 rounded-lg hover:bg-white/10 transition"
             >
               <LogOut size={20} />
-              Logout
+              <span className="hidden md:inline">Logout</span>
             </button>
           </div>
         </div>
@@ -275,6 +310,15 @@ export default function UserDashboard() {
           </div>
         )}
       </div>
+
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <EditProfileModal
+          user={user}
+          onClose={() => setShowEditModal(false)}
+          onSubmit={handleProfileUpdate}
+        />
+      )}
     </div>
   );
 }

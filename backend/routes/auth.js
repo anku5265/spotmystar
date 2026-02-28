@@ -136,4 +136,68 @@ router.post('/user/login', async (req, res) => {
   }
 });
 
+// Update user profile
+router.patch('/user/profile', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { name, email, phone, currentPassword, newPassword } = req.body;
+
+    // Get current user
+    const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [decoded.id]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = userResult.rows[0];
+
+    // If changing password, verify current password
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({ message: 'Current password is required to change password' });
+      }
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Current password is incorrect' });
+      }
+    }
+
+    // Check if email is being changed and if it's already taken
+    if (email !== user.email) {
+      const emailCheck = await pool.query('SELECT id FROM users WHERE email = $1 AND id != $2', [email, decoded.id]);
+      if (emailCheck.rows.length > 0) {
+        return res.status(400).json({ message: 'Email is already taken' });
+      }
+    }
+
+    // Update user
+    let query, params;
+    if (newPassword) {
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      query = 'UPDATE users SET name = $1, email = $2, phone = $3, password = $4 WHERE id = $5 RETURNING id, name, email, phone';
+      params = [name, email, phone, hashedPassword, decoded.id];
+    } else {
+      query = 'UPDATE users SET name = $1, email = $2, phone = $3 WHERE id = $4 RETURNING id, name, email, phone';
+      params = [name, email, phone, decoded.id];
+    }
+
+    const result = await pool.query(query, params);
+    const updatedUser = result.rows[0];
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: updatedUser
+    });
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;
