@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import axios from 'axios';
+import api from '../config/api';
 
 export default function UserLogin() {
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ export default function UserLogin() {
     setLoading(true);
 
     try {
-      const { data } = await axios.post('/api/auth/user/login', formData);
+      const { data } = await api.post('/api/auth/user/login', formData);
       
       localStorage.setItem('userToken', data.token);
       localStorage.setItem('userInfo', JSON.stringify(data.user));

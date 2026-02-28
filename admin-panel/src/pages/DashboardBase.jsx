@@ -1,7 +1,7 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Calendar, CheckCircle, Clock, LogOut } from 'lucide-react';
-import axios from 'axios';
+import api from '../config/api';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const { data } = await axios.get('/api/admin/stats');
+      const { data } = await api.get('/api/admin/stats');
       setStats(data);
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -41,7 +41,7 @@ export default function AdminDashboard() {
 
   const fetchArtists = async () => {
     try {
-      const { data } = await axios.get('/api/admin/artists');
+      const { data } = await api.get('/api/admin/artists');
       setArtists(data);
     } catch (error) {
       console.error('Error fetching artists:', error);
@@ -50,7 +50,7 @@ export default function AdminDashboard() {
 
   const fetchBookings = async () => {
     try {
-      const { data } = await axios.get('/api/admin/bookings');
+      const { data } = await api.get('/api/admin/bookings');
       setBookings(data);
     } catch (error) {
       console.error('Error fetching bookings:', error);
@@ -59,7 +59,7 @@ export default function AdminDashboard() {
 
   const fetchUsers = async () => {
     try {
-      const { data } = await axios.get('/api/admin/users');
+      const { data } = await api.get('/api/admin/users');
       setUsers(data);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -68,7 +68,7 @@ export default function AdminDashboard() {
 
   const approveArtist = async (artistId) => {
     try {
-      await axios.patch(`/api/admin/artists/${artistId}/verify`, {
+      await api.patch(`/api/admin/artists/${artistId}/verify`, {
         isVerified: true,
         status: 'active'
       });
@@ -81,7 +81,7 @@ export default function AdminDashboard() {
 
   const rejectArtist = async (artistId) => {
     try {
-      await axios.patch(`/api/admin/artists/${artistId}/verify`, {
+      await api.patch(`/api/admin/artists/${artistId}/verify`, {
         isVerified: false,
         status: 'inactive'
       });
@@ -341,9 +341,9 @@ export default function AdminDashboard() {
                   <div>
                     <h3 className="text-xl font-bold mb-2">{booking.artist?.stageName}</h3>
                     <p className="text-gray-400">Client: {booking.userName}</p>
-                    <p className="text-gray-400">ðŸ“ž {booking.phone}</p>
-                    <p className="text-gray-400">ðŸ“… {new Date(booking.eventDate).toLocaleDateString()}</p>
-                    <p className="text-gray-400">ðŸ’° â‚¹{booking.budget.toLocaleString()}</p>
+                    <p className="text-gray-400">📞 {booking.phone}</p>
+                    <p className="text-gray-400">📅 {new Date(booking.eventDate).toLocaleDateString()}</p>
+                    <p className="text-gray-400">💰 ₹{booking.budget.toLocaleString()}</p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-sm ${
                     booking.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' :

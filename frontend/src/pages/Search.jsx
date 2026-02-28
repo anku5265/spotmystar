@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Filter, Grid, List, Heart } from 'lucide-react';
-import axios from 'axios';
+import api from '../config/api';
 
 export default function Search() {
   const [searchParams] = useSearchParams();
@@ -22,7 +22,7 @@ export default function Search() {
   }, [filters]);
 
   const fetchCategories = async () => {
-    const { data } = await axios.get('/api/categories');
+    const { data } = await api.get('/api/categories');
     setCategories(data);
   };
 
@@ -32,7 +32,7 @@ export default function Search() {
       Object.entries(filters).forEach(([key, value]) => {
         if (value) params.append(key, value);
       });
-      const { data } = await axios.get(`/api/artists/search?${params}`);
+      const { data } = await api.get(`/api/artists/search?${params}`);
       setArtists(data);
     } catch (error) {
       console.error('Error fetching artists:', error);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Music, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import axios from 'axios';
+import api from '../config/api';
 
 export default function ArtistLogin() {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export default function ArtistLogin() {
     setLoading(true);
 
     try {
-      const { data } = await axios.post('/api/auth/artist/login', formData);
+      const { data } = await api.post('/api/auth/artist/login', formData);
       console.log('Artist login response:', data);
       
       localStorage.setItem('artistToken', data.token);

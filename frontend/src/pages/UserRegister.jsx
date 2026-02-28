@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserPlus, Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react';
-import axios from 'axios';
+import api from '../config/api';
 import Toast from '../components/Toast';
 
 export default function UserRegister() {
@@ -36,7 +36,7 @@ export default function UserRegister() {
     setLoading(true);
 
     try {
-      const { data } = await axios.post('/api/auth/user/register', {
+      const { data } = await api.post('/api/auth/user/register', {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,

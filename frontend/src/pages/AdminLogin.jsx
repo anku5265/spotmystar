@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/api';
 import Toast from '../components/Toast';
 
 export default function AdminLogin() {
@@ -11,7 +11,7 @@ export default function AdminLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post('/api/auth/admin/login', formData);
+      const { data } = await api.post('/api/auth/admin/login', formData);
       localStorage.setItem('adminToken', data.token);
       setToast({ message: 'Login successful!', type: 'success' });
       setTimeout(() => navigate('/admin/dashboard'), 1000);

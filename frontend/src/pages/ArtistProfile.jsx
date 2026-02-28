@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { MapPin, Phone, Mail, Instagram, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import api from '../config/api';
 
 export default function ArtistProfile() {
   const { identifier, stageName } = useParams();
@@ -25,7 +25,7 @@ export default function ArtistProfile() {
   const fetchArtist = async () => {
     try {
       const id = identifier || stageName;
-      const { data } = await axios.get(`/api/artists/${id}`);
+      const { data } = await api.get(`/api/artists/${id}`);
       setArtist(data);
     } catch (error) {
       console.error('Error fetching artist:', error);
@@ -38,7 +38,7 @@ export default function ArtistProfile() {
       const userInfo = localStorage.getItem('userInfo');
       const userId = userInfo ? JSON.parse(userInfo).id : null;
 
-      await axios.post('/api/bookings', {
+      await api.post('/api/bookings', {
         artistId: artist.id,
         userId: userId,
         ...formData

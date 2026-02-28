@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/api';
 import Toast from '../components/Toast';
 
 export default function ArtistRegister() {
@@ -35,7 +35,7 @@ export default function ArtistRegister() {
     try {
       console.log('Fetching categories from API...');
       setLoading(true);
-      const { data } = await axios.get('/api/categories');
+      const { data } = await api.get('/api/categories');
       console.log('Categories received:', data);
       console.log('Number of categories:', data.length);
       setCategories(data);
@@ -51,7 +51,7 @@ export default function ArtistRegister() {
     e.preventDefault();
     console.log('Submitting artist registration:', formData);
     try {
-      const { data } = await axios.post('/api/artists/register', formData);
+      const { data } = await api.post('/api/artists/register', formData);
       console.log('Artist registration response:', data);
       
       // Save token and artist data
