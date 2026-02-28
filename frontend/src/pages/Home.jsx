@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, MapPin, Star, TrendingUp } from 'lucide-react';
+import { Search, MapPin, Star, TrendingUp, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../config/api';
 import Toast from '../components/Toast';
+import BookingModal from '../components/BookingModal';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -12,6 +13,8 @@ export default function Home() {
   const [featuredArtists, setFeaturedArtists] = useState([]);
   const [searchCity, setSearchCity] = useState('');
   const [toast, setToast] = useState(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedArtist, setSelectedArtist] = useState(null);
 
   const cities = ['Delhi', 'Mumbai', 'Bangalore', 'Pune', 'Hyderabad', 'Chennai', 'Kolkata', 'Ahmedabad'];
 
@@ -58,6 +61,41 @@ export default function Home() {
         },
         () => alert('Location access denied')
       );
+    }
+  };
+
+  const handleBookNow = (artist, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedArtist(artist);
+    setShowBookingModal(true);
+  };
+
+  const handleBookingSubmit = async (formData) => {
+    try {
+      const token = localStorage.getItem('token');
+      let userId = null;
+      
+      if (token) {
+        try {
+          const decoded = JSON.parse(atob(token.split('.')[1]));
+          userId = decoded.id;
+        } catch (e) {
+          console.log('Token decode failed, booking as guest');
+        }
+      }
+
+      await api.post('/api/bookings', {
+        artistId: selectedArtist.id,
+        userId,
+        ...formData
+      });
+
+      setToast({ message: 'Booking request sent successfully! Artist will contact you soon.', type: 'success' });
+      setShowBookingModal(false);
+      setSelectedArtist(null);
+    } catch (error) {
+      setToast({ message: error.response?.data?.message || 'Failed to send booking request', type: 'error' });
     }
   };
 
@@ -136,33 +174,55 @@ export default function Home() {
         </h2>
         <div className="grid md:grid-cols-3 gap-6">
           {featuredArtists.map((artist) => (
-            <Link
+            <div
               key={artist.id}
-              to={`/${artist.stageName}`}
               className="card group overflow-hidden"
             >
-              <div className="relative h-64 -m-6 mb-4 overflow-hidden">
-                <img
-                  src={artist.profileImage}
-                  alt={artist.stageName}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-darker to-transparent"></div>
-                {artist.isVerified && (
-                  <div className="absolute top-4 right-4 bg-primary px-3 py-1 rounded-full text-sm">
-                    ✓ Verified
-                  </div>
-                )}
+              <Link to={`/${artist.stageName || artist.stage_name}`}>
+                <div className="relative h-64 -m-6 mb-4 overflow-hidden">
+                  <img
+                    src={artist.profileImage || artist.profile_image}
+                    alt={artist.stageName || artist.stage_name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-darker to-transparent"></div>
+                  {artist.isVerified && (
+                    <div className="absolute top-4 right-4 bg-primary px-3 py-1 rounded-full text-sm">
+                      ✓ Verified
+                    </div>
+                  )}
+                </div>
+                <h3 className="text-xl font-bold mb-2">{artist.stageName || artist.stage_name}</h3>
+                <p className="text-gray-400 mb-2">{artist.category?.name || artist.category_name} • {artist.city}</p>
+              </Link>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-primary font-semibold">
+                  ₹{(artist.priceMin || artist.price_min || 0).toLocaleString()} - ₹{(artist.priceMax || artist.price_max || 0).toLocaleString()}
+                </p>
+                <button
+                  onClick={(e) => handleBookNow(artist, e)}
+                  className="px-4 py-2 bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/50 rounded-lg transition-all text-white font-medium text-sm flex items-center gap-2"
+                >
+                  <Calendar size={16} />
+                  Book Now
+                </button>
               </div>
-              <h3 className="text-xl font-bold mb-2">{artist.stageName || artist.stage_name}</h3>
-              <p className="text-gray-400 mb-2">{artist.category?.name || artist.category_name} • {artist.city}</p>
-              <p className="text-primary font-semibold">
-                ₹{(artist.priceMin || artist.price_min || 0).toLocaleString()} - ₹{(artist.priceMax || artist.price_max || 0).toLocaleString()}
-              </p>
-            </Link>
+            </div>
           ))}
         </div>
       </section>
+
+      {/* Booking Modal */}
+      {showBookingModal && selectedArtist && (
+        <BookingModal
+          artist={selectedArtist}
+          onClose={() => {
+            setShowBookingModal(false);
+            setSelectedArtist(null);
+          }}
+          onSubmit={handleBookingSubmit}
+        />
+      )}
     </div>
   );
 }

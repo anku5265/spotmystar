@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Filter, Grid, List, Heart } from 'lucide-react';
+import { Filter, Grid, List, Heart, Calendar } from 'lucide-react';
 import api from '../config/api';
+import Toast from '../components/Toast';
+import BookingModal from '../components/BookingModal';
 
 export default function Search() {
   const [searchParams] = useSearchParams();
   const [artists, setArtists] = useState([]);
   const [categories, setCategories] = useState([]);
   const [viewMode, setViewMode] = useState('grid');
+  const [toast, setToast] = useState(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedArtist, setSelectedArtist] = useState(null);
   const [filters, setFilters] = useState({
     city: searchParams.get('city') || '',
     category: searchParams.get('category') || '',
@@ -39,8 +44,45 @@ export default function Search() {
     }
   };
 
+  const handleBookNow = (artist, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedArtist(artist);
+    setShowBookingModal(true);
+  };
+
+  const handleBookingSubmit = async (formData) => {
+    try {
+      const token = localStorage.getItem('token');
+      let userId = null;
+      
+      if (token) {
+        try {
+          const decoded = JSON.parse(atob(token.split('.')[1]));
+          userId = decoded.id;
+        } catch (e) {
+          console.log('Token decode failed, booking as guest');
+        }
+      }
+
+      await api.post('/api/bookings', {
+        artistId: selectedArtist.id,
+        userId,
+        ...formData
+      });
+
+      setToast({ message: 'Booking request sent successfully! Artist will contact you soon.', type: 'success' });
+      setShowBookingModal(false);
+      setSelectedArtist(null);
+    } catch (error) {
+      setToast({ message: error.response?.data?.message || 'Failed to send booking request', type: 'error' });
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      
       <div className="flex flex-col md:flex-row gap-8">
         {/* Filters Sidebar */}
         <aside className="md:w-64 space-y-6">
@@ -133,11 +175,11 @@ export default function Search() {
                   <Heart size={20} />
                 </button>
 
-                <Link to={`/${artist.stageName}`}>
+                <Link to={`/${artist.stageName || artist.stage_name}`}>
                   <div className="relative h-48 -m-6 mb-4 overflow-hidden rounded-t-xl">
                     <img
-                      src={artist.profileImage}
-                      alt={artist.stageName}
+                      src={artist.profileImage || artist.profile_image}
+                      alt={artist.stageName || artist.stage_name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     {artist.isVerified && (
@@ -149,15 +191,26 @@ export default function Search() {
 
                   <h3 className="text-xl font-bold mb-2">{artist.stageName || artist.stage_name}</h3>
                   <p className="text-gray-400 mb-2">{artist.category?.name || artist.category_name} • {artist.city}</p>
-                  <p className="text-primary font-semibold">
-                    ₹{(artist.priceMin || artist.price_min || 0).toLocaleString()} - ₹{(artist.priceMax || artist.price_max || 0).toLocaleString()}
-                  </p>
-                  <div className="flex items-center gap-2 mt-2 text-sm text-gray-400">
-                    <span>⭐ {artist.rating || 'New'}</span>
-                    <span>•</span>
-                    <span>{artist.totalBookings || 0} bookings</span>
-                  </div>
                 </Link>
+                <div className="flex items-center justify-between mt-3">
+                  <div>
+                    <p className="text-primary font-semibold">
+                      ₹{(artist.priceMin || artist.price_min || 0).toLocaleString()} - ₹{(artist.priceMax || artist.price_max || 0).toLocaleString()}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1 text-sm text-gray-400">
+                      <span>⭐ {artist.rating || 'New'}</span>
+                      <span>•</span>
+                      <span>{artist.totalBookings || 0} bookings</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => handleBookNow(artist, e)}
+                    className="px-4 py-2 bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/50 rounded-lg transition-all text-white font-medium text-sm flex items-center gap-2"
+                  >
+                    <Calendar size={16} />
+                    Book
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -169,6 +222,18 @@ export default function Search() {
           )}
         </main>
       </div>
+
+      {/* Booking Modal */}
+      {showBookingModal && selectedArtist && (
+        <BookingModal
+          artist={selectedArtist}
+          onClose={() => {
+            setShowBookingModal(false);
+            setSelectedArtist(null);
+          }}
+          onSubmit={handleBookingSubmit}
+        />
+      )}
     </div>
   );
 }
