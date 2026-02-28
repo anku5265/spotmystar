@@ -158,19 +158,20 @@ router.post('/register', async (req, res) => {
           INSERT INTO artists (
             full_name, stage_name, email, phone, password,
             short_bio, detailed_description,
-            primary_city, service_locations,
+            primary_city, city, service_locations,
             years_of_experience,
             pricing_model, price_min, price_max,
             instagram, youtube, facebook, twitter, linkedin, website,
             terms_accepted, privacy_accepted,
             status
           )
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, 'submitted')
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, 'submitted')
           RETURNING id, full_name, stage_name, email, status, is_verified
         `, [
           fullName, stageName, email, phone || whatsapp, hashedPassword,
           shortBio, detailedDescription,
-          primaryCity || city, serviceLocations || [],
+          primaryCity || city, // This will be used for both primary_city and city
+          serviceLocations || [],
           yearsOfExperience || 0,
           pricingModel || 'per_event', priceMin || 0, priceMax || 0,
           instagram, youtube, facebook, twitter, linkedin, website,
