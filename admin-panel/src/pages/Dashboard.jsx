@@ -78,7 +78,19 @@ export default function Dashboard() {
       setManagedUsers(managedUsersRes.data);
       setManagedArtists(managedArtistsRes.data);
     } catch (error) {
-      setToast({ message: 'Failed to load data', type: 'error' });
+      console.error('Dashboard data fetch error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to load data';
+      setToast({ message: errorMessage, type: 'error' });
+      
+      // If unauthorized, redirect to login
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminInfo');
+        setTimeout(() => navigate('/'), 2000);
+      }
     } finally {
       setLoading(false);
     }
