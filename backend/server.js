@@ -7,7 +7,7 @@ import categoryRoutes from './routes/categories.js';
 import bookingRoutes from './routes/bookings.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
-import userManagementRoutes from './routes/user-management.js';
+import userMgmtRoutes from './routes/user-mgmt.js';
 
 dotenv.config();
 
@@ -24,7 +24,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/user-management', userManagementRoutes);
+app.use('/api/user-management', userMgmtRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'SpotMyStar API - PostgreSQL/Supabase' });
