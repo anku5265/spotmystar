@@ -12,6 +12,7 @@ import ArtistDashboard from './pages/ArtistDashboard';
 import UserRegister from './pages/UserRegister';
 import UserLogin from './pages/UserLogin';
 import UserDashboard from './pages/UserDashboard';
+import AccountBlocked from './components/AccountBlocked';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/:stageName" element={<ArtistProfile />} />
             <Route path="/booking-success" element={<BookingSuccess />} />
             <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/account-blocked" element={<AccountBlocked />} />
             
             {/* User Routes */}
             <Route path="/user/register" element={<UserRegister />} />

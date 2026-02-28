@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, User, LogOut, Clock, CheckCircle, XCircle } from 'lucide-react';
-import axios from 'axios';
+import api from '../config/api';
+import NotificationBell from '../components/NotificationBell';
 
 export default function UserDashboard() {
   const navigate = useNavigate();
@@ -18,13 +19,40 @@ export default function UserDashboard() {
       return;
     }
 
-    setUser(JSON.parse(userInfo));
+    const parsedUser = JSON.parse(userInfo);
+    setUser(parsedUser);
+    
+    // Check account status
+    checkAccountStatus(parsedUser.id);
+    
     fetchBookings(token);
+    
+    // Check status every minute
+    const statusInterval = setInterval(() => checkAccountStatus(parsedUser.id), 60000);
+    return () => clearInterval(statusInterval);
   }, [navigate]);
+
+  const checkAccountStatus = async (userId) => {
+    try {
+      const { data } = await api.get(`/api/user-management/check-status/user/${userId}`);
+      
+      if (data.account_status && data.account_status !== 'active') {
+        navigate('/account-blocked', { 
+          state: { 
+            status: data.account_status, 
+            reason: data.suspension_reason,
+            suspensionEnd: data.suspension_end
+          } 
+        });
+      }
+    } catch (error) {
+      console.error('Error checking account status:', error);
+    }
+  };
 
   const fetchBookings = async (token) => {
     try {
-      const { data } = await axios.get('/api/bookings/my-bookings', {
+      const { data } = await api.get('/api/bookings/my-bookings', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setBookings(data);
@@ -75,13 +103,16 @@ export default function UserDashboard() {
               <p className="text-gray-400">{user?.phone}</p>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 glass px-4 py-2 rounded-lg hover:bg-white/10 transition"
-          >
-            <LogOut size={20} />
-            Logout
-          </button>
+          <div className="flex items-center gap-4">
+            {user && <NotificationBell userType="user" userId={user.id} />}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 glass px-4 py-2 rounded-lg hover:bg-white/10 transition"
+            >
+              <LogOut size={20} />
+              Logout
+            </button>
+          </div>
         </div>
       </div>
 

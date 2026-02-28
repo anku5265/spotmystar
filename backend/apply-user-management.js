@@ -1,6 +1,11 @@
 import pg from 'pg';
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -17,7 +22,8 @@ async function applyUserManagement() {
   try {
     console.log('🚀 Adding user management features...\n');
     
-    const sql = fs.readFileSync('./backend/database/add-user-management.sql', 'utf8');
+    const sqlPath = path.join(__dirname, 'database', 'add-user-management.sql');
+    const sql = fs.readFileSync(sqlPath, 'utf8');
     
     await pool.query(sql);
     

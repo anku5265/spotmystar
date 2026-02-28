@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, UserCheck, Clock, CheckCircle, XCircle, Eye, Calendar, UserCircle, LogOut, ChevronDown, TrendingUp } from 'lucide-react';
+import { Users, UserCheck, Clock, CheckCircle, XCircle, Eye, Calendar, UserCircle, LogOut, ChevronDown, TrendingUp, Shield, Ban, UserX } from 'lucide-react';
 import api from '../config/api';
 import Toast from '../components/Toast';
+import SuspensionModal from '../components/SuspensionModal';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -17,6 +18,11 @@ export default function Dashboard() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [adminInfo, setAdminInfo] = useState({ name: 'Admin', email: 'admin@spotmystar.com' });
   const profileMenuRef = useRef(null);
+  const [managedUsers, setManagedUsers] = useState([]);
+  const [managedArtists, setManagedArtists] = useState([]);
+  const [showSuspensionModal, setShowSuspensionModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUserType, setSelectedUserType] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -55,11 +61,13 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [statsRes, artistsRes, usersRes, bookingsRes] = await Promise.all([
+      const [statsRes, artistsRes, usersRes, bookingsRes, managedUsersRes, managedArtistsRes] = await Promise.all([
         api.get('/api/admin/stats'),
         api.get('/api/admin/artists'),
         api.get('/api/admin/users'),
-        api.get('/api/admin/bookings').catch(() => ({ data: [] }))
+        api.get('/api/admin/bookings').catch(() => ({ data: [] })),
+        api.get('/api/user-management/users').catch(() => ({ data: [] })),
+        api.get('/api/user-management/artists').catch(() => ({ data: [] }))
       ]);
       
       setStats(statsRes.data);
@@ -67,6 +75,8 @@ export default function Dashboard() {
       setPendingArtists(artistsRes.data.filter(a => a.status === 'submitted' || a.status === 'pending'));
       setAllUsers(usersRes.data);
       setBookings(bookingsRes.data);
+      setManagedUsers(managedUsersRes.data);
+      setManagedArtists(managedArtistsRes.data);
     } catch (error) {
       setToast({ message: 'Failed to load data', type: 'error' });
     } finally {
@@ -105,6 +115,31 @@ export default function Dashboard() {
     localStorage.removeItem('adminInfo');
     setShowProfileMenu(false);
     navigate('/');
+  };
+
+  const handleManageUser = (user, userType) => {
+    setSelectedUser(user);
+    setSelectedUserType(userType);
+    setShowSuspensionModal(true);
+  };
+
+  const handleStatusUpdate = async (data) => {
+    try {
+      const endpoint = selectedUserType === 'user' 
+        ? `/api/user-management/users/${selectedUser.id}/status`
+        : `/api/user-management/artists/${selectedUser.id}/status`;
+      
+      await api.patch(endpoint, data);
+      
+      setToast({ 
+        message: `Account ${data.status === 'active' ? 'reactivated' : data.status === 'terminated' ? 'terminated' : data.status === 'inactive' ? 'deactivated' : 'suspended'} successfully!`, 
+        type: 'success' 
+      });
+      
+      fetchData();
+    } catch (error) {
+      setToast({ message: 'Failed to update account status', type: 'error' });
+    }
   };
 
   if (loading) {
@@ -237,7 +272,7 @@ export default function Dashboard() {
       {/* Tabs */}
       <div className="bg-gray-800/30 backdrop-blur-sm border-b border-gray-700/50 px-6">
         <div className="flex gap-2 overflow-x-auto">
-          {['overview', 'pending', 'artists', 'users', 'bookings'].map(tab => (
+          {['overview', 'pending', 'artists', 'users', 'bookings', 'user-management'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -247,7 +282,7 @@ export default function Dashboard() {
                   : 'text-gray-400 hover:text-white'
               }`}
             >
-              {tab === 'pending' ? 'Pending Approvals' : tab}
+              {tab === 'pending' ? 'Pending Approvals' : tab === 'user-management' ? 'User Management' : tab}
               {activeTab === tab && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500"></div>
               )}
@@ -557,7 +592,148 @@ export default function Dashboard() {
             )}
           </div>
         )}
+
+        {/* User Management Tab */}
+        {activeTab === 'user-management' && (
+          <div className="space-y-8">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
+                User Management
+              </h2>
+              <div className="flex gap-4">
+                <span className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-full font-semibold">
+                  {managedUsers.length} Users
+                </span>
+                <span className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-full font-semibold">
+                  {managedArtists.length} Artists
+                </span>
+              </div>
+            </div>
+
+            {/* Users Section */}
+            <div>
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <Users size={24} className="text-blue-400" />
+                Regular Users
+              </h3>
+              <div className="card bg-gradient-to-br from-gray-800/50 to-gray-800/30 backdrop-blur-sm border-gray-700/50 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-900/50">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Name</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Email</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Phone</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Status</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {managedUsers.map(user => (
+                        <tr key={user.id} className="border-t border-gray-700/50 hover:bg-white/5 transition-colors">
+                          <td className="px-6 py-4 text-white font-medium">{user.name}</td>
+                          <td className="px-6 py-4 text-gray-300">{user.email}</td>
+                          <td className="px-6 py-4 text-gray-300">{user.phone}</td>
+                          <td className="px-6 py-4">
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              user.account_status === 'active' ? 'bg-green-500/20 text-green-400' :
+                              user.account_status === 'suspended' ? 'bg-yellow-500/20 text-yellow-400' :
+                              user.account_status === 'inactive' ? 'bg-orange-500/20 text-orange-400' :
+                              'bg-red-500/20 text-red-400'
+                            }`}>
+                              {user.account_status || 'active'}
+                            </span>
+                            {user.suspension_end && new Date(user.suspension_end) > new Date() && (
+                              <p className="text-xs text-gray-400 mt-1">
+                                Until: {new Date(user.suspension_end).toLocaleString()}
+                              </p>
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            <button
+                              onClick={() => handleManageUser(user, 'user')}
+                              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all text-sm font-medium flex items-center gap-2"
+                            >
+                              <Shield size={16} />
+                              Manage
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            {/* Artists Section */}
+            <div>
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <UserCheck size={24} className="text-purple-400" />
+                Artists
+              </h3>
+              <div className="card bg-gradient-to-br from-gray-800/50 to-gray-800/30 backdrop-blur-sm border-gray-700/50 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-900/50">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Name</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Stage Name</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Email</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Status</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {managedArtists.map(artist => (
+                        <tr key={artist.id} className="border-t border-gray-700/50 hover:bg-white/5 transition-colors">
+                          <td className="px-6 py-4 text-white font-medium">{artist.full_name}</td>
+                          <td className="px-6 py-4 text-gray-300">{artist.stage_name}</td>
+                          <td className="px-6 py-4 text-gray-300">{artist.email}</td>
+                          <td className="px-6 py-4">
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              artist.account_status === 'active' ? 'bg-green-500/20 text-green-400' :
+                              artist.account_status === 'suspended' ? 'bg-yellow-500/20 text-yellow-400' :
+                              artist.account_status === 'inactive' ? 'bg-orange-500/20 text-orange-400' :
+                              'bg-red-500/20 text-red-400'
+                            }`}>
+                              {artist.account_status || 'active'}
+                            </span>
+                            {artist.suspension_end && new Date(artist.suspension_end) > new Date() && (
+                              <p className="text-xs text-gray-400 mt-1">
+                                Until: {new Date(artist.suspension_end).toLocaleString()}
+                              </p>
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            <button
+                              onClick={() => handleManageUser(artist, 'artist')}
+                              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition-all text-sm font-medium flex items-center gap-2"
+                            >
+                              <Shield size={16} />
+                              Manage
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Suspension Modal */}
+      {showSuspensionModal && (
+        <SuspensionModal
+          user={selectedUser}
+          userType={selectedUserType}
+          onClose={() => setShowSuspensionModal(false)}
+          onSubmit={handleStatusUpdate}
+        />
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, Calendar, CheckCircle, XCircle, Clock, Music, Camera, Edit } from 'lucide-react';
 import api from '../config/api';
 import Toast from '../components/Toast';
+import NotificationBell from '../components/NotificationBell';
 
 export default function ArtistDashboard() {
   const navigate = useNavigate();
@@ -27,7 +28,32 @@ export default function ArtistDashboard() {
     
     // Fetch fresh artist data from database
     fetchArtistData(token, parsedArtist.id);
+    
+    // Check account status
+    checkAccountStatus(parsedArtist.id);
+    
+    // Check status every minute
+    const statusInterval = setInterval(() => checkAccountStatus(parsedArtist.id), 60000);
+    return () => clearInterval(statusInterval);
   }, [navigate]);
+
+  const checkAccountStatus = async (artistId) => {
+    try {
+      const { data } = await api.get(`/api/user-management/check-status/artist/${artistId}`);
+      
+      if (data.account_status && data.account_status !== 'active') {
+        navigate('/account-blocked', { 
+          state: { 
+            status: data.account_status, 
+            reason: data.suspension_reason,
+            suspensionEnd: data.suspension_end
+          } 
+        });
+      }
+    } catch (error) {
+      console.error('Error checking account status:', error);
+    }
+  };
 
   const fetchArtistData = async (token, artistId) => {
     try {
@@ -307,6 +333,7 @@ export default function ArtistDashboard() {
               </p>
             </div>
           </div>
+          {artist && <NotificationBell userType="artist" userId={artist.id} />}
         </div>
       </div>
 
