@@ -14,7 +14,7 @@ router.get('/search', async (req, res) => {
       SELECT a.*, c.name as category_name 
       FROM artists a 
       LEFT JOIN categories c ON a.category_id = c.id 
-      WHERE a.status = 'active' AND a.is_verified = true
+      WHERE (a.status = 'active' OR a.status = 'approved') AND a.is_verified = true
     `;
     const params = [];
     let paramCount = 1;
@@ -65,7 +65,7 @@ router.get('/featured', async (req, res) => {
       SELECT a.*, c.name as category_name 
       FROM artists a 
       LEFT JOIN categories c ON a.category_id = c.id 
-      WHERE a.status = 'active' AND a.is_verified = true 
+      WHERE (a.status = 'active' OR a.status = 'approved') AND a.is_verified = true 
       ORDER BY a.rating DESC, a.total_bookings DESC 
       LIMIT 6
     `);
