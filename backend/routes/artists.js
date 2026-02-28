@@ -162,19 +162,20 @@ router.post('/register', async (req, res) => {
             years_of_experience,
             pricing_model, price_min, price_max,
             instagram, youtube, facebook, twitter, linkedin, website,
+            whatsapp,
             terms_accepted, privacy_accepted,
             status
           )
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, 'submitted')
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $4, $20, $21, 'submitted')
           RETURNING id, full_name, stage_name, email, status, is_verified
         `, [
-          fullName, stageName, email, phone || whatsapp, hashedPassword,
-          shortBio, detailedDescription,
-          primaryCity || city, // This will be used for both primary_city and city
+          fullName, stageName, email, phone || whatsapp || '', hashedPassword,
+          shortBio || '', detailedDescription || '',
+          primaryCity || city || '', // This will be used for both primary_city and city
           serviceLocations || [],
           yearsOfExperience || 0,
           pricingModel || 'per_event', priceMin || 0, priceMax || 0,
-          instagram, youtube, facebook, twitter, linkedin, website,
+          instagram || '', youtube || '', facebook || '', twitter || '', linkedin || '', website || '',
           termsAccepted || false, privacyAccepted || false
         ]);
 
