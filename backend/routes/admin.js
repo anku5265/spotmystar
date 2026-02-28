@@ -6,10 +6,10 @@ const router = express.Router();
 // Dashboard stats
 router.get('/stats', async (req, res) => {
   try {
-    // Artist stats
+    // Artist stats - updated for new status values
     const totalArtists = await pool.query("SELECT COUNT(*) FROM artists");
-    const activeArtists = await pool.query("SELECT COUNT(*) FROM artists WHERE status = 'active'");
-    const pendingArtists = await pool.query("SELECT COUNT(*) FROM artists WHERE status = 'pending'");
+    const activeArtists = await pool.query("SELECT COUNT(*) FROM artists WHERE status IN ('approved', 'active')");
+    const pendingArtists = await pool.query("SELECT COUNT(*) FROM artists WHERE status IN ('submitted', 'pending')");
     const verifiedArtists = await pool.query("SELECT COUNT(*) FROM artists WHERE is_verified = true");
     
     // User stats
@@ -27,11 +27,12 @@ router.get('/stats', async (req, res) => {
       "SELECT COUNT(*) FROM bookings WHERE status = 'completed'"
     );
 
-    // Category-wise artist count
+    // Category-wise artist count - updated to use artist_categories table
     const artistsByCategory = await pool.query(`
-      SELECT c.name, COUNT(a.id) as count 
+      SELECT c.name, COUNT(DISTINCT ac.artist_id) as count 
       FROM categories c 
-      LEFT JOIN artists a ON c.id = a.category_id AND a.status = 'active'
+      LEFT JOIN artist_categories ac ON c.id = ac.category_id
+      LEFT JOIN artists a ON ac.artist_id = a.id AND a.status IN ('approved', 'active')
       GROUP BY c.name 
       ORDER BY count DESC
     `);
@@ -64,15 +65,18 @@ router.get('/stats', async (req, res) => {
   }
 });
 
-// Get all artists
+// Get all artists - updated to show multi-category artists
 router.get('/artists', async (req, res) => {
   try {
     const { status, search } = req.query;
     
     let query = `
-      SELECT a.*, c.name as category_name 
+      SELECT DISTINCT a.*, 
+        array_agg(DISTINCT c.name) FILTER (WHERE c.name IS NOT NULL) as categories,
+        string_agg(DISTINCT c.name, ', ') FILTER (WHERE c.name IS NOT NULL) as category_name
       FROM artists a 
-      LEFT JOIN categories c ON a.category_id = c.id 
+      LEFT JOIN artist_categories ac ON a.id = ac.artist_id
+      LEFT JOIN categories c ON ac.category_id = c.id
       WHERE 1=1
     `;
     const params = [];
@@ -90,22 +94,29 @@ router.get('/artists', async (req, res) => {
       paramCount++;
     }
 
-    query += ' ORDER BY a.created_at DESC';
+    query += ' GROUP BY a.id ORDER BY a.created_at DESC';
 
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (error) {
+    console.error('Error fetching artists:', error);
     res.status(500).json({ message: error.message });
   }
 });
 
-// Approve/reject artist
+// Approve/reject artist - updated for new status values
 router.patch('/artists/:id/verify', async (req, res) => {
   try {
     const { isVerified, status } = req.body;
+    
+    // Map old status values to new ones
+    let newStatus = status;
+    if (status === 'active') newStatus = 'approved';
+    if (status === 'pending') newStatus = 'submitted';
+    
     const result = await pool.query(
       'UPDATE artists SET is_verified = $1, status = $2 WHERE id = $3 RETURNING *',
-      [isVerified, status, req.params.id]
+      [isVerified, newStatus, req.params.id]
     );
     res.json(result.rows[0]);
   } catch (error) {

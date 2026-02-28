@@ -33,6 +33,11 @@ export default function Dashboard() {
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     fetchData();
 
+    // Auto-refresh every 30 seconds
+    const refreshInterval = setInterval(() => {
+      fetchData();
+    }, 30000);
+
     const handleClickOutside = (event) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
         setShowProfileMenu(false);
@@ -40,7 +45,11 @@ export default function Dashboard() {
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      clearInterval(refreshInterval);
+    };
   }, [navigate]);
 
   const fetchData = async () => {
@@ -55,7 +64,7 @@ export default function Dashboard() {
       
       setStats(statsRes.data);
       setAllArtists(artistsRes.data);
-      setPendingArtists(artistsRes.data.filter(a => a.status === 'pending'));
+      setPendingArtists(artistsRes.data.filter(a => a.status === 'submitted' || a.status === 'pending'));
       setAllUsers(usersRes.data);
       setBookings(bookingsRes.data);
     } catch (error) {
