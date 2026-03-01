@@ -24,6 +24,9 @@ export default function Dashboard() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedUserType, setSelectedUserType] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [categoryArtists, setCategoryArtists] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -183,6 +186,13 @@ export default function Dashboard() {
       console.error('Status update error:', error);
       setToast({ message: 'Failed to update account status', type: 'error' });
     }
+  };
+
+  const handleCategoryClick = (category) => {
+    const artists = allArtists.filter(a => a.category_name === category.name);
+    setSelectedCategory(category);
+    setCategoryArtists(artists);
+    setShowCategoryModal(true);
   };
 
   if (loading) {
@@ -410,12 +420,16 @@ export default function Dashboard() {
                 <h3 className="text-xl font-bold mb-4">Artists by Category</h3>
                 <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4">
                   {stats.categoryBreakdown.map((cat, idx) => (
-                    <div key={idx} className="card bg-gradient-to-br from-gray-800/50 to-gray-800/30 backdrop-blur-sm border-gray-700/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <button
+                      key={idx}
+                      onClick={() => handleCategoryClick(cat)}
+                      className="card bg-gradient-to-br from-gray-800/50 to-gray-800/30 backdrop-blur-sm border-gray-700/50 hover:shadow-xl hover:-translate-y-1 hover:border-blue-500/50 transition-all duration-300 cursor-pointer"
+                    >
                       <div className="text-center">
                         <p className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">{cat.count}</p>
                         <p className="text-gray-400 text-sm">{cat.name}</p>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -776,6 +790,72 @@ export default function Dashboard() {
           onClose={() => setShowSuspensionModal(false)}
           onSubmit={handleStatusUpdate}
         />
+      )}
+
+      {/* Category Artists Modal */}
+      {showCategoryModal && selectedCategory && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden border border-gray-700 shadow-2xl">
+            <div className="sticky top-0 bg-gray-800/95 backdrop-blur-sm flex justify-between items-center p-6 border-b border-gray-700">
+              <div>
+                <h3 className="text-2xl font-bold text-white">{selectedCategory.name}</h3>
+                <p className="text-gray-400 text-sm mt-1">{categoryArtists.length} artists in this category</p>
+              </div>
+              <button
+                onClick={() => setShowCategoryModal(false)}
+                className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+              >
+                <XCircle size={24} />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
+              {categoryArtists.length === 0 ? (
+                <div className="text-center py-12">
+                  <UserCheck className="mx-auto mb-4 text-gray-500" size={48} />
+                  <p className="text-gray-400">No artists in this category yet</p>
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {categoryArtists.map(artist => (
+                    <div key={artist.id} className="bg-gray-900/50 rounded-xl p-6 border border-gray-700 hover:border-blue-500/50 transition-all">
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-3">
+                            <h4 className="text-xl font-bold text-white">{artist.full_name}</h4>
+                            {artist.is_verified && (
+                              <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-semibold">
+                                ✓ Verified
+                              </span>
+                            )}
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                              artist.status === 'active' ? 'bg-green-500/20 text-green-400' :
+                              artist.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                              'bg-red-500/20 text-red-400'
+                            }`}>
+                              {artist.status}
+                            </span>
+                          </div>
+                          <div className="grid md:grid-cols-2 gap-2 text-sm">
+                            <p className="text-gray-400">🎭 Stage Name: <span className="text-white">{artist.stage_name}</span></p>
+                            <p className="text-gray-400">📧 Email: <span className="text-white">{artist.email}</span></p>
+                            <p className="text-gray-400">📱 WhatsApp: <span className="text-white">{artist.whatsapp}</span></p>
+                            <p className="text-gray-400">📍 City: <span className="text-white">{artist.city}</span></p>
+                            <p className="text-gray-400">💰 Price: <span className="text-green-400">₹{artist.price_min} - ₹{artist.price_max}</span></p>
+                            <p className="text-gray-400">👁️ Views: <span className="text-white">{artist.views || 0}</span></p>
+                          </div>
+                          {artist.bio && (
+                            <p className="text-gray-500 text-sm mt-2">📝 {artist.bio}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
