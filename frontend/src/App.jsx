@@ -13,6 +13,7 @@ import UserRegister from './pages/UserRegister';
 import UserLogin from './pages/UserLogin';
 import UserDashboard from './pages/UserDashboard';
 import AccountBlocked from './components/AccountBlocked';
+import AccountReactivated from './components/AccountReactivated';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/booking-success" element={<BookingSuccess />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/account-blocked" element={<AccountBlocked />} />
+            <Route path="/account-reactivated" element={<AccountReactivated />} />
             
             {/* User Routes */}
             <Route path="/user/register" element={<UserRegister />} />

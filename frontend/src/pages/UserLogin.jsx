@@ -21,11 +21,42 @@ export default function UserLogin() {
     try {
       const { data } = await api.post('/api/auth/user/login', formData);
       
+      // Check if user was previously suspended/terminated (will be in notification)
+      const userInfo = data.user;
+      
       localStorage.setItem('userToken', data.token);
-      localStorage.setItem('userInfo', JSON.stringify(data.user));
+      localStorage.setItem('userInfo', JSON.stringify(userInfo));
       
       // Dispatch custom event to notify Navbar
       window.dispatchEvent(new Event('userLogin'));
+      
+      // Check for reactivation notification
+      try {
+        const notifResponse = await api.get('/api/notifications', {
+          headers: { Authorization: `Bearer ${data.token}` }
+        });
+        const reactivationNotif = notifResponse.data.find(n => 
+          n.title.includes('Welcome Back') || n.title.includes('Account Restored')
+        );
+        
+        if (reactivationNotif && !reactivationNotif.is_read) {
+          // Mark as read
+          await api.patch(`/api/notifications/${reactivationNotif.id}/read`, {}, {
+            headers: { Authorization: `Bearer ${data.token}` }
+          });
+          
+          // Show reactivation page
+          navigate('/account-reactivated', { 
+            state: { 
+              userType: 'user',
+              previousStatus: reactivationNotif.title.includes('Welcome Back') ? 'terminated' : 'suspended'
+            } 
+          });
+          return;
+        }
+      } catch (notifError) {
+        console.log('Could not check notifications:', notifError);
+      }
       
       navigate('/');
     } catch (err) {

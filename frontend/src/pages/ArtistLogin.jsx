@@ -29,6 +29,34 @@ export default function ArtistLogin() {
       console.log('Dispatching userLogin event');
       window.dispatchEvent(new Event('userLogin'));
       
+      // Check for reactivation notification
+      try {
+        const notifResponse = await api.get('/api/notifications', {
+          headers: { Authorization: `Bearer ${data.token}` }
+        });
+        const reactivationNotif = notifResponse.data.find(n => 
+          n.title.includes('Welcome Back') || n.title.includes('Account Restored')
+        );
+        
+        if (reactivationNotif && !reactivationNotif.is_read) {
+          // Mark as read
+          await api.patch(`/api/notifications/${reactivationNotif.id}/read`, {}, {
+            headers: { Authorization: `Bearer ${data.token}` }
+          });
+          
+          // Show reactivation page
+          navigate('/account-reactivated', { 
+            state: { 
+              userType: 'artist',
+              previousStatus: reactivationNotif.title.includes('Welcome Back') ? 'terminated' : 'suspended'
+            } 
+          });
+          return;
+        }
+      } catch (notifError) {
+        console.log('Could not check notifications:', notifError);
+      }
+      
       navigate('/artist/dashboard');
     } catch (err) {
       // Check if account is suspended/terminated
