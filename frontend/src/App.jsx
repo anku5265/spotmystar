@@ -15,6 +15,7 @@ import UserLogin from './pages/UserLogin';
 import UserDashboard from './pages/UserDashboard';
 import AccountBlocked from './components/AccountBlocked';
 import AccountReactivated from './components/AccountReactivated';
+import ProtectedRoute from './components/ProtectedRoute';
 import api from './config/api';
 
 function AccountStatusChecker() {
@@ -138,20 +139,36 @@ function App() {
             <Route path="/search" element={<Search />} />
             <Route path="/artist/:identifier" element={<ArtistProfile />} />
             <Route path="/:stageName" element={<ArtistProfile />} />
-            <Route path="/booking-success" element={<BookingSuccess />} />
-            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/booking-success" element={
+              <ProtectedRoute requiredRole="user">
+                <BookingSuccess />
+              </ProtectedRoute>
+            } />
+            <Route path="/wishlist" element={
+              <ProtectedRoute requiredRole="user">
+                <Wishlist />
+              </ProtectedRoute>
+            } />
             <Route path="/account-blocked" element={<AccountBlocked />} />
             <Route path="/account-reactivated" element={<AccountReactivated />} />
             
-            {/* User Routes */}
+            {/* User Routes - Protected */}
             <Route path="/user/register" element={<UserRegister />} />
             <Route path="/user/login" element={<UserLogin />} />
-            <Route path="/user/dashboard" element={<UserDashboard />} />
+            <Route path="/user/dashboard" element={
+              <ProtectedRoute requiredRole="user">
+                <UserDashboard />
+              </ProtectedRoute>
+            } />
             
-            {/* Artist Routes */}
+            {/* Artist Routes - Protected */}
             <Route path="/artist/register" element={<ArtistRegisterNew />} />
             <Route path="/artist/login" element={<ArtistLogin />} />
-            <Route path="/artist/dashboard" element={<ArtistDashboard />} />
+            <Route path="/artist/dashboard" element={
+              <ProtectedRoute requiredRole="artist">
+                <ArtistDashboard />
+              </ProtectedRoute>
+            } />
           </Routes>
         </main>
         <Footer />
