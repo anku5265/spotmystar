@@ -27,14 +27,15 @@ router.get('/stats', async (req, res) => {
       "SELECT COUNT(*) FROM bookings WHERE status = 'completed'"
     );
 
-    // Category-wise artist count - updated to use artist_categories table
+    // Category-wise artist count - show all categories with 0 count if no artists
     const artistsByCategory = await pool.query(`
-      SELECT c.name, COUNT(DISTINCT ac.artist_id) as count 
+      SELECT c.name, 
+        COUNT(DISTINCT CASE WHEN a.status IN ('approved', 'active') THEN ac.artist_id END) as count 
       FROM categories c 
       LEFT JOIN artist_categories ac ON c.id = ac.category_id
-      LEFT JOIN artists a ON ac.artist_id = a.id AND a.status IN ('approved', 'active')
-      GROUP BY c.name 
-      ORDER BY count DESC
+      LEFT JOIN artists a ON ac.artist_id = a.id
+      GROUP BY c.id, c.name 
+      ORDER BY count DESC, c.name ASC
     `);
 
     res.json({
