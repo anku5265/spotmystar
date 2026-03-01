@@ -21,6 +21,37 @@ router.get('/artists', async (req, res) => {
   }
 });
 
+// Check current user status
+router.get('/check-status/:userType/:userId', async (req, res) => {
+  try {
+    const { userType, userId } = req.params;
+    
+    let result;
+    if (userType === 'user') {
+      result = await pool.query(
+        'SELECT account_status, suspension_reason, suspension_end FROM users WHERE id = $1',
+        [userId]
+      );
+    } else if (userType === 'artist') {
+      result = await pool.query(
+        'SELECT account_status, suspension_reason, suspension_end FROM artists WHERE id = $1',
+        [userId]
+      );
+    } else {
+      return res.status(400).json({ message: 'Invalid user type' });
+    }
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Status check error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.patch('/users/:id/status', async (req, res) => {
   try {
     const { id } = req.params;
