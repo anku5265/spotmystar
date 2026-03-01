@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Login</title>
+</head>
+<body>
+    <h1>Testing Production Backend Login</h1>
+    <button onclick="testLogin()">Test Login</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function testLogin() {
+            const result = document.getElementById('result');
+            result.textContent = 'Testing...';
+            
+            try {
+                // Test 1: Backend health
+                result.textContent += '\n\n1. Testing backend health...';
+                const healthRes = await fetch('https://spotmystar-backend.vercel.app/api');
+                const healthData = await healthRes.json();
+                result.textContent += '\n✓ Backend is running: ' + JSON.stringify(healthData);
+                
+                // Test 2: Try login
+                result.textContent += '\n\n2. Testing login with uniquegamerz267@gmail.com...';
+                const loginRes = await fetch('https://spotmystar-backend.vercel.app/api/auth/user/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'uniquegamerz267@gmail.com',
+                        password: 'test123'
+                    })
+                });
+                
+                const loginData = await loginRes.text();
+                result.textContent += '\n\nStatus: ' + loginRes.status;
+                result.textContent += '\nResponse: ' + loginData;
+                
+                if (loginRes.ok) {
+                    result.textContent += '\n\n✅ LOGIN SUCCESS!';
+                } else {
+                    result.textContent += '\n\n❌ LOGIN FAILED!';
+                    result.textContent += '\n\nTrying to check if user exists...';
+                    
+                    // Try registering
+                    result.textContent += '\n\n3. Checking registration...';
+                    const regRes = await fetch('https://spotmystar-backend.vercel.app/api/auth/user/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: 'Test User',
+                            email: 'uniquegamerz267@gmail.com',
+                            phone: '9999999999',
+                            password: 'test123'
+                        })
+                    });
+                    
+                    const regData = await regRes.text();
+                    result.textContent += '\nRegistration Status: ' + regRes.status;
+                    result.textContent += '\nRegistration Response: ' + regData;
+                }
+                
+            } catch (error) {
+                result.textContent += '\n\n❌ ERROR: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

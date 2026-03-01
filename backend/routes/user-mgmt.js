@@ -28,7 +28,7 @@ router.patch('/users/:id/status', async (req, res) => {
     
     let query, params;
     
-    if (status === 'suspend' && duration) {
+    if (status === 'suspended' && duration) {
       const suspensionEnd = new Date(Date.now() + duration * 1000);
       query = `UPDATE users 
                SET account_status = $1, 
@@ -37,7 +37,7 @@ router.patch('/users/:id/status', async (req, res) => {
                    suspension_end = $3 
                WHERE id = $4 
                RETURNING id, name, email, account_status, suspension_reason, suspension_start, suspension_end`;
-      params = [status, reason || 'No reason provided', suspensionEnd, id];
+      params = ['suspended', reason || 'No reason provided', suspensionEnd, id];
     } else if (status === 'active') {
       query = `UPDATE users 
                SET account_status = $1, 
@@ -46,7 +46,7 @@ router.patch('/users/:id/status', async (req, res) => {
                    suspension_end = NULL 
                WHERE id = $2 
                RETURNING id, name, email, account_status`;
-      params = [status, id];
+      params = ['active', id];
     } else {
       query = `UPDATE users 
                SET account_status = $1, 
@@ -62,6 +62,7 @@ router.patch('/users/:id/status', async (req, res) => {
     }
     res.json(result.rows[0]);
   } catch (error) {
+    console.error('User status update error:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -73,7 +74,7 @@ router.patch('/artists/:id/status', async (req, res) => {
     
     let query, params;
     
-    if (status === 'suspend' && duration) {
+    if (status === 'suspended' && duration) {
       const suspensionEnd = new Date(Date.now() + duration * 1000);
       query = `UPDATE artists 
                SET account_status = $1, 
@@ -82,7 +83,7 @@ router.patch('/artists/:id/status', async (req, res) => {
                    suspension_end = $3 
                WHERE id = $4 
                RETURNING id, full_name, stage_name, email, account_status, suspension_reason, suspension_start, suspension_end`;
-      params = [status, reason || 'No reason provided', suspensionEnd, id];
+      params = ['suspended', reason || 'No reason provided', suspensionEnd, id];
     } else if (status === 'active') {
       query = `UPDATE artists 
                SET account_status = $1, 
@@ -91,7 +92,7 @@ router.patch('/artists/:id/status', async (req, res) => {
                    suspension_end = NULL 
                WHERE id = $2 
                RETURNING id, full_name, stage_name, email, account_status`;
-      params = [status, id];
+      params = ['active', id];
     } else {
       query = `UPDATE artists 
                SET account_status = $1, 
@@ -107,6 +108,7 @@ router.patch('/artists/:id/status', async (req, res) => {
     }
     res.json(result.rows[0]);
   } catch (error) {
+    console.error('Artist status update error:', error);
     res.status(500).json({ message: error.message });
   }
 });

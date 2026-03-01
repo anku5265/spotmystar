@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X, Clock } from 'lucide-react';
 
 export default function SuspensionModal({ user, userType, onClose, onSubmit }) {
-  const [action, setAction] = useState('suspend');
+  const [action, setAction] = useState('suspended');
   const [duration, setDuration] = useState('3600');
   const [customDuration, setCustomDuration] = useState('');
   const [reason, setReason] = useState('');
@@ -55,14 +55,14 @@ export default function SuspensionModal({ user, userType, onClose, onSubmit }) {
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-              <option value="suspend">Suspend (Time-bound)</option>
+              <option value="suspended">Suspend (Time-bound)</option>
               <option value="inactive">Deactivate (Indefinite)</option>
               <option value="terminated">Terminate (Permanent)</option>
               <option value="active">Reactivate</option>
             </select>
           </div>
 
-          {action === 'suspend' && (
+          {action === 'suspended' && (
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 <Clock className="inline mr-2" size={16} />
@@ -104,7 +104,7 @@ export default function SuspensionModal({ user, userType, onClose, onSubmit }) {
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder={`Explain why you are ${action === 'suspend' ? 'suspending' : action === 'inactive' ? 'deactivating' : 'terminating'} this account...`}
+                placeholder={`Explain why you are ${action === 'suspended' ? 'suspending' : action === 'inactive' ? 'deactivating' : 'terminating'} this account...`}
                 className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
                 required={action === 'terminated'}
               />
