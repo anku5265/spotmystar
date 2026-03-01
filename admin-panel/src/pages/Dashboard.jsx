@@ -263,7 +263,10 @@ export default function Dashboard() {
       {stats && (
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 p-6 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 hover:-translate-y-1">
+            <button
+              onClick={() => setActiveTab('users')}
+              className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 p-6 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 hover:-translate-y-1 cursor-pointer text-left"
+            >
               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -mr-16 -mt-16"></div>
               <div className="relative">
                 <div className="flex items-center justify-between mb-4">
@@ -275,9 +278,12 @@ export default function Dashboard() {
                 <p className="text-3xl font-bold mb-1">{stats.users.total}</p>
                 <p className="text-gray-400 text-sm">Total Users</p>
               </div>
-            </div>
+            </button>
 
-            <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 p-6 hover:shadow-2xl hover:shadow-green-500/20 transition-all duration-300 hover:-translate-y-1">
+            <button
+              onClick={() => setActiveTab('artists')}
+              className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 p-6 hover:shadow-2xl hover:shadow-green-500/20 transition-all duration-300 hover:-translate-y-1 cursor-pointer text-left"
+            >
               <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full -mr-16 -mt-16"></div>
               <div className="relative">
                 <div className="flex items-center justify-between mb-4">
@@ -289,9 +295,12 @@ export default function Dashboard() {
                 <p className="text-3xl font-bold mb-1">{stats.artists.active}</p>
                 <p className="text-gray-400 text-sm">Active Artists</p>
               </div>
-            </div>
+            </button>
 
-            <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border border-yellow-500/20 p-6 hover:shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300 hover:-translate-y-1">
+            <button
+              onClick={() => setActiveTab('pending')}
+              className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border border-yellow-500/20 p-6 hover:shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300 hover:-translate-y-1 cursor-pointer text-left"
+            >
               <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full -mr-16 -mt-16"></div>
               <div className="relative">
                 <div className="flex items-center justify-between mb-4">
@@ -303,9 +312,12 @@ export default function Dashboard() {
                 <p className="text-3xl font-bold mb-1">{stats.artists.pending}</p>
                 <p className="text-gray-400 text-sm">Pending Approvals</p>
               </div>
-            </div>
+            </button>
 
-            <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 p-6 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300 hover:-translate-y-1">
+            <button
+              onClick={() => setActiveTab('bookings')}
+              className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 p-6 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300 hover:-translate-y-1 cursor-pointer text-left"
+            >
               <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full -mr-16 -mt-16"></div>
               <div className="relative">
                 <div className="flex items-center justify-between mb-4">
@@ -317,7 +329,7 @@ export default function Dashboard() {
                 <p className="text-3xl font-bold mb-1">{stats.bookings.total}</p>
                 <p className="text-gray-400 text-sm">Total Bookings</p>
               </div>
-            </div>
+            </button>
           </div>
         </div>
       )}
