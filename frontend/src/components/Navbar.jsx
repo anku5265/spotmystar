@@ -45,11 +45,14 @@ export default function Navbar() {
   };
 
   const handleLogout = () => {
+    // Clear all auth data
     localStorage.removeItem('userToken');
     localStorage.removeItem('userInfo');
     localStorage.removeItem('artistToken');
     localStorage.removeItem('artistData');
     setUser(null);
+    setShowProfileMenu(false);
+    // Redirect to public home page
     window.location.href = '/';
   };
 

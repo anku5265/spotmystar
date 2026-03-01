@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import api from '../config/api';
 import Toast from '../components/Toast';
 import BookingModal from '../components/BookingModal';
+import LoginRequiredModal from '../components/LoginRequiredModal';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export default function Home() {
   const [toast, setToast] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedArtist, setSelectedArtist] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const cities = ['Delhi', 'Mumbai', 'Bangalore', 'Pune', 'Hyderabad', 'Chennai', 'Kolkata', 'Ahmedabad'];
 
@@ -67,6 +69,24 @@ export default function Home() {
   const handleBookNow = (artist, e) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Check if user is logged in as USER (not artist)
+    const userToken = localStorage.getItem('userToken');
+    const artistToken = localStorage.getItem('artistToken');
+    
+    if (artistToken) {
+      // Artist trying to book - not allowed
+      setToast({ message: 'Artists cannot book other artists. Please login as a user.', type: 'error' });
+      return;
+    }
+    
+    if (!userToken) {
+      // Not logged in - show login modal
+      setShowLoginModal(true);
+      return;
+    }
+    
+    // User is logged in - proceed with booking
     setSelectedArtist(artist);
     setShowBookingModal(true);
   };
@@ -221,6 +241,14 @@ export default function Home() {
             setSelectedArtist(null);
           }}
           onSubmit={handleBookingSubmit}
+        />
+      )}
+
+      {/* Login Required Modal */}
+      {showLoginModal && (
+        <LoginRequiredModal
+          onClose={() => setShowLoginModal(false)}
+          message="Please login as a user to book artists"
         />
       )}
     </div>

@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../config/db.js';
 import nodemailer from 'nodemailer';
+import { verifyToken, requireUser } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -14,8 +15,8 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Create booking request
-router.post('/', async (req, res) => {
+// Create booking request - USER ONLY
+router.post('/', verifyToken, requireUser, async (req, res) => {
   try {
     const { artistId, userName, phone, email, eventDate, eventLocation, budget, message, userId } = req.body;
 
