@@ -26,40 +26,57 @@ router.patch('/users/:id/status', async (req, res) => {
     const { id } = req.params;
     const { status, reason, duration } = req.body;
     
-    let query, params;
+    let result;
     
     if (status === 'suspended' && duration) {
       const suspensionEnd = new Date(Date.now() + duration * 1000);
-      query = `UPDATE users 
-               SET account_status = $1, 
-                   suspension_reason = $2, 
-                   suspension_start = NOW(), 
-                   suspension_end = $3 
-               WHERE id = $4 
-               RETURNING id, name, email, account_status, suspension_reason, suspension_start, suspension_end`;
-      params = ['suspended', reason || 'No reason provided', suspensionEnd, id];
-      
-      // Create notification for suspended user
-      await pool.query(
-        `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
-         VALUES ($1, $2, $3, $4, $5, NOW())`,
-        [id, 'user', 'Account Suspended', reason || 'Your account has been suspended', 'account_status']
+      result = await pool.query(
+        `UPDATE users 
+         SET account_status = $1, 
+             suspension_reason = $2, 
+             suspension_start = NOW(), 
+             suspension_end = $3 
+         WHERE id = $4 
+         RETURNING id, name, email, account_status, suspension_reason, suspension_start, suspension_end`,
+        ['suspended', reason || 'No reason provided', suspensionEnd, id]
       );
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Try to create notification
+      try {
+        await pool.query(
+          `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
+           VALUES ($1, $2, $3, $4, $5, NOW())`,
+          [id, 'user', 'Account Suspended', reason || 'Your account has been suspended', 'account_status']
+        );
+      } catch (notifError) {
+        console.log('Could not create notification:', notifError.message);
+      }
+      
     } else if (status === 'active') {
-      // Get current status to determine appropriate reactivation message
+      // Get current status first
       const currentUser = await pool.query('SELECT account_status FROM users WHERE id = $1', [id]);
       const previousStatus = currentUser.rows[0]?.account_status;
       
-      query = `UPDATE users 
-               SET account_status = $1, 
-                   suspension_reason = NULL, 
-                   suspension_start = NULL, 
-                   suspension_end = NULL 
-               WHERE id = $2 
-               RETURNING id, name, email, account_status`;
-      params = ['active', id];
+      result = await pool.query(
+        `UPDATE users 
+         SET account_status = $1, 
+             suspension_reason = NULL, 
+             suspension_start = NULL, 
+             suspension_end = NULL 
+         WHERE id = $2 
+         RETURNING id, name, email, account_status`,
+        ['active', id]
+      );
       
-      // Create professional notification based on previous status
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Create professional notification
       let notificationTitle = 'Account Reactivated';
       let notificationMessage = '';
       
@@ -73,38 +90,57 @@ router.patch('/users/:id/status', async (req, res) => {
         notificationMessage = 'Your account has been successfully reactivated. You now have full access to all platform features and services. Welcome back!';
       }
       
-      await pool.query(
-        `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
-         VALUES ($1, $2, $3, $4, $5, NOW())`,
-        [id, 'user', notificationTitle, notificationMessage, 'account_status']
-      );
-    } else if (status === 'terminated') {
-      query = `UPDATE users 
-               SET account_status = $1, 
-                   suspension_reason = $2 
-               WHERE id = $3 
-               RETURNING id, name, email, account_status, suspension_reason`;
-      params = ['terminated', reason || 'No reason provided', id];
+      // Try to create notification
+      try {
+        await pool.query(
+          `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
+           VALUES ($1, $2, $3, $4, $5, NOW())`,
+          [id, 'user', notificationTitle, notificationMessage, 'account_status']
+        );
+      } catch (notifError) {
+        console.log('Could not create notification:', notifError.message);
+      }
       
-      // Create notification for terminated user
-      await pool.query(
-        `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
-         VALUES ($1, $2, $3, $4, $5, NOW())`,
-        [id, 'user', 'Account Terminated', reason || 'Your account has been permanently terminated', 'account_status']
+    } else if (status === 'terminated') {
+      result = await pool.query(
+        `UPDATE users 
+         SET account_status = $1, 
+             suspension_reason = $2 
+         WHERE id = $3 
+         RETURNING id, name, email, account_status, suspension_reason`,
+        ['terminated', reason || 'No reason provided', id]
       );
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Try to create notification
+      try {
+        await pool.query(
+          `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
+           VALUES ($1, $2, $3, $4, $5, NOW())`,
+          [id, 'user', 'Account Terminated', reason || 'Your account has been permanently terminated', 'account_status']
+        );
+      } catch (notifError) {
+        console.log('Could not create notification:', notifError.message);
+      }
+      
     } else {
-      query = `UPDATE users 
-               SET account_status = $1, 
-                   suspension_reason = $2 
-               WHERE id = $3 
-               RETURNING id, name, email, account_status, suspension_reason`;
-      params = [status, reason || 'No reason provided', id];
+      result = await pool.query(
+        `UPDATE users 
+         SET account_status = $1, 
+             suspension_reason = $2 
+         WHERE id = $3 
+         RETURNING id, name, email, account_status, suspension_reason`,
+        [status, reason || 'No reason provided', id]
+      );
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'User not found' });
+      }
     }
     
-    const result = await pool.query(query, params);
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'User not found' });
-    }
     res.json(result.rows[0]);
   } catch (error) {
     console.error('User status update error:', error);
@@ -117,40 +153,57 @@ router.patch('/artists/:id/status', async (req, res) => {
     const { id } = req.params;
     const { status, reason, duration } = req.body;
     
-    let query, params;
+    let result;
     
     if (status === 'suspended' && duration) {
       const suspensionEnd = new Date(Date.now() + duration * 1000);
-      query = `UPDATE artists 
-               SET account_status = $1, 
-                   suspension_reason = $2, 
-                   suspension_start = NOW(), 
-                   suspension_end = $3 
-               WHERE id = $4 
-               RETURNING id, full_name, stage_name, email, account_status, suspension_reason, suspension_start, suspension_end`;
-      params = ['suspended', reason || 'No reason provided', suspensionEnd, id];
-      
-      // Create notification for suspended artist
-      await pool.query(
-        `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
-         VALUES ($1, $2, $3, $4, $5, NOW())`,
-        [id, 'artist', 'Account Suspended', reason || 'Your account has been suspended', 'account_status']
+      result = await pool.query(
+        `UPDATE artists 
+         SET account_status = $1, 
+             suspension_reason = $2, 
+             suspension_start = NOW(), 
+             suspension_end = $3 
+         WHERE id = $4 
+         RETURNING id, full_name, stage_name, email, account_status, suspension_reason, suspension_start, suspension_end`,
+        ['suspended', reason || 'No reason provided', suspensionEnd, id]
       );
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Artist not found' });
+      }
+      
+      // Try to create notification
+      try {
+        await pool.query(
+          `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
+           VALUES ($1, $2, $3, $4, $5, NOW())`,
+          [id, 'artist', 'Account Suspended', reason || 'Your account has been suspended', 'account_status']
+        );
+      } catch (notifError) {
+        console.log('Could not create notification:', notifError.message);
+      }
+      
     } else if (status === 'active') {
-      // Get current status to determine appropriate reactivation message
+      // Get current status first
       const currentArtist = await pool.query('SELECT account_status FROM artists WHERE id = $1', [id]);
       const previousStatus = currentArtist.rows[0]?.account_status;
       
-      query = `UPDATE artists 
-               SET account_status = $1, 
-                   suspension_reason = NULL, 
-                   suspension_start = NULL, 
-                   suspension_end = NULL 
-               WHERE id = $2 
-               RETURNING id, full_name, stage_name, email, account_status`;
-      params = ['active', id];
+      result = await pool.query(
+        `UPDATE artists 
+         SET account_status = $1, 
+             suspension_reason = NULL, 
+             suspension_start = NULL, 
+             suspension_end = NULL 
+         WHERE id = $2 
+         RETURNING id, full_name, stage_name, email, account_status`,
+        ['active', id]
+      );
       
-      // Create professional notification based on previous status
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Artist not found' });
+      }
+      
+      // Create professional notification
       let notificationTitle = 'Account Reactivated';
       let notificationMessage = '';
       
@@ -164,38 +217,57 @@ router.patch('/artists/:id/status', async (req, res) => {
         notificationMessage = 'Your artist account has been successfully reactivated. You now have full access to all platform features including bookings and profile management. Welcome back!';
       }
       
-      await pool.query(
-        `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
-         VALUES ($1, $2, $3, $4, $5, NOW())`,
-        [id, 'artist', notificationTitle, notificationMessage, 'account_status']
-      );
-    } else if (status === 'terminated') {
-      query = `UPDATE artists 
-               SET account_status = $1, 
-                   suspension_reason = $2 
-               WHERE id = $3 
-               RETURNING id, full_name, stage_name, email, account_status, suspension_reason`;
-      params = ['terminated', reason || 'No reason provided', id];
+      // Try to create notification
+      try {
+        await pool.query(
+          `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
+           VALUES ($1, $2, $3, $4, $5, NOW())`,
+          [id, 'artist', notificationTitle, notificationMessage, 'account_status']
+        );
+      } catch (notifError) {
+        console.log('Could not create notification:', notifError.message);
+      }
       
-      // Create notification for terminated artist
-      await pool.query(
-        `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
-         VALUES ($1, $2, $3, $4, $5, NOW())`,
-        [id, 'artist', 'Account Terminated', reason || 'Your account has been permanently terminated', 'account_status']
+    } else if (status === 'terminated') {
+      result = await pool.query(
+        `UPDATE artists 
+         SET account_status = $1, 
+             suspension_reason = $2 
+         WHERE id = $3 
+         RETURNING id, full_name, stage_name, email, account_status, suspension_reason`,
+        ['terminated', reason || 'No reason provided', id]
       );
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Artist not found' });
+      }
+      
+      // Try to create notification
+      try {
+        await pool.query(
+          `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
+           VALUES ($1, $2, $3, $4, $5, NOW())`,
+          [id, 'artist', 'Account Terminated', reason || 'Your account has been permanently terminated', 'account_status']
+        );
+      } catch (notifError) {
+        console.log('Could not create notification:', notifError.message);
+      }
+      
     } else {
-      query = `UPDATE artists 
-               SET account_status = $1, 
-                   suspension_reason = $2 
-               WHERE id = $3 
-               RETURNING id, full_name, stage_name, email, account_status, suspension_reason`;
-      params = [status, reason || 'No reason provided', id];
+      result = await pool.query(
+        `UPDATE artists 
+         SET account_status = $1, 
+             suspension_reason = $2 
+         WHERE id = $3 
+         RETURNING id, full_name, stage_name, email, account_status, suspension_reason`,
+        [status, reason || 'No reason provided', id]
+      );
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Artist not found' });
+      }
     }
     
-    const result = await pool.query(query, params);
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'Artist not found' });
-    }
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Artist status update error:', error);
