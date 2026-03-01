@@ -179,7 +179,7 @@ export default function Dashboard() {
       }
       
       setToast({ 
-        message: `Account ${data.status === 'active' ? 'reactivated' : data.status === 'terminated' ? 'terminated' : data.status === 'inactive' ? 'deactivated' : 'suspended'} successfully!`, 
+        message: `Account ${data.status === 'active' ? 'reactivated' : data.status === 'terminated' ? 'terminated' : 'suspended'} successfully!`, 
         type: 'success' 
       });
     } catch (error) {

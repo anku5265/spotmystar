@@ -21,6 +21,30 @@ router.post('/artist/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
+    // Check account status
+    if (artist.account_status === 'suspended') {
+      if (artist.suspension_end && new Date(artist.suspension_end) > new Date()) {
+        return res.status(403).json({ 
+          message: 'Your account has been suspended',
+          reason: artist.suspension_reason || 'No reason provided',
+          suspendedUntil: artist.suspension_end
+        });
+      } else {
+        // Suspension expired, reactivate account
+        await pool.query('UPDATE artists SET account_status = $1, suspension_reason = NULL, suspension_start = NULL, suspension_end = NULL WHERE id = $2', ['active', artist.id]);
+      }
+    } else if (artist.account_status === 'inactive') {
+      return res.status(403).json({ 
+        message: 'Your account has been deactivated',
+        reason: artist.suspension_reason || 'No reason provided'
+      });
+    } else if (artist.account_status === 'terminated') {
+      return res.status(403).json({ 
+        message: 'Your account has been permanently terminated',
+        reason: artist.suspension_reason || 'No reason provided'
+      });
+    }
+
     const token = jwt.sign({ id: artist.id, role: 'artist' }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     res.json({
@@ -118,6 +142,30 @@ router.post('/user/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Check account status
+    if (user.account_status === 'suspended') {
+      if (user.suspension_end && new Date(user.suspension_end) > new Date()) {
+        return res.status(403).json({ 
+          message: 'Your account has been suspended',
+          reason: user.suspension_reason || 'No reason provided',
+          suspendedUntil: user.suspension_end
+        });
+      } else {
+        // Suspension expired, reactivate account
+        await pool.query('UPDATE users SET account_status = $1, suspension_reason = NULL, suspension_start = NULL, suspension_end = NULL WHERE id = $2', ['active', user.id]);
+      }
+    } else if (user.account_status === 'inactive') {
+      return res.status(403).json({ 
+        message: 'Your account has been deactivated',
+        reason: user.suspension_reason || 'No reason provided'
+      });
+    } else if (user.account_status === 'terminated') {
+      return res.status(403).json({ 
+        message: 'Your account has been permanently terminated',
+        reason: user.suspension_reason || 'No reason provided'
+      });
     }
 
     const token = jwt.sign({ id: user.id, role: 'user' }, process.env.JWT_SECRET, { expiresIn: '30d' });

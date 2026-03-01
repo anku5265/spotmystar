@@ -29,6 +29,22 @@ export default function UserLogin() {
       
       navigate('/');
     } catch (err) {
+      // Check if account is suspended/terminated
+      if (err.response?.status === 403) {
+        const errorData = err.response.data;
+        if (errorData.message.includes('suspended') || errorData.message.includes('deactivated') || errorData.message.includes('terminated')) {
+          // Redirect to account blocked page with details
+          navigate('/account-blocked', { 
+            state: { 
+              status: errorData.message.includes('suspended') ? 'suspended' : 
+                      errorData.message.includes('terminated') ? 'terminated' : 'inactive',
+              reason: errorData.reason,
+              suspensionEnd: errorData.suspendedUntil
+            } 
+          });
+          return;
+        }
+      }
       setError(err.response?.data?.message || 'Login failed');
     } finally {
       setLoading(false);

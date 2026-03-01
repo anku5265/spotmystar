@@ -15,7 +15,7 @@ export default function SuspensionModal({ user, userType, onClose, onSubmit }) {
     let finalDuration = duration === 'custom' ? parseInt(customDuration) * 3600 : parseInt(duration);
     let finalStatus = action;
 
-    if (action === 'inactive' || action === 'terminated') {
+    if (action === 'terminated') {
       finalDuration = null;
     }
 
@@ -56,8 +56,7 @@ export default function SuspensionModal({ user, userType, onClose, onSubmit }) {
               required
             >
               <option value="suspended">Suspend (Time-bound)</option>
-              <option value="inactive">Deactivate (Indefinite)</option>
-              <option value="terminated">Terminate (Permanent)</option>
+              <option value="terminated">Terminate (Permanent Ban)</option>
               <option value="active">Reactivate</option>
             </select>
           </div>
@@ -99,12 +98,12 @@ export default function SuspensionModal({ user, userType, onClose, onSubmit }) {
           {action !== 'active' && (
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Reason {action === 'terminated' && <span className="text-red-400">(Required for termination)</span>}
+                Reason {action === 'terminated' && <span className="text-red-400">(Required)</span>}
               </label>
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder={`Explain why you are ${action === 'suspended' ? 'suspending' : action === 'inactive' ? 'deactivating' : 'terminating'} this account...`}
+                placeholder={`Explain why you are ${action === 'suspended' ? 'suspending' : 'terminating'} this account...`}
                 className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
                 required={action === 'terminated'}
               />

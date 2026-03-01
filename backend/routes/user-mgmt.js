@@ -38,6 +38,13 @@ router.patch('/users/:id/status', async (req, res) => {
                WHERE id = $4 
                RETURNING id, name, email, account_status, suspension_reason, suspension_start, suspension_end`;
       params = ['suspended', reason || 'No reason provided', suspensionEnd, id];
+      
+      // Create notification for suspended user
+      await pool.query(
+        `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
+         VALUES ($1, $2, $3, $4, $5, NOW())`,
+        [id, 'user', 'Account Suspended', reason || 'Your account has been suspended', 'account_status']
+      );
     } else if (status === 'active') {
       query = `UPDATE users 
                SET account_status = $1, 
@@ -47,6 +54,27 @@ router.patch('/users/:id/status', async (req, res) => {
                WHERE id = $2 
                RETURNING id, name, email, account_status`;
       params = ['active', id];
+      
+      // Create notification for reactivated user
+      await pool.query(
+        `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
+         VALUES ($1, $2, $3, $4, $5, NOW())`,
+        [id, 'user', 'Account Reactivated', 'Your account has been reactivated. You can now access all features.', 'account_status']
+      );
+    } else if (status === 'terminated') {
+      query = `UPDATE users 
+               SET account_status = $1, 
+                   suspension_reason = $2 
+               WHERE id = $3 
+               RETURNING id, name, email, account_status, suspension_reason`;
+      params = ['terminated', reason || 'No reason provided', id];
+      
+      // Create notification for terminated user
+      await pool.query(
+        `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
+         VALUES ($1, $2, $3, $4, $5, NOW())`,
+        [id, 'user', 'Account Terminated', reason || 'Your account has been permanently terminated', 'account_status']
+      );
     } else {
       query = `UPDATE users 
                SET account_status = $1, 
@@ -84,6 +112,13 @@ router.patch('/artists/:id/status', async (req, res) => {
                WHERE id = $4 
                RETURNING id, full_name, stage_name, email, account_status, suspension_reason, suspension_start, suspension_end`;
       params = ['suspended', reason || 'No reason provided', suspensionEnd, id];
+      
+      // Create notification for suspended artist
+      await pool.query(
+        `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
+         VALUES ($1, $2, $3, $4, $5, NOW())`,
+        [id, 'artist', 'Account Suspended', reason || 'Your account has been suspended', 'account_status']
+      );
     } else if (status === 'active') {
       query = `UPDATE artists 
                SET account_status = $1, 
@@ -93,6 +128,27 @@ router.patch('/artists/:id/status', async (req, res) => {
                WHERE id = $2 
                RETURNING id, full_name, stage_name, email, account_status`;
       params = ['active', id];
+      
+      // Create notification for reactivated artist
+      await pool.query(
+        `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
+         VALUES ($1, $2, $3, $4, $5, NOW())`,
+        [id, 'artist', 'Account Reactivated', 'Your account has been reactivated. You can now access all features.', 'account_status']
+      );
+    } else if (status === 'terminated') {
+      query = `UPDATE artists 
+               SET account_status = $1, 
+                   suspension_reason = $2 
+               WHERE id = $3 
+               RETURNING id, full_name, stage_name, email, account_status, suspension_reason`;
+      params = ['terminated', reason || 'No reason provided', id];
+      
+      // Create notification for terminated artist
+      await pool.query(
+        `INSERT INTO notifications (user_id, user_type, title, message, type, created_at) 
+         VALUES ($1, $2, $3, $4, $5, NOW())`,
+        [id, 'artist', 'Account Terminated', reason || 'Your account has been permanently terminated', 'account_status']
+      );
     } else {
       query = `UPDATE artists 
                SET account_status = $1, 
