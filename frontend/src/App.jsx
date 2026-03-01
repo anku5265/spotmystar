@@ -40,16 +40,34 @@ function AccountStatusChecker() {
             const response = await api.get(`/api/user-management/check-status/user/${userInfo.id}`);
             const { account_status, suspension_reason, suspension_end } = response.data;
             
-            if (account_status === 'suspended' || account_status === 'terminated') {
-              // Logout and redirect
+            if (account_status === 'suspended') {
+              // Check if suspension expired
+              if (suspension_end && new Date(suspension_end) <= new Date()) {
+                console.log('Suspension expired, continuing...');
+                return;
+              }
+              
+              // Logout and redirect to suspension screen
               localStorage.removeItem('userToken');
               localStorage.removeItem('userInfo');
               navigate('/account-blocked', {
                 state: {
-                  status: account_status,
+                  status: 'suspended',
                   reason: suspension_reason,
                   suspensionEnd: suspension_end
-                }
+                },
+                replace: true
+              });
+            } else if (account_status === 'terminated') {
+              // Immediate logout and redirect to termination screen
+              localStorage.removeItem('userToken');
+              localStorage.removeItem('userInfo');
+              navigate('/account-blocked', {
+                state: {
+                  status: 'terminated',
+                  reason: suspension_reason
+                },
+                replace: true
               });
             }
           }
@@ -59,16 +77,34 @@ function AccountStatusChecker() {
             const response = await api.get(`/api/user-management/check-status/artist/${artistData.id}`);
             const { account_status, suspension_reason, suspension_end } = response.data;
             
-            if (account_status === 'suspended' || account_status === 'terminated') {
-              // Logout and redirect
+            if (account_status === 'suspended') {
+              // Check if suspension expired
+              if (suspension_end && new Date(suspension_end) <= new Date()) {
+                console.log('Suspension expired, continuing...');
+                return;
+              }
+              
+              // Logout and redirect to suspension screen
               localStorage.removeItem('artistToken');
               localStorage.removeItem('artistData');
               navigate('/account-blocked', {
                 state: {
-                  status: account_status,
+                  status: 'suspended',
                   reason: suspension_reason,
                   suspensionEnd: suspension_end
-                }
+                },
+                replace: true
+              });
+            } else if (account_status === 'terminated') {
+              // Immediate logout and redirect to termination screen
+              localStorage.removeItem('artistToken');
+              localStorage.removeItem('artistData');
+              navigate('/account-blocked', {
+                state: {
+                  status: 'terminated',
+                  reason: suspension_reason
+                },
+                replace: true
               });
             }
           }
@@ -78,11 +114,11 @@ function AccountStatusChecker() {
       }
     };
 
-    // Check immediately
+    // Check immediately on mount
     checkAccountStatus();
 
-    // Check every 10 seconds
-    const interval = setInterval(checkAccountStatus, 10000);
+    // Check every 5 seconds for faster real-time response
+    const interval = setInterval(checkAccountStatus, 5000);
 
     return () => clearInterval(interval);
   }, [navigate, location.pathname]);
