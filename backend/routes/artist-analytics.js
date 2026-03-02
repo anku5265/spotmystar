@@ -67,7 +67,7 @@ router.get('/stats/:artistId', verifyToken, requireArtist, async (req, res) => {
       [artistId]
     );
     
-    res.json({
+    const stats = {
       views: viewsResult.rows[0]?.views || 0,
       bookings: parseInt(totalBookingsResult.rows[0]?.total || 0),
       filteredBookings: parseInt(filteredBookingsResult.rows[0]?.total || 0),
@@ -75,10 +75,15 @@ router.get('/stats/:artistId', verifyToken, requireArtist, async (req, res) => {
       wishlistCount: parseInt(wishlistResult.rows[0]?.total || 0),
       upcomingEvents: parseInt(upcomingResult.rows[0]?.total || 0),
       filter
-    });
+    };
+    
+    res.json(stats);
   } catch (error) {
     console.error('Analytics error:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      message: 'Failed to fetch analytics',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
