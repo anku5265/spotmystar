@@ -7,6 +7,7 @@ import categoryRoutes from './routes/categories.js';
 import bookingRoutes from './routes/bookings.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
+import adminAdvancedRoutes from './routes/admin-advanced.js';
 import userMgmtRoutes from './routes/user-mgmt.js';
 import artistAnalyticsRoutes from './routes/artist-analytics.js';
 
@@ -25,6 +26,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin-advanced', adminAdvancedRoutes);
 app.use('/api/user-management', userMgmtRoutes);
 app.use('/api/artist-analytics', artistAnalyticsRoutes);
 

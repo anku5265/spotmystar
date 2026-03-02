@@ -245,6 +245,13 @@ export default function Dashboard() {
                   <p className="font-semibold">{adminInfo.name}</p>
                   <p className="text-sm text-gray-400">{adminInfo.email}</p>
                 </div>
+                <a
+                  href="/advanced"
+                  className="w-full px-4 py-3 text-left hover:bg-blue-500/10 transition-colors flex items-center gap-3 text-blue-400 border-b border-gray-700"
+                >
+                  <Shield size={18} />
+                  Advanced Dashboard
+                </a>
                 <button
                   onClick={handleLogout}
                   className="w-full px-4 py-3 text-left hover:bg-red-500/10 transition-colors flex items-center gap-3 text-red-400"
