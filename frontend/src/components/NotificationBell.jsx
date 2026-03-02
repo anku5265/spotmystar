@@ -94,7 +94,15 @@ export default function NotificationBell({ userType, userId }) {
       </button>
 
       {showDropdown && (
-        <div className="fixed right-4 top-20 w-96 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden z-[9999] animate-slide-in-right">
+        <>
+          {/* Backdrop overlay */}
+          <div 
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]"
+            onClick={() => setShowDropdown(false)}
+          ></div>
+          
+          {/* Notification dropdown */}
+          <div className="fixed right-4 top-20 w-96 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden z-[9999] animate-slide-in-right">
           <div className="p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-b border-gray-700">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold text-white">Notifications</h3>
@@ -152,7 +160,8 @@ export default function NotificationBell({ userType, userId }) {
               </button>
             </div>
           )}
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
