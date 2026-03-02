@@ -456,37 +456,42 @@ export default function ArtistDashboard() {
       
       {/* TOP HEADER - Sticky */}
       <div className="bg-gray-800/80 backdrop-blur-xl border-b border-gray-700/50 sticky top-0 z-50 shadow-xl">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between gap-3">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             {/* Left: Artist Info & Availability */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-secondary to-primary rounded-full flex items-center justify-center text-lg font-bold flex-shrink-0">
-                {artist.stage_name?.charAt(0) || artist.full_name?.charAt(0)}
-              </div>
-              <div className="hidden md:block">
-                <h1 className="text-lg font-bold text-white flex items-center gap-2">
-                  {artist.stage_name || artist.full_name}
-                  {artist.is_verified && <CheckCircle className="text-blue-400" size={16} />}
-                </h1>
-                <div className="flex items-center gap-2 text-xs text-gray-400">
-                  <span>Profile: <span className="text-white font-semibold">{profileCompletion}%</span></span>
-                  <span>•</span>
-                  <span>{artist.city || artist.primary_city}</span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-secondary to-primary rounded-full flex items-center justify-center text-xl font-bold">
+                  {artist.stage_name?.charAt(0) || artist.full_name?.charAt(0)}
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-white flex items-center gap-2">
+                    {artist.stage_name || artist.full_name}
+                    {artist.is_verified && <CheckCircle className="text-blue-400" size={18} />}
+                  </h1>
+                  <div className="flex items-center gap-3 text-sm">
+                    <span className="text-gray-400">
+                      Profile: <span className="text-white font-semibold">{profileCompletion}%</span>
+                    </span>
+                    <span className="text-gray-600">•</span>
+                    <span className="text-gray-400">
+                      Service: <span className="text-white">{artist.city || artist.primary_city}</span>
+                    </span>
+                  </div>
                 </div>
               </div>
               
               {/* Availability Toggle */}
               <button
                 onClick={toggleAvailability}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 text-sm flex-shrink-0 ${
+                className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
                   isAvailable
                     ? 'bg-green-500 hover:bg-green-600 text-white'
                     : 'bg-red-500 hover:bg-red-600 text-white'
                 }`}
               >
-                <div className={`w-1.5 h-1.5 rounded-full ${isAvailable ? 'bg-white' : 'bg-white/70'} animate-pulse`}></div>
-                <span className="hidden sm:inline">{isAvailable ? 'Available' : 'Not Available'}</span>
-                <span className="sm:hidden">{isAvailable ? 'On' : 'Off'}</span>
+                <div className={`w-2 h-2 rounded-full ${isAvailable ? 'bg-white' : 'bg-white/70'} animate-pulse`}></div>
+                {isAvailable ? 'Available' : 'Not Available'}
               </button>
             </div>
 
@@ -494,37 +499,34 @@ export default function ArtistDashboard() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowPriceModal(true)}
-                className="px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-all flex items-center gap-1.5 text-xs font-medium"
-                title="Update Price"
+                className="px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-all flex items-center gap-2 text-sm font-medium"
               >
-                <IndianRupee size={14} />
-                <span className="hidden lg:inline">Price</span>
+                <IndianRupee size={16} />
+                Update Price
               </button>
               <button
                 onClick={() => setShowPhotoModal(true)}
-                className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-all flex items-center gap-1.5 text-xs font-medium"
-                title="Add Photos"
+                className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-all flex items-center gap-2 text-sm font-medium"
               >
-                <Camera size={14} />
-                <span className="hidden lg:inline">Photos</span>
+                <Camera size={16} />
+                Add Photos
               </button>
               <button
                 onClick={() => setShowBusyModal(true)}
-                className="px-3 py-1.5 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 rounded-lg transition-all flex items-center gap-1.5 text-xs font-medium"
-                title="Mark Busy Dates"
+                className="px-4 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 rounded-lg transition-all flex items-center gap-2 text-sm font-medium"
               >
-                <Calendar size={14} />
-                <span className="hidden lg:inline">Busy</span>
+                <Calendar size={16} />
+                Mark Busy
               </button>
-              <div className="relative flex-shrink-0">
+              <div className="relative">
                 <NotificationBell userType="artist" userId={artist.id} />
               </div>
               <button
                 onClick={() => logout()}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors flex-shrink-0"
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                 title="Logout"
               >
-                <LogOut size={18} />
+                <LogOut size={20} />
               </button>
             </div>
           </div>
