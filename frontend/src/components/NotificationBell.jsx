@@ -94,7 +94,7 @@ export default function NotificationBell({ userType, userId }) {
       </button>
 
       {showDropdown && (
-        <div className="absolute right-0 mt-2 w-96 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden z-50 animate-slide-in-right">
+        <div className="absolute right-0 mt-2 w-96 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden z-[9999] animate-slide-in-right">
           <div className="p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-b border-gray-700">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold text-white">Notifications</h3>
