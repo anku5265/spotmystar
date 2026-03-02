@@ -4,10 +4,18 @@
  * and generate IDs for existing records
  */
 
-const pool = require('./config/db');
-const fs = require('fs');
-const path = require('path');
-const { generateUserId, generateArtistId, generateBookingId } = require('./utils/idGenerator');
+import dotenv from 'dotenv';
+import pool from './config/db.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { generateUserId, generateArtistId, generateBookingId } from './utils/idGenerator.js';
+
+// Load environment variables
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function applyMigration() {
   const client = await pool.connect();

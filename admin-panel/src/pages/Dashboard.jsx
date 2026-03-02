@@ -535,6 +535,7 @@ export default function Dashboard() {
                 <table className="w-full">
                   <thead className="bg-gray-900/50">
                     <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Artist ID</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Name</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Stage Name</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Category</th>
@@ -547,6 +548,11 @@ export default function Dashboard() {
                   <tbody>
                     {allArtists.map(artist => (
                       <tr key={artist.id} className="border-t border-gray-700/50 hover:bg-white/5 transition-colors">
+                        <td className="px-6 py-4">
+                          <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded font-mono text-xs font-bold">
+                            {artist.artist_id || 'N/A'}
+                          </span>
+                        </td>
                         <td className="px-6 py-4 text-white">{artist.full_name}</td>
                         <td className="px-6 py-4 text-gray-300">{artist.stage_name}</td>
                         <td className="px-6 py-4 text-blue-400">{artist.category_name}</td>
@@ -593,6 +599,7 @@ export default function Dashboard() {
                 <table className="w-full">
                   <thead className="bg-gray-900/50">
                     <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">User ID</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Name</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Email</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Phone</th>
@@ -602,6 +609,11 @@ export default function Dashboard() {
                   <tbody>
                     {allUsers.map(user => (
                       <tr key={user.id} className="border-t border-gray-700/50 hover:bg-white/5 transition-colors">
+                        <td className="px-6 py-4">
+                          <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded font-mono text-xs font-bold">
+                            {user.user_id || 'N/A'}
+                          </span>
+                        </td>
                         <td className="px-6 py-4 text-white font-medium">{user.name}</td>
                         <td className="px-6 py-4 text-gray-300">{user.email}</td>
                         <td className="px-6 py-4 text-gray-300">{user.phone}</td>
@@ -639,7 +651,12 @@ export default function Dashboard() {
                   <div key={booking.id} className="card bg-gradient-to-br from-gray-800/50 to-gray-800/30 backdrop-blur-sm border-gray-700/50 hover:shadow-xl transition-all duration-300">
                     <div className="flex justify-between items-start">
                       <div className="space-y-2">
-                        <h3 className="text-xl font-bold text-white">{booking.full_name || booking.stage_name}</h3>
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-xl font-bold text-white">{booking.full_name || booking.stage_name}</h3>
+                          <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded font-mono text-xs font-bold">
+                            {booking.booking_id || 'N/A'}
+                          </span>
+                        </div>
                         <div className="space-y-1 text-sm">
                           <p className="text-gray-400">📅 Date: <span className="text-white">{new Date(booking.event_date).toLocaleDateString()}</span></p>
                           <p className="text-gray-400">📍 Venue: <span className="text-white">{booking.venue}</span></p>
