@@ -682,116 +682,189 @@ export default function ArtistDashboard() {
             </div>
 
             {/* UPCOMING EVENTS (Next 7 days) */}
-            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 mt-4">
-              <h3 className="text-base font-bold text-white mb-3 flex items-center gap-2">
-                <Clock className="text-purple-400" size={20} />
-                Upcoming (Next 7 days)
-              </h3>
+            <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/30 rounded-xl p-4 mt-4 hover:shadow-lg hover:shadow-purple-500/10 transition-all">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <div className="p-2 bg-purple-500/20 rounded-lg">
+                    <Clock className="text-purple-400" size={18} />
+                  </div>
+                  Upcoming Events
+                </h3>
+                <span className="text-xs text-purple-400 font-semibold bg-purple-500/20 px-2 py-1 rounded-full">
+                  Next 7 days
+                </span>
+              </div>
               
               {upcomingEvents.length > 0 ? (
-                <div className="space-y-2 max-h-[180px] overflow-y-auto">
+                <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1">
                   {upcomingEvents.slice(0, 5).map((event) => (
-                    <div key={event.id} className="bg-gray-900/50 rounded-lg p-2.5 hover:bg-gray-900 transition-all">
-                      <div className="flex justify-between items-start mb-1.5">
-                        <p className="text-white font-medium text-sm">{event.user_name}</p>
-                        <span className="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs font-semibold">
-                          Confirmed
+                    <div key={event.id} className="bg-gray-900/60 border border-purple-500/20 rounded-lg p-3 hover:bg-gray-900 hover:border-purple-500/40 transition-all group">
+                      <div className="flex justify-between items-start mb-2">
+                        <p className="text-white font-semibold text-sm group-hover:text-purple-300 transition-colors">{event.user_name}</p>
+                        <span className="px-2 py-0.5 bg-green-500/20 text-green-400 rounded-md text-xs font-bold border border-green-500/30">
+                          ✓ Confirmed
                         </span>
                       </div>
-                      <div className="space-y-1 text-xs text-gray-400">
-                        <p className="flex items-center gap-1.5">
-                          <Calendar size={12} />
-                          {new Date(event.event_date).toLocaleDateString('en-IN', {
-                            day: 'numeric',
-                            month: 'short'
-                          })}
+                      <div className="space-y-1.5 text-xs">
+                        <p className="flex items-center gap-2 text-gray-300">
+                          <Calendar size={13} className="text-purple-400" />
+                          <span className="font-medium">
+                            {new Date(event.event_date).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric'
+                            })}
+                          </span>
                         </p>
-                        <p className="flex items-center gap-1.5">
-                          <MapPin size={12} />
-                          {event.event_location}
+                        <p className="flex items-center gap-2 text-gray-300">
+                          <MapPin size={13} className="text-purple-400" />
+                          <span>{event.event_location}</span>
                         </p>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-400 text-center py-6 text-sm">No upcoming events</p>
+                <div className="text-center py-8 bg-gray-900/30 rounded-lg border border-dashed border-purple-500/30">
+                  <Clock className="mx-auto text-purple-500/40 mb-2" size={32} />
+                  <p className="text-gray-400 text-sm font-medium">No upcoming events</p>
+                  <p className="text-gray-500 text-xs mt-1">Your confirmed bookings will appear here</p>
+                </div>
               )}
             </div>
 
             {/* RECENT ENQUIRIES (Last 24hrs) */}
-            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 mt-4">
-              <h3 className="text-base font-bold text-white mb-3 flex items-center gap-2">
-                <MessageSquare className="text-blue-400" size={20} />
-                Recent Enquiries
-                <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">
+            <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/30 rounded-xl p-4 mt-4 hover:shadow-lg hover:shadow-blue-500/10 transition-all">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <div className="p-2 bg-blue-500/20 rounded-lg">
+                    <MessageSquare className="text-blue-400" size={18} />
+                  </div>
+                  Recent Enquiries
+                </h3>
+                <span className="text-xs text-blue-400 font-semibold bg-blue-500/20 px-2 py-1 rounded-full">
                   Last 24hrs
                 </span>
-              </h3>
+              </div>
               
               {recentEnquiries.length > 0 ? (
                 <div className="space-y-2">
                   {recentEnquiries.map((enquiry) => (
-                    <div key={enquiry.id} className="flex justify-between items-center p-2 bg-gray-900/50 rounded-lg hover:bg-gray-900 transition-all">
-                      <div>
-                        <p className="text-white font-medium text-sm">{enquiry.user_name}</p>
-                        <p className="text-gray-400 text-xs">
-                          {new Date(enquiry.event_date).toLocaleDateString('en-IN', {
-                            day: 'numeric',
-                            month: 'short'
-                          })}
-                        </p>
+                    <div key={enquiry.id} className="flex justify-between items-center p-3 bg-gray-900/60 border border-blue-500/20 rounded-lg hover:bg-gray-900 hover:border-blue-500/40 transition-all group">
+                      <div className="flex-1">
+                        <p className="text-white font-semibold text-sm mb-1 group-hover:text-blue-300 transition-colors">{enquiry.user_name}</p>
+                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                          <Calendar size={12} className="text-blue-400" />
+                          <span>
+                            {new Date(enquiry.event_date).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric'
+                            })}
+                          </span>
+                        </div>
                       </div>
-                      <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                        enquiry.status === 'accepted' ? 'bg-green-500/20 text-green-400' :
-                        enquiry.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
-                        'bg-yellow-500/20 text-yellow-400'
+                      <span className={`px-2.5 py-1 rounded-md text-xs font-bold border ${
+                        enquiry.status === 'accepted' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                        enquiry.status === 'rejected' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
+                        'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
                       }`}>
-                        {enquiry.status === 'pending' ? 'UNREAD' : enquiry.status.toUpperCase()}
+                        {enquiry.status === 'pending' ? '● NEW' : enquiry.status.toUpperCase()}
                       </span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-400 text-center py-6 text-sm">No recent enquiries</p>
+                <div className="text-center py-8 bg-gray-900/30 rounded-lg border border-dashed border-blue-500/30">
+                  <MessageSquare className="mx-auto text-blue-500/40 mb-2" size={32} />
+                  <p className="text-gray-400 text-sm font-medium">No recent enquiries</p>
+                  <p className="text-gray-500 text-xs mt-1">New enquiries will appear here</p>
+                </div>
               )}
             </div>
 
             {/* PROFILE ANALYTICS */}
-            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 mt-4">
-              <h3 className="text-base font-bold text-white mb-3 flex items-center gap-2">
-                <BarChart3 className="text-secondary" size={20} />
-                Profile Analytics
-              </h3>
+            <div className="bg-gradient-to-br from-pink-500/10 to-secondary/10 border border-pink-500/30 rounded-xl p-4 mt-4 hover:shadow-lg hover:shadow-pink-500/10 transition-all">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <div className="p-2 bg-pink-500/20 rounded-lg">
+                    <BarChart3 className="text-secondary" size={18} />
+                  </div>
+                  Profile Analytics
+                </h3>
+                <span className="text-xs text-secondary font-semibold bg-secondary/20 px-2 py-1 rounded-full">
+                  {profileCompletion}%
+                </span>
+              </div>
               
-              <div className="space-y-3">
-                {/* Completion */}
+              <div className="space-y-4">
+                {/* Completion Bar */}
                 <div>
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-400">Completion</span>
-                    <span className="text-white font-semibold">{profileCompletion}%</span>
+                    <span className="text-gray-300 font-medium">Profile Completion</span>
+                    <span className="text-white font-bold">{profileCompletion}%</span>
                   </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div className="relative w-full bg-gray-700/50 rounded-full h-3 overflow-hidden border border-gray-600/50">
                     <div
-                      className="bg-gradient-to-r from-blue-500 to-secondary h-2 rounded-full transition-all"
+                      className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-full rounded-full transition-all duration-500 shadow-lg"
                       style={{ width: `${profileCompletion}%` }}
-                    ></div>
+                    >
+                      <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                    </div>
                   </div>
+                  {profileCompletion === 100 && (
+                    <p className="text-green-400 text-xs mt-2 flex items-center gap-1">
+                      <CheckCircle size={12} />
+                      <span className="font-semibold">Perfect! Your profile is complete</span>
+                    </p>
+                  )}
                 </div>
                 
                 {/* Checklist */}
-                <div className="space-y-1.5 text-sm">
-                  <div className="flex items-center gap-2">
-                    {artist.profile_image ? <CheckCircle size={16} className="text-green-400" /> : <AlertCircle size={16} className="text-yellow-400" />}
-                    <span className={artist.profile_image ? 'text-gray-400' : 'text-yellow-400'}>Photos</span>
+                <div className="space-y-2 text-sm bg-gray-900/40 rounded-lg p-3 border border-gray-700/50">
+                  <div className={`flex items-center justify-between p-2 rounded-lg transition-all ${
+                    artist.profile_image ? 'bg-green-500/10 border border-green-500/30' : 'bg-yellow-500/10 border border-yellow-500/30'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      {artist.profile_image ? 
+                        <CheckCircle size={18} className="text-green-400" /> : 
+                        <AlertCircle size={18} className="text-yellow-400" />
+                      }
+                      <span className={artist.profile_image ? 'text-green-300 font-medium' : 'text-yellow-300 font-medium'}>
+                        Photos
+                      </span>
+                    </div>
+                    {artist.profile_image && <span className="text-green-400 text-xs font-bold">✓</span>}
                   </div>
-                  <div className="flex items-center gap-2">
-                    {artist.bio || artist.short_bio ? <CheckCircle size={16} className="text-green-400" /> : <AlertCircle size={16} className="text-yellow-400" />}
-                    <span className={artist.bio || artist.short_bio ? 'text-gray-400' : 'text-yellow-400'}>Bio</span>
+                  
+                  <div className={`flex items-center justify-between p-2 rounded-lg transition-all ${
+                    artist.bio || artist.short_bio ? 'bg-green-500/10 border border-green-500/30' : 'bg-yellow-500/10 border border-yellow-500/30'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      {artist.bio || artist.short_bio ? 
+                        <CheckCircle size={18} className="text-green-400" /> : 
+                        <AlertCircle size={18} className="text-yellow-400" />
+                      }
+                      <span className={artist.bio || artist.short_bio ? 'text-green-300 font-medium' : 'text-yellow-300 font-medium'}>
+                        Bio
+                      </span>
+                    </div>
+                    {(artist.bio || artist.short_bio) && <span className="text-green-400 text-xs font-bold">✓</span>}
                   </div>
-                  <div className="flex items-center gap-2">
-                    {artist.price_min && artist.price_max ? <CheckCircle size={16} className="text-green-400" /> : <AlertCircle size={16} className="text-yellow-400" />}
-                    <span className={artist.price_min && artist.price_max ? 'text-gray-400' : 'text-yellow-400'}>Pricing</span>
+                  
+                  <div className={`flex items-center justify-between p-2 rounded-lg transition-all ${
+                    artist.price_min && artist.price_max ? 'bg-green-500/10 border border-green-500/30' : 'bg-yellow-500/10 border border-yellow-500/30'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      {artist.price_min && artist.price_max ? 
+                        <CheckCircle size={18} className="text-green-400" /> : 
+                        <AlertCircle size={18} className="text-yellow-400" />
+                      }
+                      <span className={artist.price_min && artist.price_max ? 'text-green-300 font-medium' : 'text-yellow-300 font-medium'}>
+                        Pricing
+                      </span>
+                    </div>
+                    {artist.price_min && artist.price_max && <span className="text-green-400 text-xs font-bold">✓</span>}
                   </div>
                 </div>
               </div>
