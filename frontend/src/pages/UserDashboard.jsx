@@ -35,13 +35,6 @@ export default function UserDashboard() {
       fetchBookings();
     }
   }, [user]);
-    
-    fetchBookings(token);
-    
-    // Check status every minute
-    const statusInterval = setInterval(() => checkAccountStatus(parsedUser.id), 60000);
-    return () => clearInterval(statusInterval);
-  }, [navigate]);
 
   const checkAccountStatus = async (userId) => {
     try {
