@@ -621,11 +621,11 @@ export default function ArtistDashboard() {
 
 
         {/* MAIN CONTENT GRID - 40:60 Ratio with Equal Heights */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
           {/* LEFT COLUMN - Calendar (40% width) */}
-          <div className="lg:col-span-2 space-y-6 flex flex-col">
+          <div className="lg:col-span-2">
             {/* INTERACTIVE CALENDAR */}
-            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 flex-1 overflow-auto">
+            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 h-[600px] overflow-auto">
               <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                 <Calendar className="text-secondary" size={22} />
                 My Calendar
@@ -800,8 +800,8 @@ export default function ArtistDashboard() {
 
 
           {/* RIGHT COLUMN - Pending Requests (60% width) */}
-          <div className="lg:col-span-3 flex flex-col">
-            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 flex-1 overflow-auto">
+          <div className="lg:col-span-3">
+            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 h-[600px] overflow-auto">
               {/* Header with Search & Sort */}
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-4">
