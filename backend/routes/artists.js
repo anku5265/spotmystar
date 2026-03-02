@@ -2,6 +2,7 @@ import express from 'express';
 import pool from '../config/db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { generateArtistId } from '../utils/idGenerator.js';
 
 const router = express.Router();
 
@@ -146,6 +147,9 @@ router.post('/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Generate unique Artist ID
+    const artistId = await generateArtistId();
+
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
@@ -164,10 +168,10 @@ router.post('/register', async (req, res) => {
             instagram, youtube, facebook, twitter, linkedin, website,
             whatsapp,
             terms_accepted, privacy_accepted,
-            status
+            status, artist_id
           )
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $4, $20, $21, 'submitted')
-          RETURNING id, full_name, stage_name, email, status, is_verified
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $4, $20, $21, 'submitted', $22)
+          RETURNING id, full_name, stage_name, email, status, is_verified, artist_id
         `, [
           fullName, stageName, email, phone || whatsapp || '', hashedPassword,
           shortBio || '', detailedDescription || '',
@@ -176,7 +180,8 @@ router.post('/register', async (req, res) => {
           yearsOfExperience || 0,
           pricingModel || 'per_event', priceMin || 0, priceMax || 0,
           instagram || '', youtube || '', facebook || '', twitter || '', linkedin || '', website || '',
-          termsAccepted || false, privacyAccepted || false
+          termsAccepted || false, privacyAccepted || false,
+          artistId
         ]);
 
         const artist = artistResult.rows[0];
@@ -212,11 +217,11 @@ router.post('/register', async (req, res) => {
           INSERT INTO artists (
             full_name, stage_name, category_id, bio, city, price_min, price_max, 
             email, whatsapp, instagram, password, status,
-            phone, primary_city, short_bio
+            phone, primary_city, short_bio, artist_id
           )
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'submitted', $9, $5, $4)
-          RETURNING id, full_name, stage_name, email, status, is_verified
-        `, [fullName, stageName, category, bio, city, priceMin, priceMax, email, whatsapp, instagram, hashedPassword]);
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'submitted', $9, $5, $4, $12)
+          RETURNING id, full_name, stage_name, email, status, is_verified, artist_id
+        `, [fullName, stageName, category, bio, city, priceMin, priceMax, email, whatsapp, instagram, hashedPassword, artistId]);
 
         const artist = artistResult.rows[0];
 
@@ -237,6 +242,7 @@ router.post('/register', async (req, res) => {
         token,
         artist: {
           id: artist.id,
+          artistId: artist.artist_id,
           fullName: artist.full_name,
           stageName: artist.stage_name,
           email: artist.email,

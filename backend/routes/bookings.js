@@ -2,6 +2,7 @@ import express from 'express';
 import pool from '../config/db.js';
 import nodemailer from 'nodemailer';
 import { verifyToken, requireUser } from '../middleware/auth.js';
+import { generateBookingId } from '../utils/idGenerator.js';
 
 const router = express.Router();
 
@@ -27,11 +28,14 @@ router.post('/', verifyToken, requireUser, async (req, res) => {
 
     const artist = artistResult.rows[0];
 
+    // Generate unique Booking ID
+    const bookingId = await generateBookingId();
+
     const result = await pool.query(`
-      INSERT INTO bookings (artist_id, user_id, user_name, phone, email, event_date, event_location, budget, message)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      RETURNING id
-    `, [artistId, userId || null, userName, phone, email, eventDate, eventLocation, budget, message]);
+      INSERT INTO bookings (artist_id, user_id, user_name, phone, email, event_date, event_location, budget, message, booking_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      RETURNING id, booking_id
+    `, [artistId, userId || null, userName, phone, email, eventDate, eventLocation, budget, message, bookingId]);
 
     // Send email to artist
     try {
@@ -41,6 +45,7 @@ router.post('/', verifyToken, requireUser, async (req, res) => {
         subject: `New Booking Request from ${userName}`,
         html: `
           <h2>New Booking Request</h2>
+          <p><strong>Booking ID:</strong> ${bookingId}</p>
           <p><strong>From:</strong> ${userName}</p>
           <p><strong>Phone:</strong> ${phone}</p>
           <p><strong>Email:</strong> ${email}</p>
@@ -57,7 +62,8 @@ router.post('/', verifyToken, requireUser, async (req, res) => {
 
     res.status(201).json({ 
       message: 'Booking request sent successfully!', 
-      bookingId: result.rows[0].id 
+      bookingId: result.rows[0].booking_id,
+      id: result.rows[0].id
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -2,6 +2,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
+import { generateUserId } from '../utils/idGenerator.js';
 
 const router = express.Router();
 
@@ -105,10 +106,13 @@ router.post('/user/register', async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Generate unique User ID
+    const userId = await generateUserId();
+
     // Create user
     const result = await pool.query(
-      'INSERT INTO users (name, email, phone, password, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, phone',
-      [name, email, phone, hashedPassword, 'user']
+      'INSERT INTO users (name, email, phone, password, role, user_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, email, phone, user_id',
+      [name, email, phone, hashedPassword, 'user', userId]
     );
 
     const user = result.rows[0];
@@ -118,6 +122,7 @@ router.post('/user/register', async (req, res) => {
       token,
       user: {
         id: user.id,
+        userId: user.user_id,
         name: user.name,
         email: user.email,
         phone: user.phone
