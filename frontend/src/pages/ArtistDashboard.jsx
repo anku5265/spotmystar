@@ -55,7 +55,6 @@ export default function ArtistDashboard() {
   // Analytics State
   const [recentEnquiries, setRecentEnquiries] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
-  const [growthData, setGrowthData] = useState({ visits: 0, bookings: 0, wishlist: 0 });
 
 
   useEffect(() => {
@@ -96,8 +95,7 @@ export default function ArtistDashboard() {
         fetchAnalytics(artistId, filter),
         fetchPendingRequests(artistId),
         fetchRecentEnquiries(artistId),
-        fetchUpcomingEvents(artistId),
-        fetchGrowthData(artistId)
+        fetchUpcomingEvents(artistId)
       ]);
       
       setLoading(false);
@@ -153,24 +151,6 @@ export default function ArtistDashboard() {
       setUpcomingEvents(res.data);
     } catch (error) {
       console.error('Error fetching upcoming events:', error);
-    }
-  };
-
-  const fetchGrowthData = async (artistId) => {
-    try {
-      const token = localStorage.getItem('artistToken');
-      // Fetch current and previous period stats for growth calculation
-      const currentRes = await api.get(`/api/artist-analytics/stats/${artistId}?filter=weekly`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      // For simplicity, showing positive growth - in production, compare with previous period
-      setGrowthData({
-        visits: 12,
-        bookings: 8,
-        wishlist: 5
-      });
-    } catch (error) {
-      console.error('Error fetching growth data:', error);
     }
   };
 
@@ -536,21 +516,26 @@ export default function ArtistDashboard() {
       <div className="container mx-auto px-4 py-6">
         {/* PERFORMANCE METRICS SECTION */}
         <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-              <BarChart3 className="text-secondary" size={28} />
-              Performance Metrics
-            </h2>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+            <div>
+              <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+                <div className="p-2 bg-secondary/20 rounded-lg">
+                  <BarChart3 className="text-secondary" size={32} />
+                </div>
+                Performance Dashboard
+              </h2>
+              <p className="text-gray-400 text-sm mt-2">Track your visibility, engagement, and bookings in real-time</p>
+            </div>
             
             {/* Filter Tabs */}
-            <div className="flex gap-2 bg-gray-800/50 p-1 rounded-lg">
+            <div className="flex gap-2 bg-gray-800/50 p-1.5 rounded-xl border border-gray-700/50">
               {['daily', 'weekly', 'monthly'].map((f) => (
                 <button
                   key={f}
                   onClick={() => handleFilterChange(f)}
-                  className={`px-4 py-2 rounded-lg capitalize transition-all text-sm font-medium ${
+                  className={`px-5 py-2.5 rounded-lg capitalize transition-all text-sm font-semibold ${
                     filter === f
-                      ? 'bg-secondary text-white shadow-lg'
+                      ? 'bg-gradient-to-r from-secondary to-primary text-white shadow-lg shadow-secondary/30'
                       : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
                   }`}
                 >
@@ -560,60 +545,103 @@ export default function ArtistDashboard() {
             </div>
           </div>
 
-          {/* Stats Cards */}
+          {/* Stats Cards Grid */}
           {stats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Total Visits */}
-              <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl p-6 hover:shadow-xl hover:shadow-blue-500/10 transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <Eye className="text-blue-400" size={28} />
-                  <div className="flex items-center gap-1 text-green-400 text-sm font-semibold">
-                    <ArrowUp size={14} />
-                    +{growthData.visits}%
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
+              {/* Total Profile Views */}
+              <div className="bg-gradient-to-br from-blue-500/20 via-blue-500/10 to-transparent border border-blue-500/30 rounded-2xl p-6 hover:shadow-2xl hover:shadow-blue-500/20 transition-all hover:scale-105 hover:border-blue-400/50 cursor-pointer group">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="p-3 bg-blue-500/20 rounded-xl group-hover:bg-blue-500/30 transition-all">
+                    <Eye className="text-blue-400" size={28} />
+                  </div>
+                  <div className="flex items-center gap-1 text-green-400 text-xs font-bold bg-green-500/10 px-2 py-1 rounded-full">
+                    <TrendingUp size={12} />
+                    Live
                   </div>
                 </div>
-                <p className="text-4xl font-bold text-white mb-1">{stats.views?.toLocaleString() || 0}</p>
-                <p className="text-gray-400 text-sm font-medium">Total Visits</p>
+                <p className="text-4xl font-black text-white mb-2 tracking-tight">
+                  {stats.views?.toLocaleString() || 0}
+                </p>
+                <p className="text-gray-400 text-sm font-semibold mb-1">Profile Views</p>
+                <p className="text-gray-500 text-xs">Total all-time visits</p>
               </div>
 
               {/* Total Bookings */}
-              <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-xl p-6 hover:shadow-xl hover:shadow-green-500/10 transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <Calendar className="text-green-400" size={28} />
-                  <div className="flex items-center gap-1 text-green-400 text-sm font-semibold">
-                    <ArrowUp size={14} />
-                    +{growthData.bookings}%
+              <div className="bg-gradient-to-br from-green-500/20 via-green-500/10 to-transparent border border-green-500/30 rounded-2xl p-6 hover:shadow-2xl hover:shadow-green-500/20 transition-all hover:scale-105 hover:border-green-400/50 cursor-pointer group">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="p-3 bg-green-500/20 rounded-xl group-hover:bg-green-500/30 transition-all">
+                    <Calendar className="text-green-400" size={28} />
+                  </div>
+                  <div className="flex items-center gap-1 text-green-400 text-xs font-bold bg-green-500/10 px-2 py-1 rounded-full">
+                    <ArrowUp size={12} />
+                    {stats.filteredBookings || 0}
                   </div>
                 </div>
-                <p className="text-4xl font-bold text-white mb-1">{stats.bookings?.toLocaleString() || 0}</p>
-                <p className="text-gray-400 text-sm font-medium">Total Bookings</p>
+                <p className="text-4xl font-black text-white mb-2 tracking-tight">
+                  {stats.bookings?.toLocaleString() || 0}
+                </p>
+                <p className="text-gray-400 text-sm font-semibold mb-1">Total Bookings</p>
+                <p className="text-gray-500 text-xs">
+                  {stats.filteredBookings || 0} this {filter === 'daily' ? 'day' : filter === 'weekly' ? 'week' : 'month'}
+                </p>
+              </div>
+
+              {/* Pending Requests */}
+              <div className="bg-gradient-to-br from-yellow-500/20 via-yellow-500/10 to-transparent border border-yellow-500/30 rounded-2xl p-6 hover:shadow-2xl hover:shadow-yellow-500/20 transition-all hover:scale-105 hover:border-yellow-400/50 cursor-pointer group">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="p-3 bg-yellow-500/20 rounded-xl group-hover:bg-yellow-500/30 transition-all">
+                    <Clock className="text-yellow-400" size={28} />
+                  </div>
+                  {stats.pendingRequests > 0 && (
+                    <div className="flex items-center gap-1 text-yellow-400 text-xs font-bold bg-yellow-500/20 px-2 py-1 rounded-full animate-pulse">
+                      <AlertCircle size={12} />
+                      Action
+                    </div>
+                  )}
+                </div>
+                <p className="text-4xl font-black text-white mb-2 tracking-tight">
+                  {stats.pendingRequests?.toLocaleString() || 0}
+                </p>
+                <p className="text-gray-400 text-sm font-semibold mb-1">Pending Requests</p>
+                <p className="text-gray-500 text-xs">Awaiting your response</p>
+              </div>
+
+              {/* Upcoming Events */}
+              <div className="bg-gradient-to-br from-purple-500/20 via-purple-500/10 to-transparent border border-purple-500/30 rounded-2xl p-6 hover:shadow-2xl hover:shadow-purple-500/20 transition-all hover:scale-105 hover:border-purple-400/50 cursor-pointer group">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="p-3 bg-purple-500/20 rounded-xl group-hover:bg-purple-500/30 transition-all">
+                    <Star className="text-purple-400" size={28} />
+                  </div>
+                  {stats.upcomingEvents > 0 && (
+                    <div className="flex items-center gap-1 text-purple-400 text-xs font-bold bg-purple-500/10 px-2 py-1 rounded-full">
+                      <CheckCircle size={12} />
+                      Confirmed
+                    </div>
+                  )}
+                </div>
+                <p className="text-4xl font-black text-white mb-2 tracking-tight">
+                  {stats.upcomingEvents?.toLocaleString() || 0}
+                </p>
+                <p className="text-gray-400 text-sm font-semibold mb-1">Upcoming Events</p>
+                <p className="text-gray-500 text-xs">Confirmed bookings ahead</p>
               </div>
 
               {/* Wishlist Count */}
-              <div className="bg-gradient-to-br from-pink-500/10 to-pink-600/5 border border-pink-500/20 rounded-xl p-6 hover:shadow-xl hover:shadow-pink-500/10 transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <Heart className="text-pink-400" size={28} />
-                  <div className="flex items-center gap-1 text-green-400 text-sm font-semibold">
-                    <ArrowUp size={14} />
-                    +{growthData.wishlist}%
+              <div className="bg-gradient-to-br from-pink-500/20 via-pink-500/10 to-transparent border border-pink-500/30 rounded-2xl p-6 hover:shadow-2xl hover:shadow-pink-500/20 transition-all hover:scale-105 hover:border-pink-400/50 cursor-pointer group">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="p-3 bg-pink-500/20 rounded-xl group-hover:bg-pink-500/30 transition-all">
+                    <Heart className="text-pink-400" size={28} />
+                  </div>
+                  <div className="flex items-center gap-1 text-pink-400 text-xs font-bold bg-pink-500/10 px-2 py-1 rounded-full">
+                    <Sparkles size={12} />
+                    Popular
                   </div>
                 </div>
-                <p className="text-4xl font-bold text-white mb-1">{stats.wishlistCount?.toLocaleString() || 0}</p>
-                <p className="text-gray-400 text-sm font-medium">Wishlist Count</p>
-              </div>
-
-              {/* Service Area */}
-              <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-xl p-6 hover:shadow-xl hover:shadow-purple-500/10 transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <MapPinned className="text-purple-400" size={28} />
-                  <Sparkles className="text-purple-400" size={20} />
-                </div>
-                <p className="text-2xl font-bold text-white mb-1">{artist.city || artist.primary_city}</p>
-                <p className="text-gray-400 text-sm font-medium">
-                  {artist.service_locations?.length > 0 
-                    ? `+${artist.service_locations.length} more cities` 
-                    : 'Primary Service Area'}
+                <p className="text-4xl font-black text-white mb-2 tracking-tight">
+                  {stats.wishlistCount?.toLocaleString() || 0}
                 </p>
+                <p className="text-gray-400 text-sm font-semibold mb-1">Wishlist Adds</p>
+                <p className="text-gray-500 text-xs">Users who saved you</p>
               </div>
             </div>
           )}
