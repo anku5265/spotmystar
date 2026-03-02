@@ -11,7 +11,7 @@ async function runAdminUpgrade() {
     console.log('🚀 Starting Admin Panel Upgrade...');
 
     // Read the SQL file
-    const sqlPath = path.join(__dirname, 'database', 'admin-panel-upgrade.sql');
+    const sqlPath = path.join(__dirname, 'database', 'admin-panel-upgrade-minimal.sql');
     const sql = fs.readFileSync(sqlPath, 'utf8');
 
     // Split by semicolons and filter out empty statements
