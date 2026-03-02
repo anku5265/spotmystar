@@ -9,7 +9,7 @@ import BookingSuccess from './pages/BookingSuccess';
 import Wishlist from './pages/Wishlist';
 import ArtistRegisterNew from './pages/ArtistRegisterNew';
 import ArtistLogin from './pages/ArtistLogin';
-import ArtistDashboard from './pages/ArtistDashboard';
+import ArtistDashboard from './pages/ArtistDashboardNew';
 import UserRegister from './pages/UserRegister';
 import UserLogin from './pages/UserLogin';
 import UserDashboard from './pages/UserDashboard';
