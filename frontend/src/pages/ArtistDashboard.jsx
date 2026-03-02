@@ -683,6 +683,56 @@ export default function ArtistDashboard() {
 
             {/* BOTTOM SECTIONS - Full Width Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+              {/* RECENT ENQUIRIES */}
+              <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/30 rounded-xl p-4 hover:shadow-lg hover:shadow-blue-500/10 transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <div className="p-2 bg-blue-500/20 rounded-lg">
+                      <MessageSquare className="text-blue-400" size={18} />
+                    </div>
+                    Recent Enquiries
+                  </h3>
+                  <span className="text-xs text-blue-400 font-semibold bg-blue-500/20 px-2 py-1 rounded-full">
+                    Last 24hrs
+                  </span>
+                </div>
+                
+                {recentEnquiries.length > 0 ? (
+                  <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
+                    {recentEnquiries.map((enquiry) => (
+                      <div key={enquiry.id} className="flex justify-between items-center p-3 bg-gray-900/60 border border-blue-500/20 rounded-lg hover:bg-gray-900 hover:border-blue-500/40 transition-all group">
+                        <div className="flex-1">
+                          <p className="text-white font-semibold text-sm mb-1 group-hover:text-blue-300 transition-colors">{enquiry.user_name}</p>
+                          <div className="flex items-center gap-2 text-xs text-gray-400">
+                            <Calendar size={12} className="text-blue-400" />
+                            <span>
+                              {new Date(enquiry.event_date).toLocaleDateString('en-IN', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric'
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                        <span className={`px-2.5 py-1 rounded-md text-xs font-bold border ${
+                          enquiry.status === 'accepted' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                          enquiry.status === 'rejected' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
+                          'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                        }`}>
+                          {enquiry.status === 'pending' ? '● NEW' : enquiry.status.toUpperCase()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 bg-gray-900/30 rounded-lg border border-dashed border-blue-500/30">
+                    <MessageSquare className="mx-auto text-blue-500/40 mb-2" size={32} />
+                    <p className="text-gray-400 text-sm font-medium">No recent enquiries</p>
+                    <p className="text-gray-500 text-xs mt-1">New enquiries will appear here</p>
+                  </div>
+                )}
+              </div>
+
               {/* UPCOMING EVENTS */}
               <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/30 rounded-xl p-4 hover:shadow-lg hover:shadow-purple-500/10 transition-all">
                 <div className="flex items-center justify-between mb-3">
@@ -731,56 +781,6 @@ export default function ArtistDashboard() {
                     <Clock className="mx-auto text-purple-500/40 mb-2" size={32} />
                     <p className="text-gray-400 text-sm font-medium">No upcoming events</p>
                     <p className="text-gray-500 text-xs mt-1">Your confirmed bookings will appear here</p>
-                  </div>
-                )}
-              </div>
-
-              {/* RECENT ENQUIRIES */}
-              <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/30 rounded-xl p-4 hover:shadow-lg hover:shadow-blue-500/10 transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <div className="p-2 bg-blue-500/20 rounded-lg">
-                      <MessageSquare className="text-blue-400" size={18} />
-                    </div>
-                    Recent Enquiries
-                  </h3>
-                  <span className="text-xs text-blue-400 font-semibold bg-blue-500/20 px-2 py-1 rounded-full">
-                    Last 24hrs
-                  </span>
-                </div>
-                
-                {recentEnquiries.length > 0 ? (
-                  <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
-                    {recentEnquiries.map((enquiry) => (
-                      <div key={enquiry.id} className="flex justify-between items-center p-3 bg-gray-900/60 border border-blue-500/20 rounded-lg hover:bg-gray-900 hover:border-blue-500/40 transition-all group">
-                        <div className="flex-1">
-                          <p className="text-white font-semibold text-sm mb-1 group-hover:text-blue-300 transition-colors">{enquiry.user_name}</p>
-                          <div className="flex items-center gap-2 text-xs text-gray-400">
-                            <Calendar size={12} className="text-blue-400" />
-                            <span>
-                              {new Date(enquiry.event_date).toLocaleDateString('en-IN', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric'
-                              })}
-                            </span>
-                          </div>
-                        </div>
-                        <span className={`px-2.5 py-1 rounded-md text-xs font-bold border ${
-                          enquiry.status === 'accepted' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
-                          enquiry.status === 'rejected' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
-                          'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-                        }`}>
-                          {enquiry.status === 'pending' ? '● NEW' : enquiry.status.toUpperCase()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12 bg-gray-900/30 rounded-lg border border-dashed border-blue-500/30">
-                    <MessageSquare className="mx-auto text-blue-500/40 mb-2" size={32} />
-                    <p className="text-gray-400 text-sm font-medium">No recent enquiries</p>
-                    <p className="text-gray-500 text-xs mt-1">New enquiries will appear here</p>
                   </div>
                 )}
               </div>
