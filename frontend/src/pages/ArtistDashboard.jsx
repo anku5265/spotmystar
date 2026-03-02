@@ -619,7 +619,7 @@ export default function ArtistDashboard() {
 
 
         {/* MAIN CONTENT GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* LEFT COLUMN - Calendar & Upcoming Events */}
           <div className="lg:col-span-1 space-y-6">
             {/* INTERACTIVE CALENDAR */}
@@ -798,7 +798,7 @@ export default function ArtistDashboard() {
 
 
           {/* RIGHT COLUMN - Pending Requests */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
               {/* Header with Search & Sort */}
               <div className="mb-6">
