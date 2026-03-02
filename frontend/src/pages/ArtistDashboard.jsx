@@ -343,7 +343,7 @@ export default function ArtistDashboard() {
     
     // Empty cells for days before month starts
     for (let i = 0; i < startingDayOfWeek; i++) {
-      days.push(<div key={`empty-${i}`} className="h-20 border border-gray-700/30"></div>);
+      days.push(<div key={`empty-${i}`} className="aspect-square border border-gray-700/30"></div>);
     }
     
     // Days of the month
@@ -359,20 +359,20 @@ export default function ArtistDashboard() {
         <div
           key={day}
           onClick={() => !isPast && handleDateClick(date)}
-          className={`h-20 border border-gray-700/30 p-1 cursor-pointer transition-all ${
+          className={`aspect-square border border-gray-700/30 p-1 cursor-pointer transition-all flex flex-col ${
             isPast ? 'bg-gray-800/30 cursor-not-allowed' :
             isBusy ? 'bg-red-500/20 hover:bg-red-500/30' :
             isToday ? 'bg-blue-500/20 hover:bg-blue-500/30 ring-2 ring-blue-500' :
             'bg-gray-800/50 hover:bg-gray-700/50'
           }`}
         >
-          <div className="text-sm font-semibold mb-1">{day}</div>
+          <div className="text-xs font-semibold mb-0.5">{day}</div>
           {events.length > 0 && (
-            <div className="space-y-0.5">
-              {events.slice(0, 2).map((event, idx) => (
+            <div className="space-y-0.5 flex-1 overflow-hidden">
+              {events.slice(0, 1).map((event, idx) => (
                 <div
                   key={idx}
-                  className={`text-xs px-1 py-0.5 rounded truncate ${
+                  className={`text-[10px] px-0.5 py-0.5 rounded truncate ${
                     event.status === 'confirmed' ? 'bg-green-500/30 text-green-300' :
                     event.status === 'tentative' ? 'bg-yellow-500/30 text-yellow-300' :
                     'bg-red-500/30 text-red-300'
@@ -382,8 +382,8 @@ export default function ArtistDashboard() {
                   {event.title}
                 </div>
               ))}
-              {events.length > 2 && (
-                <div className="text-xs text-gray-400">+{events.length - 2} more</div>
+              {events.length > 1 && (
+                <div className="text-[9px] text-gray-400">+{events.length - 1}</div>
               )}
             </div>
           )}
@@ -625,56 +625,56 @@ export default function ArtistDashboard() {
           {/* LEFT COLUMN - Calendar (40% width) */}
           <div className="lg:col-span-2">
             {/* INTERACTIVE CALENDAR */}
-            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 h-[600px] overflow-auto">
+            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 h-[600px] overflow-hidden flex flex-col">
               <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                 <Calendar className="text-secondary" size={22} />
                 My Calendar
               </h3>
               
-              <div className="bg-gray-900/50 rounded-lg p-4">
+              <div className="bg-gray-900/50 rounded-lg p-3 flex-1 flex flex-col">
                 {/* Month Navigation */}
-                <div className="flex justify-between items-center mb-4">
-                  <button onClick={prevMonth} className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
-                    <ChevronLeft size={20} />
+                <div className="flex justify-between items-center mb-3">
+                  <button onClick={prevMonth} className="p-1.5 hover:bg-gray-700 rounded-lg transition-colors">
+                    <ChevronLeft size={18} />
                   </button>
-                  <h4 className="text-lg font-semibold">
+                  <h4 className="text-base font-semibold">
                     {currentMonth.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
                   </h4>
-                  <button onClick={nextMonth} className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
-                    <ChevronRight size={20} />
+                  <button onClick={nextMonth} className="p-1.5 hover:bg-gray-700 rounded-lg transition-colors">
+                    <ChevronRight size={18} />
                   </button>
                 </div>
                 
                 {/* Day Headers */}
-                <div className="grid grid-cols-7 gap-1 mb-2">
+                <div className="grid grid-cols-7 gap-1 mb-1">
                   {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
-                    <div key={day} className="text-center text-xs font-semibold text-gray-400 py-2">
+                    <div key={day} className="text-center text-xs font-semibold text-gray-400 py-1">
                       {day}
                     </div>
                   ))}
                 </div>
                 
                 {/* Calendar Grid */}
-                <div className="grid grid-cols-7 gap-1">
+                <div className="grid grid-cols-7 gap-1 flex-1">
                   {renderCalendar()}
                 </div>
                 
                 {/* Legend */}
-                <div className="flex flex-wrap gap-3 mt-4 text-xs">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 bg-green-500 rounded"></div>
+                <div className="flex flex-wrap gap-2 mt-3 text-xs">
+                  <div className="flex items-center gap-1">
+                    <div className="w-2.5 h-2.5 bg-green-500 rounded"></div>
                     <span className="text-gray-400">Confirmed</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2.5 h-2.5 bg-yellow-500 rounded"></div>
                     <span className="text-gray-400">Tentative</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 bg-red-500 rounded"></div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2.5 h-2.5 bg-red-500 rounded"></div>
                     <span className="text-gray-400">Blocked</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 bg-blue-500 rounded ring-2 ring-blue-500"></div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2.5 h-2.5 bg-blue-500 rounded ring-2 ring-blue-500"></div>
                     <span className="text-gray-400">Today</span>
                   </div>
                 </div>
@@ -682,17 +682,17 @@ export default function ArtistDashboard() {
             </div>
 
             {/* UPCOMING EVENTS (Next 7 days) */}
-            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <Clock className="text-purple-400" size={22} />
+            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 mt-4">
+              <h3 className="text-base font-bold text-white mb-3 flex items-center gap-2">
+                <Clock className="text-purple-400" size={20} />
                 Upcoming (Next 7 days)
               </h3>
               
               {upcomingEvents.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2 max-h-[180px] overflow-y-auto">
                   {upcomingEvents.slice(0, 5).map((event) => (
-                    <div key={event.id} className="bg-gray-900/50 rounded-lg p-3 hover:bg-gray-900 transition-all">
-                      <div className="flex justify-between items-start mb-2">
+                    <div key={event.id} className="bg-gray-900/50 rounded-lg p-2.5 hover:bg-gray-900 transition-all">
+                      <div className="flex justify-between items-start mb-1.5">
                         <p className="text-white font-medium text-sm">{event.user_name}</p>
                         <span className="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs font-semibold">
                           Confirmed
@@ -715,14 +715,14 @@ export default function ArtistDashboard() {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-400 text-center py-8 text-sm">No upcoming events</p>
+                <p className="text-gray-400 text-center py-6 text-sm">No upcoming events</p>
               )}
             </div>
 
             {/* RECENT ENQUIRIES (Last 24hrs) */}
-            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <MessageSquare className="text-blue-400" size={22} />
+            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 mt-4">
+              <h3 className="text-base font-bold text-white mb-3 flex items-center gap-2">
+                <MessageSquare className="text-blue-400" size={20} />
                 Recent Enquiries
                 <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">
                   Last 24hrs
@@ -753,34 +753,34 @@ export default function ArtistDashboard() {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-400 text-center py-8 text-sm">No recent enquiries</p>
+                <p className="text-gray-400 text-center py-6 text-sm">No recent enquiries</p>
               )}
             </div>
 
             {/* PROFILE ANALYTICS */}
-            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <BarChart3 className="text-secondary" size={22} />
+            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 mt-4">
+              <h3 className="text-base font-bold text-white mb-3 flex items-center gap-2">
+                <BarChart3 className="text-secondary" size={20} />
                 Profile Analytics
               </h3>
               
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {/* Completion */}
                 <div>
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-gray-400">Completion</span>
                     <span className="text-white font-semibold">{profileCompletion}%</span>
                   </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2.5">
+                  <div className="w-full bg-gray-700 rounded-full h-2">
                     <div
-                      className="bg-gradient-to-r from-blue-500 to-secondary h-2.5 rounded-full transition-all"
+                      className="bg-gradient-to-r from-blue-500 to-secondary h-2 rounded-full transition-all"
                       style={{ width: `${profileCompletion}%` }}
                     ></div>
                   </div>
                 </div>
                 
                 {/* Checklist */}
-                <div className="space-y-2 text-sm">
+                <div className="space-y-1.5 text-sm">
                   <div className="flex items-center gap-2">
                     {artist.profile_image ? <CheckCircle size={16} className="text-green-400" /> : <AlertCircle size={16} className="text-yellow-400" />}
                     <span className={artist.profile_image ? 'text-gray-400' : 'text-yellow-400'}>Photos</span>
@@ -801,10 +801,10 @@ export default function ArtistDashboard() {
 
           {/* RIGHT COLUMN - Pending Requests (60% width) */}
           <div className="lg:col-span-3">
-            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 h-[600px] overflow-auto">
+            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 h-[600px] flex flex-col overflow-hidden">
               {/* Header with Search & Sort */}
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-4">
+              <div className="mb-4 flex-shrink-0">
+                <div className="flex items-center justify-between mb-3">
                   <h3 className="text-xl font-bold text-white flex items-center gap-2">
                     <Clock className="text-yellow-400" size={24} />
                     Pending Booking Requests
@@ -850,140 +850,142 @@ export default function ArtistDashboard() {
               </div>
 
               {/* Requests List */}
-              {filteredRequests.length > 0 ? (
-                <div className="space-y-4 max-h-[800px] overflow-y-auto pr-2">
-                  {filteredRequests.map((request) => (
-                    <div
-                      key={request.id}
-                      className="bg-gradient-to-br from-gray-900/80 to-gray-900/50 border border-gray-700 rounded-xl p-5 hover:border-secondary/50 transition-all"
-                    >
-                      {/* Request Header */}
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="text-lg font-bold text-white">{request.user_name}</h4>
-                            {!request.is_read && (
-                              <span className="px-2 py-0.5 bg-yellow-500 text-black rounded text-xs font-bold">
-                                NEW
+              <div className="flex-1 overflow-y-auto pr-2">
+                {filteredRequests.length > 0 ? (
+                  <div className="space-y-4">
+                    {filteredRequests.map((request) => (
+                      <div
+                        key={request.id}
+                        className="bg-gradient-to-br from-gray-900/80 to-gray-900/50 border border-gray-700 rounded-xl p-5 hover:border-secondary/50 transition-all"
+                      >
+                        {/* Request Header */}
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="text-lg font-bold text-white">{request.user_name}</h4>
+                              {!request.is_read && (
+                                <span className="px-2 py-0.5 bg-yellow-500 text-black rounded text-xs font-bold">
+                                  NEW
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap gap-3 text-sm text-gray-400">
+                              <span className="flex items-center gap-1">
+                                <Mail size={14} />
+                                {request.email}
                               </span>
-                            )}
+                              <span className="flex items-center gap-1">
+                                <Phone size={14} />
+                                {request.phone}
+                              </span>
+                            </div>
                           </div>
-                          <div className="flex flex-wrap gap-3 text-sm text-gray-400">
-                            <span className="flex items-center gap-1">
-                              <Mail size={14} />
-                              {request.email}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Phone size={14} />
-                              {request.phone}
-                            </span>
-                          </div>
+                          <span className="px-3 py-1.5 bg-yellow-500/20 text-yellow-400 rounded-lg text-xs font-bold">
+                            PENDING
+                          </span>
                         </div>
-                        <span className="px-3 py-1.5 bg-yellow-500/20 text-yellow-400 rounded-lg text-xs font-bold">
-                          PENDING
-                        </span>
-                      </div>
 
-                      {/* Event Details Grid */}
-                      <div className="grid grid-cols-2 gap-4 mb-4 p-4 bg-gray-800/50 rounded-lg">
-                        <div>
-                          <p className="text-gray-400 text-xs mb-1">Event Date & Time</p>
-                          <p className="text-white font-semibold flex items-center gap-1.5">
-                            <Calendar size={16} className="text-blue-400" />
-                            {new Date(request.event_date).toLocaleDateString('en-IN', {
+                        {/* Event Details Grid */}
+                        <div className="grid grid-cols-2 gap-4 mb-4 p-4 bg-gray-800/50 rounded-lg">
+                          <div>
+                            <p className="text-gray-400 text-xs mb-1">Event Date & Time</p>
+                            <p className="text-white font-semibold flex items-center gap-1.5">
+                              <Calendar size={16} className="text-blue-400" />
+                              {new Date(request.event_date).toLocaleDateString('en-IN', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric'
+                              })}
+                            </p>
+                          </div>
+                          
+                          <div>
+                            <p className="text-gray-400 text-xs mb-1">Location</p>
+                            <p className="text-white font-semibold flex items-center gap-1.5">
+                              <MapPin size={16} className="text-green-400" />
+                              {request.event_location}
+                            </p>
+                          </div>
+                          
+                          {request.event_type && (
+                            <div>
+                              <p className="text-gray-400 text-xs mb-1">Event Type</p>
+                              <p className="text-white font-semibold flex items-center gap-1.5">
+                                <Users size={16} className="text-purple-400" />
+                                {request.event_type}
+                              </p>
+                            </div>
+                          )}
+                          
+                          {request.budget && (
+                            <div>
+                              <p className="text-gray-400 text-xs mb-1">Budget</p>
+                              <p className="text-white font-semibold flex items-center gap-1.5">
+                                <IndianRupee size={16} className="text-green-400" />
+                                ₹{request.budget.toLocaleString()}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Message */}
+                        {request.message && (
+                          <div className="mb-4 p-4 bg-gray-800/30 rounded-lg border-l-4 border-secondary">
+                            <p className="text-gray-400 text-xs mb-1.5 font-semibold">Message from client:</p>
+                            <p className="text-gray-300 text-sm leading-relaxed">{request.message}</p>
+                          </div>
+                        )}
+
+                        {/* Timestamp */}
+                        <div className="flex items-center justify-between mb-4 text-xs text-gray-500">
+                          <span>
+                            Enquiry #{request.id} • Received {new Date(request.created_at).toLocaleString('en-IN', {
                               day: 'numeric',
-                              month: 'long',
-                              year: 'numeric'
+                              month: 'short',
+                              hour: '2-digit',
+                              minute: '2-digit'
                             })}
-                          </p>
+                          </span>
                         </div>
-                        
-                        <div>
-                          <p className="text-gray-400 text-xs mb-1">Location</p>
-                          <p className="text-white font-semibold flex items-center gap-1.5">
-                            <MapPin size={16} className="text-green-400" />
-                            {request.event_location}
-                          </p>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => handleBookingAction(request.id, 'accepted')}
+                            className="flex-1 px-5 py-3 bg-green-500 hover:bg-green-600 rounded-lg transition-all flex items-center justify-center gap-2 font-semibold text-white shadow-lg hover:shadow-green-500/50"
+                          >
+                            <CheckCircle size={18} />
+                            ACCEPT
+                          </button>
+                          <button
+                            onClick={() => handleBookingAction(request.id, 'rejected')}
+                            className="flex-1 px-5 py-3 bg-red-500 hover:bg-red-600 rounded-lg transition-all flex items-center justify-center gap-2 font-semibold text-white shadow-lg hover:shadow-red-500/50"
+                          >
+                            <XCircle size={18} />
+                            REJECT
+                          </button>
+                          <button
+                            onClick={() => setSelectedRequest(request)}
+                            className="px-5 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-all flex items-center justify-center gap-2 font-semibold text-white"
+                          >
+                            VIEW DETAILS
+                          </button>
                         </div>
-                        
-                        {request.event_type && (
-                          <div>
-                            <p className="text-gray-400 text-xs mb-1">Event Type</p>
-                            <p className="text-white font-semibold flex items-center gap-1.5">
-                              <Users size={16} className="text-purple-400" />
-                              {request.event_type}
-                            </p>
-                          </div>
-                        )}
-                        
-                        {request.budget && (
-                          <div>
-                            <p className="text-gray-400 text-xs mb-1">Budget</p>
-                            <p className="text-white font-semibold flex items-center gap-1.5">
-                              <IndianRupee size={16} className="text-green-400" />
-                              ₹{request.budget.toLocaleString()}
-                            </p>
-                          </div>
-                        )}
                       </div>
-
-                      {/* Message */}
-                      {request.message && (
-                        <div className="mb-4 p-4 bg-gray-800/30 rounded-lg border-l-4 border-secondary">
-                          <p className="text-gray-400 text-xs mb-1.5 font-semibold">Message from client:</p>
-                          <p className="text-gray-300 text-sm leading-relaxed">{request.message}</p>
-                        </div>
-                      )}
-
-                      {/* Timestamp */}
-                      <div className="flex items-center justify-between mb-4 text-xs text-gray-500">
-                        <span>
-                          Enquiry #{request.id} • Received {new Date(request.created_at).toLocaleString('en-IN', {
-                            day: 'numeric',
-                            month: 'short',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </span>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => handleBookingAction(request.id, 'accepted')}
-                          className="flex-1 px-5 py-3 bg-green-500 hover:bg-green-600 rounded-lg transition-all flex items-center justify-center gap-2 font-semibold text-white shadow-lg hover:shadow-green-500/50"
-                        >
-                          <CheckCircle size={18} />
-                          ACCEPT
-                        </button>
-                        <button
-                          onClick={() => handleBookingAction(request.id, 'rejected')}
-                          className="flex-1 px-5 py-3 bg-red-500 hover:bg-red-600 rounded-lg transition-all flex items-center justify-center gap-2 font-semibold text-white shadow-lg hover:shadow-red-500/50"
-                        >
-                          <XCircle size={18} />
-                          REJECT
-                        </button>
-                        <button
-                          onClick={() => setSelectedRequest(request)}
-                          className="px-5 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-all flex items-center justify-center gap-2 font-semibold text-white"
-                        >
-                          VIEW DETAILS
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-16">
-                  <Clock className="mx-auto text-gray-600 mb-4" size={64} />
-                  <p className="text-gray-400 text-lg font-medium">
-                    {requestSearch ? 'No requests match your search' : 'No pending requests'}
-                  </p>
-                  <p className="text-gray-500 text-sm mt-2">
-                    {requestSearch ? 'Try a different search term' : 'New booking requests will appear here'}
-                  </p>
-                </div>
-              )}
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-16">
+                    <Clock className="mx-auto text-gray-600 mb-4" size={64} />
+                    <p className="text-gray-400 text-lg font-medium">
+                      {requestSearch ? 'No requests match your search' : 'No pending requests'}
+                    </p>
+                    <p className="text-gray-500 text-sm mt-2">
+                      {requestSearch ? 'Try a different search term' : 'New booking requests will appear here'}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
