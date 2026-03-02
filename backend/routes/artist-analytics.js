@@ -30,14 +30,20 @@ router.get('/stats/:artistId', verifyToken, requireArtist, async (req, res) => {
       dateCondition = `AND created_at >= '${monthAgo.toISOString()}'`;
     }
     
-    // Get profile visits (views) - total views
+    // Get total profile visits (views) - always show total
     const viewsResult = await pool.query(
       `SELECT views FROM artists WHERE id = $1`,
       [artistId]
     );
     
-    // Get bookings count for the filter period
-    const bookingsResult = await pool.query(
+    // Get total bookings (all time)
+    const totalBookingsResult = await pool.query(
+      `SELECT COUNT(*) as total FROM bookings WHERE artist_id = $1`,
+      [artistId]
+    );
+    
+    // Get bookings count for the filter period (for growth calculation)
+    const filteredBookingsResult = await pool.query(
       `SELECT COUNT(*) as total FROM bookings WHERE artist_id = $1 ${dateCondition}`,
       [artistId]
     );
@@ -63,7 +69,8 @@ router.get('/stats/:artistId', verifyToken, requireArtist, async (req, res) => {
     
     res.json({
       views: viewsResult.rows[0]?.views || 0,
-      bookings: parseInt(bookingsResult.rows[0]?.total || 0),
+      bookings: parseInt(totalBookingsResult.rows[0]?.total || 0),
+      filteredBookings: parseInt(filteredBookingsResult.rows[0]?.total || 0),
       pendingRequests: parseInt(pendingResult.rows[0]?.total || 0),
       wishlistCount: parseInt(wishlistResult.rows[0]?.total || 0),
       upcomingEvents: parseInt(upcomingResult.rows[0]?.total || 0),
