@@ -457,7 +457,7 @@ export default function ArtistDashboardPro() {
       {/* TOP HEADER - Sticky */}
       <div className="bg-gray-800/80 backdrop-blur-xl border-b border-gray-700/50 sticky top-0 z-40 shadow-xl">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 overflow-visible">
             {/* Left: Artist Info & Availability */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
@@ -496,7 +496,7 @@ export default function ArtistDashboardPro() {
             </div>
 
             {/* Right: Quick Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 overflow-visible">
               <button
                 onClick={() => setShowPriceModal(true)}
                 className="px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-all flex items-center gap-2 text-sm font-medium"
@@ -518,7 +518,7 @@ export default function ArtistDashboardPro() {
                 <Calendar size={16} />
                 Mark Busy
               </button>
-              <div className="relative">
+              <div className="relative z-[100]">
                 <NotificationBell userType="artist" userId={artist.id} />
               </div>
               <button
