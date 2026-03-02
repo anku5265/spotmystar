@@ -30,31 +30,31 @@ router.get('/stats/:artistId', verifyToken, requireArtist, async (req, res) => {
       dateCondition = `AND created_at >= '${monthAgo.toISOString()}'`;
     }
     
-    // Get profile visits (views)
+    // Get profile visits (views) - total views
     const viewsResult = await pool.query(
       `SELECT views FROM artists WHERE id = $1`,
       [artistId]
     );
     
-    // Get bookings count
+    // Get bookings count for the filter period
     const bookingsResult = await pool.query(
       `SELECT COUNT(*) as total FROM bookings WHERE artist_id = $1 ${dateCondition}`,
       [artistId]
     );
     
-    // Get pending requests count
+    // Get pending requests count (always current, not filtered)
     const pendingResult = await pool.query(
       `SELECT COUNT(*) as total FROM bookings WHERE artist_id = $1 AND status = 'pending'`,
       [artistId]
     );
     
-    // Get wishlist count
+    // Get wishlist count (always current, not filtered)
     const wishlistResult = await pool.query(
-      `SELECT COUNT(*) as total FROM wishlists WHERE artist_id = $1`,
+      `SELECT COUNT(*) as total FROM wishlist WHERE artist_id = $1`,
       [artistId]
     );
     
-    // Get upcoming events (accepted bookings)
+    // Get upcoming events (accepted bookings in future)
     const upcomingResult = await pool.query(
       `SELECT COUNT(*) as total FROM bookings 
        WHERE artist_id = $1 AND status = 'accepted' AND event_date >= NOW()`,

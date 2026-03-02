@@ -56,8 +56,8 @@ export default function SuspensionModal({ user, userType, onClose, onSubmit }) {
               required
             >
               <option value="suspended">Suspend (Time-bound)</option>
-              <option value="terminated">Terminate (Permanent Ban)</option>
-              <option value="active">Reactivate</option>
+              <option value="terminated">Terminate (Permanent)</option>
+              <option value="active">Reactivate Account</option>
             </select>
           </div>
 

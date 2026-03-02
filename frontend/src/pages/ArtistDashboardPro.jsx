@@ -13,7 +13,7 @@ import Toast from '../components/Toast';
 import NotificationBell from '../components/NotificationBell';
 import { useAuth } from '../hooks/useAuth';
 
-export default function ArtistDashboard() {
+export default function ArtistDashboardPro() {
   const navigate = useNavigate();
   const { isAuthenticated, userRole, user: authUser, isLoading, logout } = useAuth('artist');
   
