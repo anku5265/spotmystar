@@ -4,9 +4,11 @@ import { Eye, Calendar, CheckCircle, XCircle, Clock, Music, Camera, Edit } from 
 import api from '../config/api';
 import Toast from '../components/Toast';
 import NotificationBell from '../components/NotificationBell';
+import { useAuth } from '../hooks/useAuth';
 
 export default function ArtistDashboard() {
   const navigate = useNavigate();
+  const { isAuthenticated, userRole, user: authUser, isLoading, logout } = useAuth('artist');
   const [artist, setArtist] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,18 +18,18 @@ export default function ArtistDashboard() {
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('artistToken');
-    const artistData = localStorage.getItem('artistData');
+    // Wait for auth validation
+    if (isLoading) return;
     
-    if (!token || !artistData) {
-      navigate('/artist/login');
-      return;
+    // If not authenticated or wrong role, useAuth hook will redirect
+    if (!isAuthenticated || userRole !== 'artist') return;
+    
+    // Fetch artist data
+    if (authUser && authUser.id) {
+      const token = localStorage.getItem('artistToken');
+      fetchArtistData(token, authUser.id);
     }
-
-    const parsedArtist = JSON.parse(artistData);
-    
-    // Fetch fresh artist data from database
-    fetchArtistData(token, parsedArtist.id);
+  }, [isLoading, isAuthenticated, userRole, authUser]);
     
     // Check account status
     checkAccountStatus(parsedArtist.id);
@@ -205,13 +207,20 @@ export default function ArtistDashboard() {
     }
   };
 
-  if (loading) {
+  if (isLoading || loading) {
     return (
-      <div className="container mx-auto px-4 py-20 text-center">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-        <p className="text-gray-400">Loading your dashboard...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-secondary mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading dashboard...</p>
+        </div>
       </div>
     );
+  }
+
+  // Don't render if not authenticated
+  if (!isAuthenticated || userRole !== 'artist') {
+    return null;
   }
 
   if (!artist) {
@@ -219,7 +228,7 @@ export default function ArtistDashboard() {
       <div className="container mx-auto px-4 py-20 text-center">
         <p className="text-gray-400">Unable to load artist data. Please try logging in again.</p>
         <button 
-          onClick={() => navigate('/artist/login')}
+          onClick={() => logout()}
           className="btn-primary mt-4"
         >
           Back to Login

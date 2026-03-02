@@ -5,9 +5,11 @@ import api from '../config/api';
 import NotificationBell from '../components/NotificationBell';
 import EditProfileModal from '../components/EditProfileModal';
 import Toast from '../components/Toast';
+import { useAuth } from '../hooks/useAuth';
 
 export default function UserDashboard() {
   const navigate = useNavigate();
+  const { isAuthenticated, userRole, user: authUser, isLoading, logout } = useAuth('user');
   const [user, setUser] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,19 +17,24 @@ export default function UserDashboard() {
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
-    const userInfo = localStorage.getItem('userInfo');
-    const token = localStorage.getItem('userToken');
-
-    if (!userInfo || !token) {
-      navigate('/user/login');
-      return;
-    }
-
-    const parsedUser = JSON.parse(userInfo);
-    setUser(parsedUser);
+    // Wait for auth validation
+    if (isLoading) return;
     
-    // Check account status
-    checkAccountStatus(parsedUser.id);
+    // If not authenticated or wrong role, useAuth hook will redirect
+    if (!isAuthenticated || userRole !== 'user') return;
+    
+    // Set user from auth hook
+    if (authUser) {
+      setUser(authUser);
+      checkAccountStatus(authUser.id);
+    }
+  }, [isLoading, isAuthenticated, userRole, authUser]);
+
+  useEffect(() => {
+    if (user) {
+      fetchBookings();
+    }
+  }, [user]);
     
     fetchBookings(token);
     
@@ -68,9 +75,7 @@ export default function UserDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('userToken');
-    localStorage.removeItem('userInfo');
-    navigate('/');
+    logout(); // Use logout from useAuth hook
   };
 
   const handleProfileUpdate = async (formData) => {
@@ -109,8 +114,20 @@ export default function UserDashboard() {
     }
   };
 
-  if (loading) {
-    return <div className="container mx-auto px-4 py-20 text-center">Loading...</div>;
+  if (isLoading || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated
+  if (!isAuthenticated || userRole !== 'user') {
+    return null;
   }
 
   return (
