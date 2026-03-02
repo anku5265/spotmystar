@@ -561,62 +561,60 @@ export default function ArtistDashboard() {
           </div>
 
           {/* Stats Cards */}
-          {stats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Total Visits */}
-              <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl p-6 hover:shadow-xl hover:shadow-blue-500/10 transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <Eye className="text-blue-400" size={28} />
-                  <div className="flex items-center gap-1 text-green-400 text-sm font-semibold">
-                    <ArrowUp size={14} />
-                    +{growthData.visits}%
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Total Visits */}
+            <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl p-6 hover:shadow-xl hover:shadow-blue-500/10 transition-all">
+              <div className="flex items-center justify-between mb-3">
+                <Eye className="text-blue-400" size={28} />
+                <div className="flex items-center gap-1 text-green-400 text-sm font-semibold">
+                  <ArrowUp size={14} />
+                  +{growthData.visits}%
                 </div>
-                <p className="text-4xl font-bold text-white mb-1">{stats.views?.toLocaleString() || 0}</p>
-                <p className="text-gray-400 text-sm font-medium">Total Visits</p>
               </div>
-
-              {/* Total Bookings */}
-              <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-xl p-6 hover:shadow-xl hover:shadow-green-500/10 transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <Calendar className="text-green-400" size={28} />
-                  <div className="flex items-center gap-1 text-green-400 text-sm font-semibold">
-                    <ArrowUp size={14} />
-                    +{growthData.bookings}%
-                  </div>
-                </div>
-                <p className="text-4xl font-bold text-white mb-1">{stats.bookings?.toLocaleString() || 0}</p>
-                <p className="text-gray-400 text-sm font-medium">Total Bookings</p>
-              </div>
-
-              {/* Wishlist Count */}
-              <div className="bg-gradient-to-br from-pink-500/10 to-pink-600/5 border border-pink-500/20 rounded-xl p-6 hover:shadow-xl hover:shadow-pink-500/10 transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <Heart className="text-pink-400" size={28} />
-                  <div className="flex items-center gap-1 text-green-400 text-sm font-semibold">
-                    <ArrowUp size={14} />
-                    +{growthData.wishlist}%
-                  </div>
-                </div>
-                <p className="text-4xl font-bold text-white mb-1">{stats.wishlistCount?.toLocaleString() || 0}</p>
-                <p className="text-gray-400 text-sm font-medium">Wishlist Count</p>
-              </div>
-
-              {/* Service Area */}
-              <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-xl p-6 hover:shadow-xl hover:shadow-purple-500/10 transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <MapPinned className="text-purple-400" size={28} />
-                  <Sparkles className="text-purple-400" size={20} />
-                </div>
-                <p className="text-2xl font-bold text-white mb-1">{artist.city || artist.primary_city}</p>
-                <p className="text-gray-400 text-sm font-medium">
-                  {artist.service_locations?.length > 0 
-                    ? `+${artist.service_locations.length} more cities` 
-                    : 'Primary Service Area'}
-                </p>
-              </div>
+              <p className="text-4xl font-bold text-white mb-1">{stats?.views?.toLocaleString() || 0}</p>
+              <p className="text-gray-400 text-sm font-medium">Total Visits</p>
             </div>
-          )}
+
+            {/* Total Bookings */}
+            <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-xl p-6 hover:shadow-xl hover:shadow-green-500/10 transition-all">
+              <div className="flex items-center justify-between mb-3">
+                <Calendar className="text-green-400" size={28} />
+                <div className="flex items-center gap-1 text-green-400 text-sm font-semibold">
+                  <ArrowUp size={14} />
+                  +{growthData.bookings}%
+                </div>
+              </div>
+              <p className="text-4xl font-bold text-white mb-1">{stats?.bookings?.toLocaleString() || 0}</p>
+              <p className="text-gray-400 text-sm font-medium">Total Bookings</p>
+            </div>
+
+            {/* Wishlist Count */}
+            <div className="bg-gradient-to-br from-pink-500/10 to-pink-600/5 border border-pink-500/20 rounded-xl p-6 hover:shadow-xl hover:shadow-pink-500/10 transition-all">
+              <div className="flex items-center justify-between mb-3">
+                <Heart className="text-pink-400" size={28} />
+                <div className="flex items-center gap-1 text-green-400 text-sm font-semibold">
+                  <ArrowUp size={14} />
+                  +{growthData.wishlist}%
+                </div>
+              </div>
+              <p className="text-4xl font-bold text-white mb-1">{stats?.wishlistCount?.toLocaleString() || 0}</p>
+              <p className="text-gray-400 text-sm font-medium">Wishlist Count</p>
+            </div>
+
+            {/* Service Area */}
+            <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-xl p-6 hover:shadow-xl hover:shadow-purple-500/10 transition-all">
+              <div className="flex items-center justify-between mb-3">
+                <MapPinned className="text-purple-400" size={28} />
+                <Sparkles className="text-purple-400" size={20} />
+              </div>
+              <p className="text-2xl font-bold text-white mb-1">{artist?.city || artist?.primary_city || 'N/A'}</p>
+              <p className="text-gray-400 text-sm font-medium">
+                {artist?.service_locations?.length > 0 
+                  ? `+${artist.service_locations.length} more cities` 
+                  : 'Primary Service Area'}
+              </p>
+            </div>
+          </div>
         </div>
 
 
