@@ -9,7 +9,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-12">
         {/* Logo Section */}
         <div className="flex items-center gap-3 mb-8">
-          <img src="/logo.svg" alt="SpotMyStar" className="w-12 h-12" />
+          <img src="/star-logo.svg" alt="SpotMyStar" className="w-12 h-12" />
           <div>
             <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               SpotMyStar

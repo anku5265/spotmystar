@@ -65,7 +65,7 @@ export default function Navbar() {
             to="/" 
             className="flex items-center gap-2 hover:opacity-80 transition"
           >
-            <img src="/logo.svg" alt="SpotMyStar" className="w-8 h-8" />
+            <img src="/star-logo.svg" alt="SpotMyStar" className="w-8 h-8" />
             <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               SpotMyStar
             </span>

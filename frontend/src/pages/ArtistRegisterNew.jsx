@@ -756,7 +756,7 @@ export default function ArtistRegisterNew() {
       
       <div className="card">
         <div className="flex items-center gap-3 mb-6">
-          <img src="/logo.svg" alt="SpotMyStar" className="w-12 h-12" />
+          <img src="/star-logo.svg" alt="SpotMyStar" className="w-12 h-12" />
           <div>
             <h1 className="text-3xl font-bold">Join as Artist/Creator</h1>
             <p className="text-gray-400">Complete your profile to start receiving bookings</p>
