@@ -258,7 +258,7 @@ export default function AdvancedDashboard() {
             <img src="/logo.svg" alt="SpotMyStar" className="w-10 h-10" />
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                SpotMyStar Advanced Admin
+                SpotMyStar Admin
               </h1>
               <p className="text-gray-400 text-sm mt-1">Complete platform management & control</p>
             </div>
