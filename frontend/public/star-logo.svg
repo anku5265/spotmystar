@@ -1,4 +1,8 @@
 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M20 2L25.8778 14.1222L39 20L25.8778 25.8778L20 38L14.1222 25.8778L1 20L14.1222 14.1222L20 2Z" stroke="white" stroke-width="2" fill="none"/>
-  <path d="M20 8L23.5147 16.4853L32 20L23.5147 23.5147L20 32L16.4853 23.5147L8 20L16.4853 16.4853L20 8Z" stroke="white" stroke-width="1.5" fill="none"/>
+  <!-- Perfect pentagram star matching your image -->
+  <!-- Outer 5-pointed star -->
+  <path d="M20 2L24.7023 15.2977L37 20L24.7023 24.7023L20 38L15.2977 24.7023L3 20L15.2977 15.2977L20 2Z" stroke="white" stroke-width="2" fill="none"/>
+  
+  <!-- Inner pentagram lines creating the star pattern -->
+  <path d="M20 2L15.2977 24.7023L37 20L3 20L24.7023 24.7023L20 2" stroke="white" stroke-width="1.5" fill="none"/>
 </svg>
