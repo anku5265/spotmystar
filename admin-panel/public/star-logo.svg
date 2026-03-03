@@ -1,9 +1,6 @@
 <svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
-  <rect width="300" height="300" fill="#3c3c5c"/>
-  <!-- Main star outline -->
-  <path d="M150 50 L175 110 L240 110 L190 150 L210 220 L150 185 L90 220 L110 150 L60 110 L125 110 Z" 
-        stroke="white" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-  <!-- Inner connecting lines for geometric effect -->
-  <path d="M150 50 L190 150 M240 110 L150 185 M210 220 L110 150 M90 220 L175 110 M60 110 L150 185 M125 110 L190 150" 
-        stroke="white" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<!-- Main star outline matching exact origami style -->
+<path d="M150 30 L162 75 L220 75 L185 105 L200 155 L150 135 L100 155 L115 105 L80 75 L138 75 Z" stroke="white" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
+<!-- Inner diamond folds -->
+<path d="M150 55 L150 80 M150 220 L150 195 M105 150 L130 150 M195 150 L170 150 M115 115 L145 145 M155 155 L185 125 M115 185 L145 155 M155 145 L185 115" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-opacity="0.7"/>
 </svg>
