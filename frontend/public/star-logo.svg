@@ -1,8 +1,17 @@
 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Perfect pentagram star matching your image -->
-  <!-- Outer 5-pointed star -->
-  <path d="M20 2L24.7023 15.2977L37 20L24.7023 24.7023L20 38L15.2977 24.7023L3 20L15.2977 15.2977L20 2Z" stroke="white" stroke-width="2" fill="none"/>
+  <!-- Exact pentagram star as shown in reference image -->
+  <!-- 5 outer points of the star -->
+  <path d="M20 2L12.36 14.64L2 20L12.36 25.36L20 38L27.64 25.36L38 20L27.64 14.64L20 2Z" stroke="white" stroke-width="2" fill="none"/>
   
-  <!-- Inner pentagram lines creating the star pattern -->
-  <path d="M20 2L15.2977 24.7023L37 20L3 20L24.7023 24.7023L20 2" stroke="white" stroke-width="1.5" fill="none"/>
+  <!-- All internal pentagram connecting lines -->
+  <path d="M20 2L12.36 25.36" stroke="white" stroke-width="1.5"/>
+  <path d="M20 2L27.64 25.36" stroke="white" stroke-width="1.5"/>
+  <path d="M12.36 14.64L38 20" stroke="white" stroke-width="1.5"/>
+  <path d="M12.36 14.64L27.64 25.36" stroke="white" stroke-width="1.5"/>
+  <path d="M2 20L27.64 14.64" stroke="white" stroke-width="1.5"/>
+  <path d="M2 20L20 38" stroke="white" stroke-width="1.5"/>
+  <path d="M12.36 25.36L38 20" stroke="white" stroke-width="1.5"/>
+  <path d="M12.36 25.36L27.64 14.64" stroke="white" stroke-width="1.5"/>
+  <path d="M20 38L27.64 14.64" stroke="white" stroke-width="1.5"/>
+  <path d="M20 38L12.36 14.64" stroke="white" stroke-width="1.5"/>
 </svg>
