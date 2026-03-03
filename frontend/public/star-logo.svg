@@ -1,6 +1,12 @@
-<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
-<!-- Main star outline matching exact origami style -->
-<path d="M150 30 L162 75 L220 75 L185 105 L200 155 L150 135 L100 155 L115 105 L80 75 L138 75 Z" stroke="white" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
-<!-- Inner diamond folds -->
-<path d="M150 55 L150 80 M150 220 L150 195 M105 150 L130 150 M195 150 L170 150 M115 115 L145 145 M155 155 L185 125 M115 185 L145 155 M155 145 L185 115" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-opacity="0.7"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <polygon points="100,20 120,80 180,80 135,115 155,175 100,140 45,175 65,115 20,80 80,80" 
+           fill="url(#starGradient)" 
+           stroke="#FF8C00" 
+           stroke-width="2"/>
 </svg>
