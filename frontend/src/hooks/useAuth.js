@@ -24,17 +24,32 @@ export const useAuth = (requiredRole = null) => {
       
       let currentRole = null;
       let currentUser = null;
+      let hasValidToken = false;
       
       if (userToken && userInfo) {
-        currentRole = 'user';
-        currentUser = JSON.parse(userInfo);
+        try {
+          currentRole = 'user';
+          currentUser = JSON.parse(userInfo);
+          hasValidToken = true;
+        } catch (e) {
+          // Invalid JSON, clear storage
+          localStorage.removeItem('userToken');
+          localStorage.removeItem('userInfo');
+        }
       } else if (artistToken && artistData) {
-        currentRole = 'artist';
-        currentUser = JSON.parse(artistData);
+        try {
+          currentRole = 'artist';
+          currentUser = JSON.parse(artistData);
+          hasValidToken = true;
+        } catch (e) {
+          // Invalid JSON, clear storage
+          localStorage.removeItem('artistToken');
+          localStorage.removeItem('artistData');
+        }
       }
       
-      // If no role found and role is required
-      if (!currentRole && requiredRole) {
+      // If no valid authentication found and role is required
+      if (!hasValidToken && requiredRole) {
         setIsAuthenticated(false);
         setUserRole(null);
         setUser(null);
@@ -43,29 +58,58 @@ export const useAuth = (requiredRole = null) => {
         return;
       }
       
-      // If role doesn't match required role
+      // If role doesn't match required role - STRICT ENFORCEMENT
       if (requiredRole && currentRole !== requiredRole) {
         setIsAuthenticated(false);
         setUserRole(currentRole);
         setUser(currentUser);
         setIsLoading(false);
         
-        // Redirect to appropriate dashboard
-        if (currentRole === 'user') {
-          navigate('/user/dashboard', { replace: true, state: { message: 'Access denied. Artists only.' } });
-        } else if (currentRole === 'artist') {
-          navigate('/artist/dashboard', { replace: true, state: { message: 'Access denied. Users only.' } });
+        // Clear tokens to prevent any cross-role access
+        if (currentRole === 'user' && requiredRole === 'artist') {
+          console.warn('User attempted to access artist-only area');
+          navigate('/user/dashboard', { 
+            replace: true, 
+            state: { 
+              message: 'Access denied. This area is for artists only.',
+              type: 'error'
+            } 
+          });
+        } else if (currentRole === 'artist' && requiredRole === 'user') {
+          console.warn('Artist attempted to access user-only area');
+          navigate('/artist/dashboard', { 
+            replace: true, 
+            state: { 
+              message: 'Access denied. This area is for users only.',
+              type: 'error'
+            } 
+          });
+        } else {
+          // Unknown role combination
+          navigate('/', { 
+            replace: true, 
+            state: { 
+              message: 'Access denied. Please login with appropriate credentials.',
+              type: 'error'
+            } 
+          });
         }
         return;
       }
       
       // All checks passed
-      setIsAuthenticated(!!currentRole);
+      setIsAuthenticated(hasValidToken);
       setUserRole(currentRole);
       setUser(currentUser);
       setIsLoading(false);
     } catch (error) {
       console.error('Auth validation error:', error);
+      // Clear all auth data on error
+      localStorage.removeItem('userToken');
+      localStorage.removeItem('userInfo');
+      localStorage.removeItem('artistToken');
+      localStorage.removeItem('artistData');
+      
       setIsAuthenticated(false);
       setUserRole(null);
       setUser(null);
@@ -78,14 +122,27 @@ export const useAuth = (requiredRole = null) => {
   };
 
   const logout = () => {
+    // Clear all authentication data
     localStorage.removeItem('userToken');
     localStorage.removeItem('userInfo');
     localStorage.removeItem('artistToken');
     localStorage.removeItem('artistData');
+    
     setIsAuthenticated(false);
     setUserRole(null);
     setUser(null);
-    navigate('/', { replace: true });
+    
+    navigate('/', { replace: true, state: { message: 'Logged out successfully' } });
+  };
+
+  const switchRole = (targetRole) => {
+    // Force logout and redirect to appropriate login
+    logout();
+    if (targetRole === 'user') {
+      navigate('/user/login');
+    } else if (targetRole === 'artist') {
+      navigate('/artist/login');
+    }
   };
 
   return {
@@ -94,6 +151,7 @@ export const useAuth = (requiredRole = null) => {
     user,
     isLoading,
     logout,
+    switchRole,
     revalidate: validateAuth
   };
 };
@@ -118,4 +176,37 @@ export const getCurrentRole = () => {
 // Helper function to check specific role
 export const hasRole = (role) => {
   return getCurrentRole() === role;
+};
+
+// Helper function to get auth token for API calls
+export const getAuthToken = () => {
+  const userToken = localStorage.getItem('userToken');
+  const artistToken = localStorage.getItem('artistToken');
+  return userToken || artistToken || null;
+};
+
+// Helper function to get auth headers for API calls
+export const getAuthHeaders = () => {
+  const token = getAuthToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+// Strict role validation for components
+export const validateRoleAccess = (requiredRole) => {
+  const currentRole = getCurrentRole();
+  
+  if (!currentRole) {
+    return { hasAccess: false, reason: 'NOT_AUTHENTICATED' };
+  }
+  
+  if (currentRole !== requiredRole) {
+    return { 
+      hasAccess: false, 
+      reason: 'ROLE_MISMATCH',
+      currentRole,
+      requiredRole
+    };
+  }
+  
+  return { hasAccess: true };
 };

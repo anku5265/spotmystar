@@ -57,7 +57,8 @@ export default function ArtistLogin() {
         console.log('Could not check notifications:', notifError);
       }
       
-      navigate('/artist/dashboard');
+      // ROLE-BASED REDIRECT: Always redirect artists to artist dashboard
+      navigate('/artist/dashboard', { replace: true });
     } catch (err) {
       // Check if account is suspended/terminated
       if (err.response?.status === 403) {

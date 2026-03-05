@@ -58,7 +58,8 @@ export default function UserLogin() {
         console.log('Could not check notifications:', notifError);
       }
       
-      navigate('/');
+      // ROLE-BASED REDIRECT: Always redirect users to user dashboard
+      navigate('/user/dashboard', { replace: true });
     } catch (err) {
       // Check if account is suspended/terminated
       if (err.response?.status === 403) {
