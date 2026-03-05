@@ -34,25 +34,41 @@ export default function Home() {
 
   const fetchCategories = async () => {
     try {
-      console.log('Fetching categories...');
       const { data } = await api.get('/api/categories');
-      console.log('Categories fetched:', data);
-      setCategories(data);
+      if (data.length === 0) {
+        // Auto-seed if no categories found
+        await seedDataIfNeeded();
+        const { data: newData } = await api.get('/api/categories');
+        setCategories(newData);
+      } else {
+        setCategories(data);
+      }
     } catch (error) {
       console.error('Error fetching categories:', error);
-      setToast({ message: 'Failed to load categories', type: 'error' });
     }
   };
 
   const fetchFeaturedArtists = async () => {
     try {
-      console.log('Fetching featured artists...');
       const { data } = await api.get('/api/artists/featured');
-      console.log('Featured artists fetched:', data);
-      setFeaturedArtists(data);
+      if (data.length === 0) {
+        // Auto-seed if no artists found
+        await seedDataIfNeeded();
+        const { data: newData } = await api.get('/api/artists/featured');
+        setFeaturedArtists(newData);
+      } else {
+        setFeaturedArtists(data);
+      }
     } catch (error) {
       console.error('Error fetching featured artists:', error);
-      setToast({ message: 'Failed to load featured artists', type: 'error' });
+    }
+  };
+
+  const seedDataIfNeeded = async () => {
+    try {
+      await api.post('/api/seed/basic-data');
+    } catch (error) {
+      console.error('Error seeding data:', error);
     }
   };
 
@@ -178,53 +194,18 @@ export default function Home() {
           <TrendingUp className="text-primary" />
           Browse by Category
         </h2>
-        {categories.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {categories.map((cat) => (
-              <Link
-                key={cat.id}
-                to={`/search?category=${cat.id}`}
-                className="card text-center hover:scale-105 transition-transform"
-              >
-                <div className="text-4xl mb-3">{cat.icon || '🎵'}</div>
-                <h3 className="font-semibold">{cat.name}</h3>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-gray-400 mb-4">No categories found. Loading sample data...</p>
-            <button
-              onClick={async () => {
-                try {
-                  await api.post('/api/seed/basic-data');
-                  setToast({ message: 'Sample data loaded successfully!', type: 'success' });
-                  fetchCategories();
-                  fetchFeaturedArtists();
-                } catch (error) {
-                  setToast({ message: 'Failed to load sample data', type: 'error' });
-                }
-              }}
-              className="btn-primary mb-4"
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {categories.map((cat) => (
+            <Link
+              key={cat.id}
+              to={`/search?category=${cat.id}`}
+              className="card text-center hover:scale-105 transition-transform"
             >
-              Load Sample Data
-            </button>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {/* Placeholder categories */}
-              {[
-                { name: 'DJ', icon: '🎧' },
-                { name: 'Band', icon: '🎸' },
-                { name: 'Anchor', icon: '🎤' },
-                { name: 'Dancer', icon: '💃' }
-              ].map((cat, index) => (
-                <div key={index} className="card text-center opacity-50">
-                  <div className="text-4xl mb-3">{cat.icon}</div>
-                  <h3 className="font-semibold">{cat.name}</h3>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+              <div className="text-4xl mb-3">{cat.icon || '🎵'}</div>
+              <h3 className="font-semibold">{cat.name}</h3>
+            </Link>
+          ))}
+        </div>
       </section>
 
       {/* Featured Artists */}
@@ -233,88 +214,47 @@ export default function Home() {
           <Star className="text-primary" />
           Featured Artists
         </h2>
-        {featuredArtists.length > 0 ? (
-          <div className="grid md:grid-cols-3 gap-6">
-            {featuredArtists.map((artist) => (
-              <div
-                key={artist.id}
-                className="card group overflow-hidden"
-              >
-                <Link to={`/${artist.stageName || artist.stage_name}`}>
-                  <div className="relative h-64 -m-6 mb-4 overflow-hidden">
-                    <img
-                      src={artist.profileImage || artist.profile_image || '/placeholder-artist.jpg'}
-                      alt={artist.stageName || artist.stage_name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/400x300/1a1a2e/ffffff?text=Artist';
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-darker to-transparent"></div>
-                    {artist.isVerified && (
-                      <div className="absolute top-4 right-4 bg-primary px-3 py-1 rounded-full text-sm">
-                        ✓ Verified
-                      </div>
-                    )}
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">{artist.stageName || artist.stage_name}</h3>
-                  <p className="text-gray-400 mb-2">{artist.category?.name || artist.category_name} • {artist.city}</p>
-                </Link>
-                <div className="flex items-center justify-between mt-3">
-                  <p className="text-primary font-semibold">
-                    ₹{(artist.priceMin || artist.price_min || 0).toLocaleString()} - ₹{(artist.priceMax || artist.price_max || 0).toLocaleString()}
-                  </p>
-                  <button
-                    onClick={(e) => handleBookNow(artist, e)}
-                    className="px-4 py-2 bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/50 rounded-lg transition-all text-white font-medium text-sm flex items-center gap-2"
-                  >
-                    <Calendar size={16} />
-                    Book Now
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-gray-400 mb-4">No featured artists found. Loading sample data...</p>
-            <button
-              onClick={async () => {
-                try {
-                  await api.post('/api/seed/basic-data');
-                  setToast({ message: 'Sample data loaded successfully!', type: 'success' });
-                  fetchCategories();
-                  fetchFeaturedArtists();
-                } catch (error) {
-                  setToast({ message: 'Failed to load sample data', type: 'error' });
-                }
-              }}
-              className="btn-primary mb-4"
+        <div className="grid md:grid-cols-3 gap-6">
+          {featuredArtists.map((artist) => (
+            <div
+              key={artist.id}
+              className="card group overflow-hidden"
             >
-              Load Sample Data
-            </button>
-            <div className="grid md:grid-cols-3 gap-6">
-              {/* Placeholder artists */}
-              {[1, 2, 3].map((index) => (
-                <div key={index} className="card group overflow-hidden opacity-50">
-                  <div className="relative h-64 -m-6 mb-4 overflow-hidden bg-gray-700">
-                    <div className="w-full h-full flex items-center justify-center text-gray-500">
-                      <Star size={48} />
+              <Link to={`/${artist.stageName || artist.stage_name}`}>
+                <div className="relative h-64 -m-6 mb-4 overflow-hidden">
+                  <img
+                    src={artist.profileImage || artist.profile_image || 'https://via.placeholder.com/400x300/1a1a2e/ffffff?text=Artist'}
+                    alt={artist.stageName || artist.stage_name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/400x300/1a1a2e/ffffff?text=Artist';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-darker to-transparent"></div>
+                  {artist.isVerified && (
+                    <div className="absolute top-4 right-4 bg-primary px-3 py-1 rounded-full text-sm">
+                      ✓ Verified
                     </div>
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">Loading...</h3>
-                  <p className="text-gray-400 mb-2">Artist • City</p>
-                  <div className="flex items-center justify-between mt-3">
-                    <p className="text-primary font-semibold">₹0 - ₹0</p>
-                    <button className="px-4 py-2 bg-gray-600 rounded-lg text-sm opacity-50">
-                      Loading...
-                    </button>
-                  </div>
+                  )}
                 </div>
-              ))}
+                <h3 className="text-xl font-bold mb-2">{artist.stageName || artist.stage_name}</h3>
+                <p className="text-gray-400 mb-2">{artist.category?.name || artist.category_name} • {artist.city}</p>
+              </Link>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-primary font-semibold">
+                  ₹{(artist.priceMin || artist.price_min || 0).toLocaleString()} - ₹{(artist.priceMax || artist.price_max || 0).toLocaleString()}
+                </p>
+                <button
+                  onClick={(e) => handleBookNow(artist, e)}
+                  className="px-4 py-2 bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/50 rounded-lg transition-all text-white font-medium text-sm flex items-center gap-2"
+                >
+                  <Calendar size={16} />
+                  Book Now
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          ))}
+        </div>
       </section>
 
       {/* Booking Modal */}
