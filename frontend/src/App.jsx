@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
-import RoleBasedNavbar from './components/RoleBasedNavbar';
+import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Search from './pages/Search';
@@ -116,28 +116,12 @@ function AccountStatusChecker() {
   return null;
 }
 
-// Role-based redirect component
-function RoleBasedRedirect() {
-  const navigate = useNavigate();
-  const currentRole = getCurrentRole();
-  
-  useEffect(() => {
-    if (currentRole === 'user') {
-      navigate('/user/dashboard', { replace: true });
-    } else if (currentRole === 'artist') {
-      navigate('/artist/dashboard', { replace: true });
-    }
-  }, [currentRole, navigate]);
-  
-  return null;
-}
-
 function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen flex flex-col">
         <AccountStatusChecker />
-        <RoleBasedNavbar />
+        <Navbar />
         <main className="flex-1">
           <Routes>
             {/* Public Routes */}
@@ -177,9 +161,6 @@ function App() {
                 <ArtistDashboard />
               </ProtectedRoute>
             } />
-            
-            {/* Role-based redirect for authenticated users accessing root */}
-            <Route path="/dashboard" element={<RoleBasedRedirect />} />
             
             {/* Catch-all route for invalid paths */}
             <Route path="*" element={

@@ -1,7 +1,7 @@
 import express from 'express';
 import pool from '../config/db.js';
 import nodemailer from 'nodemailer';
-import { requireUser, strictRoleGuard } from '../middleware/auth.js';
+import { verifyToken, requireUser } from '../middleware/auth.js';
 import { generateBookingId } from '../utils/idGenerator.js';
 
 const router = express.Router();
@@ -16,8 +16,8 @@ const transporter = nodemailer.createTransporter({
   }
 });
 
-// Create booking request - STRICT USER ONLY
-router.post('/', requireUser, strictRoleGuard('user'), async (req, res) => {
+// Create booking request - USER ONLY
+router.post('/', verifyToken, requireUser, async (req, res) => {
   try {
     const { artistId, userName, phone, email, eventDate, eventLocation, budget, message } = req.body;
 
@@ -70,6 +70,53 @@ router.post('/', requireUser, strictRoleGuard('user'), async (req, res) => {
       bookingId: result.rows[0].booking_id,
       id: result.rows[0].id
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get bookings for logged-in user
+router.get('/my-bookings', verifyToken, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT b.*, 
+             a.stage_name, a.profile_image, a.whatsapp, a.instagram,
+             c.name as category_name
+      FROM bookings b
+      LEFT JOIN artists a ON b.artist_id = a.id
+      LEFT JOIN categories c ON a.category_id = c.id
+      WHERE b.user_id = $1
+      ORDER BY b.created_at DESC
+    `, [req.user.id]);
+    
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get bookings for artist
+router.get('/artist/:artistId', verifyToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM bookings WHERE artist_id = $1 ORDER BY created_at DESC',
+      [req.params.artistId]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update booking status
+router.patch('/:id/status', verifyToken, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const result = await pool.query(
+      'UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *',
+      [status, req.params.id]
+    );
+    res.json(result.rows[0]);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
