@@ -10,6 +10,7 @@ import adminRoutes from './routes/admin.js';
 import adminAdvancedRoutes from './routes/admin-advanced.js';
 import userMgmtRoutes from './routes/user-mgmt.js';
 import artistAnalyticsRoutes from './routes/artist-analytics.js';
+import seedRoutes from './routes/seed.js';
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/admin-advanced', adminAdvancedRoutes);
 app.use('/api/user-management', userMgmtRoutes);
 app.use('/api/artist-analytics', artistAnalyticsRoutes);
+app.use('/api/seed', seedRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'SpotMyStar API - Role-Based Access Control System' });
