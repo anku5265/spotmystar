@@ -1,5 +1,6 @@
 import express from 'express';
 import pool from '../config/db.js';
+import bcrypt from 'bcryptjs';
 
 const router = express.Router();
 
@@ -16,20 +17,20 @@ router.post('/basic-data', async (req, res) => {
       console.log('📂 Seeding categories...');
       
       const categories = [
-        { name: 'DJ', icon: '🎧', slug: 'dj', description: 'Professional DJs for parties and events' },
-        { name: 'Band', icon: '🎸', slug: 'band', description: 'Live bands for concerts and events' },
-        { name: 'Anchor', icon: '🎤', slug: 'anchor', description: 'Event hosts and anchors' },
-        { name: 'Dancer', icon: '💃', slug: 'dancer', description: 'Professional dancers and choreographers' },
-        { name: 'Singer', icon: '🎵', slug: 'singer', description: 'Vocalists for events and performances' },
-        { name: 'Comedian', icon: '😂', slug: 'comedian', description: 'Stand-up comedians and entertainers' }
+        { name: 'DJ', icon: '🎧', description: 'Professional DJs for parties and events' },
+        { name: 'Band', icon: '🎸', description: 'Live bands for concerts and events' },
+        { name: 'Anchor', icon: '🎤', description: 'Event hosts and anchors' },
+        { name: 'Dancer', icon: '💃', description: 'Professional dancers and choreographers' },
+        { name: 'Singer', icon: '🎵', description: 'Vocalists for events and performances' },
+        { name: 'Comedian', icon: '😂', description: 'Stand-up comedians and entertainers' }
       ];
 
       for (const cat of categories) {
         await pool.query(`
-          INSERT INTO categories (name, icon, slug, description, is_active, display_order)
-          VALUES ($1, $2, $3, $4, true, 0)
-          ON CONFLICT (slug) DO NOTHING
-        `, [cat.name, cat.icon, cat.slug, cat.description]);
+          INSERT INTO categories (name, icon, description)
+          VALUES ($1, $2, $3)
+          ON CONFLICT (name) DO NOTHING
+        `, [cat.name, cat.icon, cat.description]);
       }
       
       console.log('✅ Categories seeded successfully');
@@ -39,7 +40,7 @@ router.post('/basic-data', async (req, res) => {
     const artistsResult = await pool.query('SELECT COUNT(*) FROM artists WHERE is_verified = true');
     const artistCount = parseInt(artistsResult.rows[0].count);
 
-    if (artistCount === 0) {
+    if (artistCount < 3) {
       console.log('🎭 Seeding sample artists...');
       
       // Get category IDs
@@ -49,98 +50,113 @@ router.post('/basic-data', async (req, res) => {
       const sampleArtists = [
         {
           full_name: 'Rajesh Kumar',
-          stage_name: 'DJ Raj',
-          email: 'djraj@example.com',
+          stage_name: 'DJ_Raj_' + Date.now(),
+          email: 'djraj' + Date.now() + '@example.com',
           phone: '9876543210',
+          whatsapp: '9876543210',
           city: 'Mumbai',
-          description: 'Professional DJ with 5+ years experience in Bollywood and EDM',
+          bio: 'Professional DJ with 5+ years experience in Bollywood and EDM',
           price_min: 15000,
           price_max: 50000,
-          category: 'DJ'
+          category: 'DJ',
+          password: 'password123'
         },
         {
           full_name: 'Priya Sharma',
-          stage_name: 'Priya Live',
-          email: 'priya@example.com',
+          stage_name: 'Priya_Live_' + Date.now(),
+          email: 'priya' + Date.now() + '@example.com',
           phone: '9876543211',
+          whatsapp: '9876543211',
           city: 'Delhi',
-          description: 'Versatile singer specializing in Bollywood and classical music',
+          bio: 'Versatile singer specializing in Bollywood and classical music',
           price_min: 20000,
           price_max: 75000,
-          category: 'Singer'
+          category: 'Singer',
+          password: 'password123'
         },
         {
           full_name: 'Amit Patel',
-          stage_name: 'The Rockers',
-          email: 'rockers@example.com',
+          stage_name: 'The_Rockers_' + Date.now(),
+          email: 'rockers' + Date.now() + '@example.com',
           phone: '9876543212',
+          whatsapp: '9876543212',
           city: 'Bangalore',
-          description: 'Rock band with original compositions and cover songs',
+          bio: 'Rock band with original compositions and cover songs',
           price_min: 30000,
           price_max: 100000,
-          category: 'Band'
+          category: 'Band',
+          password: 'password123'
         },
         {
           full_name: 'Neha Gupta',
-          stage_name: 'Neha Anchor',
-          email: 'neha@example.com',
+          stage_name: 'Neha_Anchor_' + Date.now(),
+          email: 'neha' + Date.now() + '@example.com',
           phone: '9876543213',
+          whatsapp: '9876543213',
           city: 'Pune',
-          description: 'Professional event anchor and host for corporate events',
+          bio: 'Professional event anchor and host for corporate events',
           price_min: 10000,
           price_max: 40000,
-          category: 'Anchor'
+          category: 'Anchor',
+          password: 'password123'
         },
         {
           full_name: 'Rohit Singh',
-          stage_name: 'Dance Fusion',
-          email: 'rohit@example.com',
+          stage_name: 'Dance_Fusion_' + Date.now(),
+          email: 'rohit' + Date.now() + '@example.com',
           phone: '9876543214',
+          whatsapp: '9876543214',
           city: 'Hyderabad',
-          description: 'Contemporary and Bollywood dance choreographer',
+          bio: 'Contemporary and Bollywood dance choreographer',
           price_min: 12000,
           price_max: 45000,
-          category: 'Dancer'
+          category: 'Dancer',
+          password: 'password123'
         },
         {
           full_name: 'Vikram Joshi',
-          stage_name: 'Comedy King',
-          email: 'vikram@example.com',
+          stage_name: 'Comedy_King_' + Date.now(),
+          email: 'vikram' + Date.now() + '@example.com',
           phone: '9876543215',
+          whatsapp: '9876543215',
           city: 'Chennai',
-          description: 'Stand-up comedian with clean humor for all audiences',
+          bio: 'Stand-up comedian with clean humor for all audiences',
           price_min: 8000,
           price_max: 35000,
-          category: 'Comedian'
+          category: 'Comedian',
+          password: 'password123'
         }
       ];
 
       for (const artist of sampleArtists) {
         // Find category ID
         const category = categories.find(c => c.name === artist.category);
-        const categoryId = category ? category.id : categories[0].id;
+        const categoryId = category ? category.id : categories[0]?.id;
+
+        if (!categoryId) continue;
+
+        const hashedPassword = await bcrypt.hash(artist.password, 10);
 
         await pool.query(`
           INSERT INTO artists (
-            full_name, stage_name, email, phone, city, description,
+            full_name, stage_name, email, phone, whatsapp, city, bio,
             price_min, price_max, category_id, status, is_verified,
-            profile_image, rating, total_bookings, views
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'active', true, $10, $11, $12, $13)
+            profile_image, password
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'approved', true, $11, $12)
           ON CONFLICT (email) DO NOTHING
         `, [
           artist.full_name,
           artist.stage_name,
           artist.email,
           artist.phone,
+          artist.whatsapp,
           artist.city,
-          artist.description,
+          artist.bio,
           artist.price_min,
           artist.price_max,
           categoryId,
           'https://via.placeholder.com/400x300/1a1a2e/ffffff?text=' + encodeURIComponent(artist.stage_name),
-          4.5, // rating
-          Math.floor(Math.random() * 50) + 10, // total_bookings
-          Math.floor(Math.random() * 1000) + 100 // views
+          hashedPassword
         ]);
       }
       
@@ -149,8 +165,8 @@ router.post('/basic-data', async (req, res) => {
 
     res.json({ 
       message: 'Basic data seeded successfully!',
-      categories: categoryCount,
-      artists: artistCount
+      categoriesCount: categoryCount,
+      artistsCount: artistCount
     });
     
   } catch (error) {

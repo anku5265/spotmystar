@@ -35,40 +35,20 @@ export default function Home() {
   const fetchCategories = async () => {
     try {
       const { data } = await api.get('/api/categories');
-      if (data.length === 0) {
-        // Auto-seed if no categories found
-        await seedDataIfNeeded();
-        const { data: newData } = await api.get('/api/categories');
-        setCategories(newData);
-      } else {
-        setCategories(data);
-      }
+      setCategories(data || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
+      setCategories([]);
     }
   };
 
   const fetchFeaturedArtists = async () => {
     try {
       const { data } = await api.get('/api/artists/featured');
-      if (data.length === 0) {
-        // Auto-seed if no artists found
-        await seedDataIfNeeded();
-        const { data: newData } = await api.get('/api/artists/featured');
-        setFeaturedArtists(newData);
-      } else {
-        setFeaturedArtists(data);
-      }
+      setFeaturedArtists(data || []);
     } catch (error) {
       console.error('Error fetching featured artists:', error);
-    }
-  };
-
-  const seedDataIfNeeded = async () => {
-    try {
-      await api.post('/api/seed/basic-data');
-    } catch (error) {
-      console.error('Error seeding data:', error);
+      setFeaturedArtists([]);
     }
   };
 

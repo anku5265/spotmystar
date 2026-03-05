@@ -6,41 +6,10 @@ const router = express.Router();
 // Get all categories with optional grouping
 router.get('/', async (req, res) => {
   try {
-    const { grouped } = req.query;
-    
-    let result = await pool.query(`
+    const result = await pool.query(`
       SELECT * FROM categories 
-      WHERE is_active = true 
-      ORDER BY display_order, name
+      ORDER BY name
     `);
-    
-    // If no categories exist, seed them automatically
-    if (result.rows.length === 0) {
-      console.log('No categories found, seeding from schema-v2...');
-      // Categories will be seeded by schema-v2.sql
-      result = await pool.query(`
-        SELECT * FROM categories 
-        WHERE is_active = true 
-        ORDER BY display_order, name
-      `);
-    }
-    
-    if (grouped === 'true') {
-      // Group categories by category_group
-      const grouped = {
-        performing_artists: [],
-        creative_professionals: [],
-        influencers_creators: []
-      };
-      
-      result.rows.forEach(cat => {
-        if (grouped[cat.category_group]) {
-          grouped[cat.category_group].push(cat);
-        }
-      });
-      
-      return res.json(grouped);
-    }
     
     res.json(result.rows);
   } catch (error) {
