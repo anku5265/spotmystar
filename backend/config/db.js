@@ -4,20 +4,24 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Build connection string from individual env vars or use DATABASE_URL
-const connectionString = process.env.DATABASE_URL || 
-  `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`;
+// Database Configuration - DISCONNECTED
+// Update DATABASE_URL in .env file to reconnect
 
-if (!connectionString || connectionString.includes('undefined')) {
-  console.error('❌ ERROR: Database configuration not found!');
-  console.error('Please set DATABASE_URL or DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT');
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString || connectionString.includes('your-project') || connectionString.includes('undefined')) {
+  console.log('⚠ DATABASE DISCONNECTED');
+  console.log('  To reconnect:');
+  console.log('  1. Create new Supabase project');
+  console.log('  2. Update DATABASE_URL in backend/.env');
+  console.log('  3. Restart the server');
 }
 
 const pool = new Pool({
-  connectionString: connectionString,
-  ssl: {
+  connectionString: connectionString || 'postgresql://localhost:5432/spotmystar',
+  ssl: connectionString && !connectionString.includes('localhost') ? {
     rejectUnauthorized: false
-  }
+  } : false
 });
 
 export default pool;
