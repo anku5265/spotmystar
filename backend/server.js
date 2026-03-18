@@ -28,6 +28,9 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/user-management', userMgmtRoutes);
 app.use('/api/seed', seedRoutes);
 
+// Stub for admin-advanced routes (not implemented)
+app.get('/api/admin-advanced/*', (req, res) => res.json({ data: [], stats: {}, flags: [], logs: [] }));
+
 app.get('/', (req, res) => {
   res.json({ message: 'SpotMyStar API - Role-Based Access Control System' });
 });
