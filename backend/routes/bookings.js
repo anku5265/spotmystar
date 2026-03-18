@@ -1,20 +1,9 @@
 import express from 'express';
 import pool from '../config/db.js';
-import nodemailer from 'nodemailer';
 import { verifyToken, requireUser } from '../middleware/auth.js';
 import { generateBookingId } from '../utils/idGenerator.js';
 
 const router = express.Router();
-
-// Email transporter
-const transporter = nodemailer.createTransporter({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
 
 // Create booking request - USER ONLY
 router.post('/', verifyToken, requireUser, async (req, res) => {
