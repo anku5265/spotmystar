@@ -149,7 +149,6 @@ export default function UserDashboard() {
               <Settings size={20} />
               <span className="hidden md:inline">Edit Profile</span>
             </button>
-            {user && <NotificationBell userType="user" userId={user.id} />}
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 glass px-4 py-2 rounded-lg hover:bg-white/10 transition"

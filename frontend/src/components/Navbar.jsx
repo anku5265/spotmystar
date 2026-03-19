@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Menu, User, ChevronDown, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import NotificationBell from './NotificationBell';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -74,8 +75,13 @@ export default function Navbar() {
           {/* Desktop Menu - 3-4 elements max */}
           <div className="hidden md:flex items-center gap-6">
             {user ? (
-              /* After Login - Profile Dropdown */
-              <div className="relative profile-dropdown">
+              /* After Login - Notification Bell + Profile Dropdown */
+              <div className="flex items-center gap-3">
+                <NotificationBell 
+                  userType={user.stageName ? 'artist' : 'user'} 
+                  userId={user.id} 
+                />
+                <div className="relative profile-dropdown">
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
                   className="flex items-center gap-2 hover:text-primary transition"
@@ -109,6 +115,7 @@ export default function Navbar() {
                     </button>
                   </div>
                 )}
+                </div>
               </div>
             ) : (
               /* Before Login - 3 Elements */
