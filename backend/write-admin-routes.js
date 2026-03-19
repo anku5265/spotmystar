@@ -1,4 +1,6 @@
-import express from 'express';
+import { writeFileSync } from 'fs';
+
+const content = `import express from 'express';
 import pool from '../config/db.js';
 
 const router = express.Router();
@@ -109,3 +111,7 @@ router.get('/analytics/dashboard', async (req, res) => {
 });
 
 export default router;
+`;
+
+writeFileSync('./backend/routes/admin-advanced.js', content, 'utf8');
+console.log('Done! File written successfully.');
