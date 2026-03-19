@@ -329,12 +329,6 @@ export default function ArtistRegisterNew() {
 
   const renderStep2 = () => (
     <div className="space-y-6">
-      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
-        <p className="text-sm text-blue-200">
-          💡 Category select karo, phir primary set karne ke liye radio button click karo
-        </p>
-      </div>
-
       <div className="bg-white/5 rounded-lg p-4">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
           {categories.map(cat => (
