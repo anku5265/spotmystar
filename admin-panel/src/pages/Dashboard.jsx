@@ -631,35 +631,240 @@ export default function AdvancedDashboard() {
         )}
 
         {/* Other tabs would be implemented similarly */}
+        {/* Booking Control Tab */}
         {activeTab === 'bookings' && (
-          <div className="text-center py-16">
-            <Calendar className="mx-auto mb-4 text-gray-500" size={64} />
-            <h3 className="text-xl font-bold text-white mb-2">Advanced Booking Management</h3>
-            <p className="text-gray-400">Coming soon - Comprehensive booking lifecycle control</p>
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-green-400 to-teal-400 bg-clip-text text-transparent">Booking Control</h2>
+              <span className="px-4 py-2 bg-green-500/20 text-green-400 rounded-full font-semibold">{bookings.length} Total</span>
+            </div>
+            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-900/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Client</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Artist</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Event Date</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Budget</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Status</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Location</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bookings.map(b => (
+                    <tr key={b.id} className="border-t border-gray-700/50 hover:bg-gray-700/20 transition-colors">
+                      <td className="px-4 py-3">
+                        <p className="text-white font-medium">{b.user_name}</p>
+                        <p className="text-gray-400 text-xs">{b.phone}</p>
+                      </td>
+                      <td className="px-4 py-3 text-gray-300">{b.full_name || b.stage_name || '—'}</td>
+                      <td className="px-4 py-3 text-gray-300">{new Date(b.event_date).toLocaleDateString('en-IN')}</td>
+                      <td className="px-4 py-3 text-green-400 font-semibold">₹{(b.budget || 0).toLocaleString()}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          b.status === 'accepted' ? 'bg-green-500/20 text-green-400' :
+                          b.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                          b.status === 'completed' ? 'bg-blue-500/20 text-blue-400' :
+                          'bg-red-500/20 text-red-400'
+                        }`}>{b.status}</span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-400 text-sm">{b.event_location}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {bookings.length === 0 && (
+                <div className="text-center py-12">
+                  <Calendar className="mx-auto mb-3 text-gray-500" size={40} />
+                  <p className="text-gray-400">No bookings yet</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
+        {/* Risk Management Tab */}
         {activeTab === 'risk-management' && (
-          <div className="text-center py-16">
-            <Shield className="mx-auto mb-4 text-gray-500" size={64} />
-            <h3 className="text-xl font-bold text-white mb-2">Risk Management System</h3>
-            <p className="text-gray-400">Coming soon - Advanced risk detection and management</p>
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">Risk Management</h2>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-red-500/20 rounded-lg"><Shield className="text-red-400" size={24} /></div>
+                  <h3 className="font-bold text-white">Pending Artists</h3>
+                </div>
+                <p className="text-3xl font-black text-white mb-1">{pendingArtists.length}</p>
+                <p className="text-gray-400 text-sm">Awaiting review</p>
+              </div>
+              <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-yellow-500/20 rounded-lg"><AlertTriangle className="text-yellow-400" size={24} /></div>
+                  <h3 className="font-bold text-white">Pending Bookings</h3>
+                </div>
+                <p className="text-3xl font-black text-white mb-1">{bookings.filter(b => b.status === 'pending').length}</p>
+                <p className="text-gray-400 text-sm">Need attention</p>
+              </div>
+              <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-green-500/20 rounded-lg"><CheckCircle className="text-green-400" size={24} /></div>
+                  <h3 className="font-bold text-white">Active Risk Flags</h3>
+                </div>
+                <p className="text-3xl font-black text-white mb-1">0</p>
+                <p className="text-gray-400 text-sm">All clear</p>
+              </div>
+            </div>
+            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <Clock className="text-yellow-400" size={20} /> Pending Artist Approvals
+              </h3>
+              {pendingArtists.length === 0 ? (
+                <div className="text-center py-8">
+                  <CheckCircle className="mx-auto mb-2 text-green-400" size={32} />
+                  <p className="text-gray-400">No pending approvals</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {pendingArtists.map(artist => (
+                    <div key={artist.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-lg border border-gray-700/50">
+                      <div>
+                        <p className="text-white font-semibold">{artist.full_name}</p>
+                        <p className="text-gray-400 text-sm">{artist.stage_name} • {artist.city} • {artist.category_name}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => handleArtistAction(artist.id, 'accept')} className="px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg text-sm hover:bg-green-500/30 transition-colors">Approve</button>
+                        <button onClick={() => handleArtistAction(artist.id, 'reject')} className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-sm hover:bg-red-500/30 transition-colors">Reject</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
-        {activeTab === 'analytics' && (
-          <div className="text-center py-16">
-            <TrendingUp className="mx-auto mb-4 text-gray-500" size={64} />
-            <h3 className="text-xl font-bold text-white mb-2">Advanced Analytics</h3>
-            <p className="text-gray-400">Coming soon - Comprehensive platform analytics</p>
+        {/* Analytics Tab */}
+        {activeTab === 'analytics' && analytics && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Platform Analytics</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { label: 'Total Users', value: analytics.users.total_users, color: 'blue', sub: `${analytics.users.new_users} new` },
+                { label: 'Total Artists', value: analytics.artists.total_artists, color: 'purple', sub: `${analytics.artists.pending_artists} pending` },
+                { label: 'Total Bookings', value: analytics.bookings.total_bookings, color: 'green', sub: `${analytics.bookings.recent_bookings} recent` },
+                { label: 'Verified Artists', value: analytics.artists.verified_artists, color: 'yellow', sub: `${analytics.artists.active_artists} active` },
+              ].map(card => (
+                <div key={card.label} className={`bg-gray-800/50 border border-${card.color}-500/20 rounded-xl p-6`}>
+                  <p className="text-4xl font-black text-white mb-2">{card.value}</p>
+                  <p className="text-gray-400 font-semibold">{card.label}</p>
+                  <p className={`text-${card.color}-400 text-sm mt-1`}>{card.sub}</p>
+                </div>
+              ))}
+            </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
+                <h3 className="text-lg font-bold text-white mb-4">Booking Status Breakdown</h3>
+                <div className="space-y-3">
+                  {['pending','accepted','completed','rejected'].map(s => {
+                    const count = bookings.filter(b => b.status === s).length;
+                    const pct = bookings.length ? Math.round((count / bookings.length) * 100) : 0;
+                    return (
+                      <div key={s}>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="capitalize text-gray-300">{s}</span>
+                          <span className="text-white font-semibold">{count} ({pct}%)</span>
+                        </div>
+                        <div className="h-2 bg-gray-700 rounded-full">
+                          <div className={`h-2 rounded-full ${s==='accepted'||s==='completed'?'bg-green-500':s==='pending'?'bg-yellow-500':'bg-red-500'}`} style={{width: pct + '%'}}></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
+                <h3 className="text-lg font-bold text-white mb-4">Artist Status Breakdown</h3>
+                <div className="space-y-3">
+                  {['active','pending','inactive'].map(s => {
+                    const count = allArtists.filter(a => a.status === s).length;
+                    const pct = allArtists.length ? Math.round((count / allArtists.length) * 100) : 0;
+                    return (
+                      <div key={s}>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="capitalize text-gray-300">{s}</span>
+                          <span className="text-white font-semibold">{count} ({pct}%)</span>
+                        </div>
+                        <div className="h-2 bg-gray-700 rounded-full">
+                          <div className={`h-2 rounded-full ${s==='active'?'bg-green-500':s==='pending'?'bg-yellow-500':'bg-red-500'}`} style={{width: pct + '%'}}></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
+        {/* Audit Log Tab */}
         {activeTab === 'audit-log' && (
-          <div className="text-center py-16">
-            <FileText className="mx-auto mb-4 text-gray-500" size={64} />
-            <h3 className="text-xl font-bold text-white mb-2">Complete Audit Log</h3>
-            <p className="text-gray-400">Coming soon - Full activity tracking and audit trail</p>
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-300 to-gray-400 bg-clip-text text-transparent">Activity Log</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
+                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                  <Users className="text-blue-400" size={20} /> Recent User Registrations
+                </h3>
+                <div className="space-y-3">
+                  {allUsers.slice(0, 8).map(u => (
+                    <div key={u.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg">
+                      <div>
+                        <p className="text-white text-sm font-medium">{u.name || 'Unknown'}</p>
+                        <p className="text-gray-400 text-xs">{u.email}</p>
+                      </div>
+                      <span className="text-gray-500 text-xs">{new Date(u.created_at).toLocaleDateString('en-IN')}</span>
+                    </div>
+                  ))}
+                  {allUsers.length === 0 && <p className="text-gray-400 text-center py-4">No users yet</p>}
+                </div>
+              </div>
+              <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
+                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                  <UserCheck className="text-purple-400" size={20} /> Recent Artist Registrations
+                </h3>
+                <div className="space-y-3">
+                  {allArtists.slice(0, 8).map(a => (
+                    <div key={a.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg">
+                      <div>
+                        <p className="text-white text-sm font-medium">{a.stage_name || a.full_name}</p>
+                        <p className="text-gray-400 text-xs">{a.city} • {a.category_name}</p>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${a.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>{a.status}</span>
+                    </div>
+                  ))}
+                  {allArtists.length === 0 && <p className="text-gray-400 text-center py-4">No artists yet</p>}
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <Calendar className="text-green-400" size={20} /> Recent Bookings
+              </h3>
+              <div className="space-y-3">
+                {bookings.slice(0, 10).map(b => (
+                  <div key={b.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg">
+                    <div>
+                      <p className="text-white text-sm font-medium">{b.user_name} → {b.full_name || b.stage_name || 'Artist'}</p>
+                      <p className="text-gray-400 text-xs">{b.event_location} • {new Date(b.event_date).toLocaleDateString('en-IN')}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${b.status === 'accepted' ? 'bg-green-500/20 text-green-400' : b.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'}`}>{b.status}</span>
+                      <p className="text-green-400 text-xs mt-1">₹{(b.budget||0).toLocaleString()}</p>
+                    </div>
+                  </div>
+                ))}
+                {bookings.length === 0 && <p className="text-gray-400 text-center py-4">No bookings yet</p>}
+              </div>
+            </div>
           </div>
         )}
       </div>
