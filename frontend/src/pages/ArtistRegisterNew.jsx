@@ -544,52 +544,73 @@ export default function ArtistRegisterNew() {
   );
 
   const renderStep4 = () => (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
-        <label className="block text-sm mb-2">Pricing Model</label>
-        <select
-          value={formData.pricingModel}
-          onChange={(e) => setFormData({ ...formData, pricingModel: e.target.value })}
-          className="w-full bg-white/5 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-primary"
-        >
-          <option value="per_event">Per Event</option>
-          <option value="per_hour">Per Hour</option>
-          <option value="per_day">Per Day</option>
-          <option value="custom">Custom</option>
-        </select>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm mb-2">Minimum Price (₹) *</label>
-          <input
-            type="number"
-            placeholder="e.g., 5000"
-            required
-            value={formData.priceMin}
-            onChange={(e) => setFormData({ ...formData, priceMin: e.target.value })}
-            className="w-full bg-white/5 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div>
-          <label className="block text-sm mb-2">Maximum Price (₹) *</label>
-          <input
-            type="number"
-            placeholder="e.g., 50000"
-            required
-            value={formData.priceMax}
-            onChange={(e) => setFormData({ ...formData, priceMax: e.target.value })}
-            className="w-full bg-white/5 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-primary"
-          />
+        <label className="block text-sm font-medium text-gray-300 mb-2">Pricing Model</label>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { value: 'per_event', label: 'Per Event', icon: '🎪' },
+            { value: 'per_hour', label: 'Per Hour', icon: '⏰' },
+            { value: 'per_day', label: 'Per Day', icon: '📅' },
+            { value: 'custom', label: 'Custom', icon: '✏️' },
+          ].map(opt => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setFormData({ ...formData, pricingModel: opt.value })}
+              className={`p-4 rounded-xl border-2 text-center transition-all ${
+                formData.pricingModel === opt.value
+                  ? 'border-primary bg-primary/20 text-white'
+                  : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/30 hover:bg-white/10'
+              }`}
+            >
+              <div className="text-2xl mb-1">{opt.icon}</div>
+              <div className="text-sm font-medium">{opt.label}</div>
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="bg-white/5 rounded-lg p-4">
-        <p className="text-sm text-gray-400">
-          💡 Tip: Set a realistic price range based on your experience and market rates. 
-          You can always adjust this later from your dashboard.
-        </p>
+      <div className="grid md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Minimum Price (₹) *</label>
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">₹</span>
+            <input
+              type="number"
+              placeholder="5,000"
+              required
+              value={formData.priceMin}
+              onChange={(e) => setFormData({ ...formData, priceMin: e.target.value })}
+              className="w-full bg-white/5 rounded-xl pl-8 pr-4 py-4 outline-none focus:ring-2 focus:ring-primary border border-white/10 focus:border-primary text-white text-lg"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Maximum Price (₹) *</label>
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">₹</span>
+            <input
+              type="number"
+              placeholder="50,000"
+              required
+              value={formData.priceMax}
+              onChange={(e) => setFormData({ ...formData, priceMax: e.target.value })}
+              className="w-full bg-white/5 rounded-xl pl-8 pr-4 py-4 outline-none focus:ring-2 focus:ring-primary border border-white/10 focus:border-primary text-white text-lg"
+            />
+          </div>
+        </div>
       </div>
+
+      {formData.priceMin && formData.priceMax && (
+        <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 text-center">
+          <p className="text-gray-400 text-sm">Your Price Range</p>
+          <p className="text-2xl font-bold text-white mt-1">
+            ₹{parseInt(formData.priceMin).toLocaleString()} — ₹{parseInt(formData.priceMax).toLocaleString()}
+          </p>
+          <p className="text-gray-400 text-sm mt-1">{formData.pricingModel.replace('_', ' ')}</p>
+        </div>
+      )}
     </div>
   );
 
