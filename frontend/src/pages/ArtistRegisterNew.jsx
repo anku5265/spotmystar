@@ -13,6 +13,7 @@ export default function ArtistRegisterNew() {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [serviceLocationInput, setServiceLocationInput] = useState('');
 
   const [formData, setFormData] = useState({
@@ -306,14 +307,23 @@ export default function ArtistRegisterNew() {
         </button>
       </div>
 
-      <input
-        type="password"
-        placeholder="Confirm Password *"
-        required
-        value={formData.confirmPassword}
-        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-        className="w-full bg-white/5 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-primary"
-      />
+      <div className="relative">
+        <input
+          type={showConfirmPassword ? "text" : "password"}
+          placeholder="Confirm Password *"
+          required
+          value={formData.confirmPassword}
+          onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+          className="w-full bg-white/5 rounded-lg px-4 py-3 pr-12 outline-none focus:ring-2 focus:ring-primary"
+        />
+        <button
+          type="button"
+          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+        >
+          {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+        </button>
+      </div>
     </div>
   );
 
