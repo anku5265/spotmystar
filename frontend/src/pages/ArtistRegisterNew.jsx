@@ -281,7 +281,7 @@ export default function ArtistRegisterNew() {
 
       <input
         type="tel"
-        placeholder="Phone Number (OTP Verified) *"
+        placeholder="Phone Number *"
         required
         value={formData.phone}
         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
