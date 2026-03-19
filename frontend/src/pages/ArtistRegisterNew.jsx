@@ -6,7 +6,7 @@ import Toast from '../components/Toast';
 export default function ArtistRegisterNew() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const [categories, setCategories] = useState({});
+  const [categories, setCategories] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [primaryCategory, setPrimaryCategory] = useState('');
   const [categoryAttributes, setCategoryAttributes] = useState({});
@@ -67,8 +67,8 @@ export default function ArtistRegisterNew() {
 
   const fetchCategories = async () => {
     try {
-      const { data } = await api.get('/api/categories?grouped=true');
-      setCategories(data);
+      const { data } = await api.get('/api/categories');
+      setCategories(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error loading categories:', error);
       setToast({ message: 'Failed to load categories', type: 'error' });
@@ -331,62 +331,49 @@ export default function ArtistRegisterNew() {
     <div className="space-y-6">
       <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
         <p className="text-sm text-blue-200">
-          💡 Select categories and click radio button to set primary
+          💡 Category select karo, phir primary set karne ke liye radio button click karo
         </p>
       </div>
 
-      {Object.entries(categories).map(([groupKey, groupCategories]) => {
-        if (!groupCategories || groupCategories.length === 0) return null;
-        
-        const groupTitles = {
-          performing_artists: 'A. Performing Artists',
-          creative_professionals: 'B. Creative Professionals',
-          influencers_creators: 'C. Influencers & Digital Creators'
-        };
-
-        return (
-          <div key={groupKey} className="bg-white/5 rounded-lg p-4">
-            <h4 className="font-bold text-lg mb-3 text-primary">{groupTitles[groupKey]}</h4>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {groupCategories.map(cat => (
-                <div
-                  key={cat.id}
-                  className={`flex items-center justify-between p-2 rounded-lg transition ${
-                    selectedCategories.includes(cat.id)
-                      ? 'bg-primary/20 border-2 border-primary'
-                      : 'bg-white/5 border-2 border-transparent hover:bg-white/10'
-                  }`}
-                >
-                  {/* Checkbox for category selection */}
-                  <label className="flex items-center space-x-2 cursor-pointer flex-1">
-                    <input
-                      type="checkbox"
-                      checked={selectedCategories.includes(cat.id)}
-                      onChange={() => handleCategorySelect(cat.id)}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-xl">{cat.icon}</span>
-                    <span className="text-sm font-medium">{cat.name}</span>
-                  </label>
-
-                  {/* Radio button for primary - only show if selected */}
-                  {selectedCategories.includes(cat.id) && (
-                    <input
-                      type="radio"
-                      name="primaryCategory"
-                      value={cat.id}
-                      checked={primaryCategory === cat.id}
-                      onChange={(e) => setPrimaryCategory(e.target.value)}
-                      className="w-4 h-4 text-primary"
-                      title="Set as primary"
-                    />
-                  )}
-                </div>
-              ))}
+      <div className="bg-white/5 rounded-lg p-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {categories.map(cat => (
+            <div
+              key={cat.id}
+              className={`flex items-center justify-between p-3 rounded-lg transition cursor-pointer ${
+                selectedCategories.includes(cat.id)
+                  ? 'bg-primary/20 border-2 border-primary'
+                  : 'bg-white/5 border-2 border-transparent hover:bg-white/10'
+              }`}
+            >
+              <label className="flex items-center space-x-2 cursor-pointer flex-1">
+                <input
+                  type="checkbox"
+                  checked={selectedCategories.includes(cat.id)}
+                  onChange={() => handleCategorySelect(cat.id)}
+                  className="w-4 h-4"
+                />
+                <span className="text-xl">{cat.icon}</span>
+                <span className="text-sm font-medium">{cat.name}</span>
+              </label>
+              {selectedCategories.includes(cat.id) && (
+                <input
+                  type="radio"
+                  name="primaryCategory"
+                  value={cat.id}
+                  checked={primaryCategory === cat.id}
+                  onChange={(e) => setPrimaryCategory(e.target.value)}
+                  className="w-4 h-4 text-primary"
+                  title="Set as primary"
+                />
+              )}
             </div>
-          </div>
-        );
-      })}
+          ))}
+        </div>
+        {categories.length === 0 && (
+          <p className="text-gray-400 text-center py-4">Loading categories...</p>
+        )}
+      </div>
     </div>
   );
 
@@ -466,7 +453,7 @@ export default function ArtistRegisterNew() {
         const attrs = categoryAttributes[catId] || [];
         if (attrs.length === 0) return null;
 
-        const cat = Object.values(categories).flat().find(c => c.id === catId);
+        const cat = categories.find(c => c.id === catId);
         
         return (
           <div key={catId} className="bg-white/5 rounded-lg p-4 space-y-3">
@@ -671,7 +658,7 @@ export default function ArtistRegisterNew() {
 
   const renderStep6 = () => {
     const selectedCats = selectedCategories.map(catId => 
-      Object.values(categories).flat().find(c => c.id === catId)
+      categories.find(c => c.id === catId)
     ).filter(Boolean);
 
     return (
