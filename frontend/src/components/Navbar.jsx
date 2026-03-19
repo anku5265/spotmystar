@@ -93,27 +93,36 @@ export default function Navbar() {
                 </button>
                 
                 {showProfileMenu && (
-                  <div className="absolute right-0 mt-2 w-48 glass rounded-lg shadow-xl py-2 border border-white/10 z-50">
-                    <div className="px-4 py-3 border-b border-white/10">
-                      <p className="text-lg font-semibold truncate">{user.name || user.fullName || user.stageName}</p>
-                    </div>
-                    <Link
-                      to={user.stageName ? "/artist/dashboard" : "/user/dashboard"}
-                      className="block px-4 py-2 hover:bg-white/5 transition"
+                  <>
+                    <div 
+                      className="fixed inset-0 z-[9998]"
                       onClick={() => setShowProfileMenu(false)}
-                    >
-                      My Dashboard
-                    </Link>
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setShowProfileMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-white/5 transition text-red-400"
-                    >
-                      Logout
-                    </button>
-                  </div>
+                    />
+                    <div className="fixed right-4 top-14 w-52 bg-gray-900 rounded-xl shadow-2xl border border-white/10 overflow-hidden z-[9999]">
+                      <div className="px-4 py-3 bg-gradient-to-r from-primary/20 to-secondary/20 border-b border-white/10">
+                        <p className="font-semibold text-white truncate">{user.name || user.fullName || user.stageName}</p>
+                        <p className="text-xs text-gray-400 truncate">{user.email || ''}</p>
+                      </div>
+                      <Link
+                        to={user.stageName ? "/artist/dashboard" : "/user/dashboard"}
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition text-gray-200 hover:text-white"
+                        onClick={() => setShowProfileMenu(false)}
+                      >
+                        My Dashboard
+                      </Link>
+                      <div className="border-t border-white/10">
+                        <button
+                          onClick={() => {
+                            handleLogout();
+                            setShowProfileMenu(false);
+                          }}
+                          className="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-red-500/10 transition text-red-400"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    </div>
+                  </>
                 )}
                 </div>
               </div>
