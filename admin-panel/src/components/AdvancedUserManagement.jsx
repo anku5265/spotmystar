@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { 
-  Users, Search, Filter, Eye, Shield, Ban, CheckCircle, 
+  Users, Search, Filter, Eye, Shield, Ban, CheckCircle, X,
   AlertTriangle, Clock, UserX, Edit3, MoreVertical,
   Calendar, Mail, Phone, MapPin, TrendingUp, Activity
 } from 'lucide-react';
@@ -98,10 +98,13 @@ export default function AdvancedUserManagement() {
     return (
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div className="bg-gray-800 rounded-2xl max-w-md w-full border border-gray-700 shadow-2xl">
-          <div className="p-6 border-b border-gray-700">
+          <div className="p-6 border-b border-gray-700 flex items-center justify-between">
             <h3 className="text-xl font-bold text-white capitalize">
               {action} User: {user.name}
             </h3>
+            <button type="button" onClick={onClose} className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-gray-700">
+              <X size={20} />
+            </button>
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
