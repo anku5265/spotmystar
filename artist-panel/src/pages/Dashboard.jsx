@@ -130,6 +130,7 @@ export default function ArtistDashboard() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const profilePicInputRef = useRef(null);
   const [profilePicUploading, setProfilePicUploading] = useState(false);
+  const [showCongratsPopup, setShowCongratsPopup] = useState(false);
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
@@ -248,26 +249,13 @@ export default function ArtistDashboard() {
         return;
       }
 
-      // Check if just approved — show congratulations notification
+      // Check if just approved — show congratulations popup
       const wasJustApproved = localStorage.getItem(`approved_notif_${artistId}`);
       if (!wasJustApproved && (d.status === 'active' || d.status === 'approved')) {
-        const approvedAt = d.updated_at ? new Date(d.updated_at) : null;
-        const now = new Date();
-        const hoursSinceApproval = approvedAt ? (now - approvedAt) / (1000 * 60 * 60) : 999;
-        // Show congrats if approved within last 7 days and not shown before
-        if (hoursSinceApproval < 168) {
-          setNotifications(prev => [{
-            id: 'congrats',
-            type: 'system',
-            title: '🎉 Profile Approved! Welcome to SpotMyStar!',
-            message: `Congratulations ${d.stage_name || d.full_name}! Your profile is now live. Clients can now discover and book you!`,
-            time: 'Just now',
-            read: false,
-            urgent: false,
-            isCongrats: true
-          }, ...prev]);
-          localStorage.setItem(`approved_notif_${artistId}`, 'shown');
-        }
+        // Show congrats popup — auto dismiss after 8 seconds
+        setShowCongratsPopup(true);
+        localStorage.setItem(`approved_notif_${artistId}`, 'shown');
+        setTimeout(() => setShowCongratsPopup(false), 8000);
       }
       await Promise.all([
         fetchAnalytics(artistId, filter),
@@ -611,6 +599,73 @@ export default function ArtistDashboard() {
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-gray-950 text-white' : 'bg-gray-100 text-gray-900'} flex`}>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
+      {/* ── Congratulations Popup ── */}
+      {showCongratsPopup && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="relative max-w-md w-full bg-gradient-to-br from-gray-900 via-purple-900/30 to-gray-900 border border-yellow-500/40 rounded-3xl p-8 shadow-2xl shadow-purple-500/20 text-center animate-bounce-in">
+            {/* Close button */}
+            <button
+              onClick={() => setShowCongratsPopup(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition p-1 rounded-lg hover:bg-gray-700"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Confetti emoji row */}
+            <div className="text-4xl mb-4 flex justify-center gap-2">
+              🎉 🌟 🎊
+            </div>
+
+            {/* Animated checkmark */}
+            <div className="relative inline-flex items-center justify-center mb-6">
+              <div className="absolute w-24 h-24 rounded-full bg-green-500/20 animate-ping" />
+              <div className="relative w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/40">
+                <CheckCircle size={40} className="text-white" />
+              </div>
+            </div>
+
+            <h2 className="text-2xl font-black text-white mb-2">
+              Congratulations! 🎉
+            </h2>
+            <p className="text-yellow-400 font-bold text-lg mb-3">
+              Your Profile is Now Live!
+            </p>
+            <p className="text-gray-300 text-sm leading-relaxed mb-6">
+              Welcome to <span className="text-purple-400 font-semibold">SpotMyStar</span>, {displayName}!
+              Your profile has been approved by our team. Clients can now discover and book you for their events.
+            </p>
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {[
+                { icon: '👁️', label: 'Profile Visible', sub: 'To all users' },
+                { icon: '📩', label: 'Bookings Open', sub: 'Accept requests' },
+                { icon: '⭐', label: 'Go Explore', sub: 'Your dashboard' },
+              ].map((s, i) => (
+                <div key={i} className="bg-white/5 rounded-xl p-3">
+                  <div className="text-2xl mb-1">{s.icon}</div>
+                  <p className="text-xs font-semibold text-white">{s.label}</p>
+                  <p className="text-xs text-gray-400">{s.sub}</p>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setShowCongratsPopup(false)}
+              className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-bold hover:opacity-90 transition text-sm"
+            >
+              Let's Go! 🚀
+            </button>
+
+            {/* Auto-dismiss bar */}
+            <div className="mt-4 h-1 bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full animate-shrink-bar" />
+            </div>
+            <p className="text-xs text-gray-500 mt-2">Auto-closing in 8 seconds</p>
+          </div>
+        </div>
+      )}
 
       {/* ── Mobile Overlay ── */}
       {sidebarOpen && <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
