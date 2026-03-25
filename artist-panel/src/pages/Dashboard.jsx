@@ -242,6 +242,33 @@ export default function ArtistDashboard() {
           setCalendarEvents(av.events || []);
         } catch { setBusyDates([]); setCalendarEvents([]); }
       }
+      // If pending/rejected, don't fetch analytics — just show status screen
+      if (d.status === 'pending' || d.status === 'rejected') {
+        setLoading(false);
+        return;
+      }
+
+      // Check if just approved — show congratulations notification
+      const wasJustApproved = localStorage.getItem(`approved_notif_${artistId}`);
+      if (!wasJustApproved && (d.status === 'active' || d.status === 'approved')) {
+        const approvedAt = d.updated_at ? new Date(d.updated_at) : null;
+        const now = new Date();
+        const hoursSinceApproval = approvedAt ? (now - approvedAt) / (1000 * 60 * 60) : 999;
+        // Show congrats if approved within last 7 days and not shown before
+        if (hoursSinceApproval < 168) {
+          setNotifications(prev => [{
+            id: 'congrats',
+            type: 'system',
+            title: '🎉 Profile Approved! Welcome to SpotMyStar!',
+            message: `Congratulations ${d.stage_name || d.full_name}! Your profile is now live. Clients can now discover and book you!`,
+            time: 'Just now',
+            read: false,
+            urgent: false,
+            isCongrats: true
+          }, ...prev]);
+          localStorage.setItem(`approved_notif_${artistId}`, 'shown');
+        }
+      }
       await Promise.all([
         fetchAnalytics(artistId, filter),
         fetchPendingRequests(artistId),
@@ -485,6 +512,100 @@ export default function ArtistDashboard() {
 
   const displayName = artist?.stage_name || artist?.full_name || authUser?.stageName || authUser?.fullName || 'Artist';
   const unreadNotifs = notifications.filter(n => !n.read).length;
+
+  // ── Pending Approval Screen ──
+  if (artist?.status === 'pending') {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+        <div className="max-w-lg w-full text-center">
+          {/* Animated waiting icon */}
+          <div className="relative inline-flex items-center justify-center mb-8">
+            <div className="absolute w-32 h-32 rounded-full border-4 border-purple-500/20 animate-ping" />
+            <div className="absolute w-24 h-24 rounded-full border-4 border-purple-500/40 animate-pulse" />
+            <div className="relative w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-2xl shadow-purple-500/30">
+              <Clock size={36} className="text-white" />
+            </div>
+          </div>
+
+          <h1 className="text-3xl font-black text-white mb-3">Profile Under Review</h1>
+          <p className="text-gray-400 text-lg mb-8">
+            Hey <span className="text-purple-400 font-semibold">{displayName}</span>! Your profile has been submitted successfully.
+          </p>
+
+          {/* Status Steps */}
+          <div className="bg-gray-900/80 border border-gray-800 rounded-2xl p-6 mb-8 text-left">
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Application Status</h3>
+            <div className="space-y-4">
+              {[
+                { step: 1, label: 'Profile Submitted', desc: 'Your registration is complete', done: true },
+                { step: 2, label: 'Under Admin Review', desc: 'Our team is reviewing your profile', done: false, active: true },
+                { step: 3, label: 'Profile Approved', desc: 'You will be notified once approved', done: false },
+                { step: 4, label: 'Go Live on SpotMyStar', desc: 'Start receiving booking requests', done: false },
+              ].map((s) => (
+                <div key={s.step} className="flex items-start gap-4">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold mt-0.5 ${
+                    s.done ? 'bg-green-500 text-white' :
+                    s.active ? 'bg-purple-500 text-white animate-pulse' :
+                    'bg-gray-700 text-gray-500'
+                  }`}>
+                    {s.done ? '✓' : s.step}
+                  </div>
+                  <div>
+                    <p className={`font-semibold text-sm ${s.done ? 'text-green-400' : s.active ? 'text-purple-400' : 'text-gray-500'}`}>
+                      {s.label}
+                      {s.active && <span className="ml-2 text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full">In Progress</span>}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">{s.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Info cards */}
+          <div className="grid grid-cols-2 gap-3 mb-8">
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-left">
+              <p className="text-2xl mb-1">⏱️</p>
+              <p className="text-sm font-semibold text-white">Review Time</p>
+              <p className="text-xs text-gray-400 mt-1">Usually within 24-48 hours</p>
+            </div>
+            <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 text-left">
+              <p className="text-2xl mb-1">🔔</p>
+              <p className="text-sm font-semibold text-white">Notification</p>
+              <p className="text-xs text-gray-400 mt-1">You'll be notified on approval</p>
+            </div>
+          </div>
+
+          <button
+            onClick={logout}
+            className="flex items-center gap-2 mx-auto px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl transition-all text-sm font-medium"
+          >
+            <LogOut size={16} /> Logout
+          </button>
+          <p className="text-xs text-gray-600 mt-4">Questions? Contact support@spotmystar.com</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Rejected Screen ──
+  if (artist?.status === 'rejected') {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+        <div className="max-w-lg w-full text-center">
+          <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-500/30">
+            <XCircle size={40} className="text-red-400" />
+          </div>
+          <h1 className="text-3xl font-black text-white mb-3">Application Not Approved</h1>
+          <p className="text-gray-400 mb-6">Your profile was not approved at this time. Please contact support for more information.</p>
+          <div className="flex gap-3 justify-center">
+            <a href="mailto:support@spotmystar.com" className="px-6 py-3 bg-purple-500 text-white rounded-xl font-semibold hover:bg-purple-600 transition text-sm">Contact Support</a>
+            <button onClick={logout} className="px-6 py-3 bg-gray-800 text-gray-300 rounded-xl font-semibold hover:bg-gray-700 transition text-sm flex items-center gap-2"><LogOut size={16} />Logout</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
 
   return (
@@ -1439,7 +1560,10 @@ export default function ArtistDashboard() {
                 {unreadNotifs > 0 && <button onClick={markAllRead} className="text-purple-400 hover:text-purple-300 text-sm font-semibold">Mark all read</button>}
               </div>
               {notifications.map(notif => (
-                <GlassCard key={notif.id} className={`p-4 cursor-pointer transition-all ${!notif.read ? 'border-purple-500/30 bg-purple-500/5' : ''}`} onClick={() => markNotificationRead(notif.id)}>
+                <GlassCard key={notif.id} className={`p-4 cursor-pointer transition-all ${
+                  notif.isCongrats ? 'border-yellow-500/50 bg-gradient-to-r from-yellow-500/10 to-purple-500/10' :
+                  !notif.read ? 'border-purple-500/30 bg-purple-500/5' : ''
+                }`} onClick={() => markNotificationRead(notif.id)}>
                   <div className="flex items-start gap-3">
                     <div className={`p-2.5 rounded-xl flex-shrink-0 ${
                       notif.type === 'booking' ? 'bg-blue-500/20 text-blue-400' :
