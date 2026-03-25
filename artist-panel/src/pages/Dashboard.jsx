@@ -221,7 +221,12 @@ export default function ArtistDashboard() {
   useEffect(() => {
     if (isLoading) return;
     if (!isAuthenticated || userRole !== 'artist') return;
-    if (authUser?.id) fetchAllData(localStorage.getItem('artistToken'), authUser.id);
+    if (authUser?.id) {
+      // Safety timeout — force loading false after 10s no matter what
+      const timeout = setTimeout(() => setLoading(false), 10000);
+      fetchAllData(localStorage.getItem('artistToken'), authUser.id)
+        .finally(() => clearTimeout(timeout));
+    }
   }, [isLoading, isAuthenticated, userRole, authUser]);
 
   useEffect(() => {
@@ -269,7 +274,7 @@ export default function ArtistDashboard() {
         localStorage.setItem(`approved_notif_${artistId}`, 'shown');
         setTimeout(() => setShowCongratsPopup(false), 8000);
       }
-      await Promise.all([
+      await Promise.allSettled([
         fetchAnalytics(artistId, filter),
         fetchPendingRequests(artistId),
         fetchRecentEnquiries(artistId),
