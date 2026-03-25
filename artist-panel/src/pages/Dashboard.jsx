@@ -249,10 +249,22 @@ export default function ArtistDashboard() {
         return;
       }
 
-      // Check if just approved — show congratulations popup
+      // Check if just approved — show congratulations popup + notification
       const wasJustApproved = localStorage.getItem(`approved_notif_${artistId}`);
       if (!wasJustApproved && (d.status === 'active' || d.status === 'approved')) {
-        // Show congrats popup — auto dismiss after 8 seconds
+        const congratsNotif = {
+          id: 'congrats_' + Date.now(),
+          type: 'system',
+          title: '🎉 Profile Approved! Welcome to SpotMyStar!',
+          message: `Congratulations ${d.stage_name || d.full_name}! Your profile is now live. Clients can now discover and book you for their events!`,
+          time: 'Just now',
+          read: false,
+          urgent: false,
+          isCongrats: true
+        };
+        // Add to notifications list (bell icon)
+        setNotifications(prev => [congratsNotif, ...prev]);
+        // Show popup — auto dismiss after 8 seconds
         setShowCongratsPopup(true);
         localStorage.setItem(`approved_notif_${artistId}`, 'shown');
         setTimeout(() => setShowCongratsPopup(false), 8000);
