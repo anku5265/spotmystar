@@ -372,6 +372,11 @@ export default function ArtistDashboard() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!supabase) {
+      setToast({ message: 'Storage not configured. Add Supabase env vars in Vercel.', type: 'error' });
+      return;
+    }
+
     // Validate size (2MB max)
     if (file.size > 2 * 1024 * 1024) {
       setToast({ message: 'Image too large. Max 2MB allowed.', type: 'error' });
