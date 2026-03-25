@@ -175,25 +175,31 @@ router.post('/basic-data', async (req, res) => {
   }
 });
 
-// Reset/create admin user
-router.post('/reset-admin', async (req, res) => {
+// Reset/create admin user — GET for easy browser access
+router.get('/reset-admin', async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash('admin123', 10);
-    
-    // Delete existing admin
     await pool.query("DELETE FROM users WHERE email = 'admin@spotmystar.com'");
-    
-    // Create fresh admin
     await pool.query(
       'INSERT INTO users (email, name, password, role) VALUES ($1, $2, $3, $4)',
       ['admin@spotmystar.com', 'Admin', hashedPassword, 'admin']
     );
-    
-    res.json({ 
-      message: '✅ Admin reset successfully',
-      email: 'admin@spotmystar.com',
-      password: 'admin123'
-    });
+    res.json({ message: '✅ Admin reset successfully', email: 'admin@spotmystar.com', password: 'admin123' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Reset/create admin user — POST
+router.post('/reset-admin', async (req, res) => {
+  try {
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    await pool.query("DELETE FROM users WHERE email = 'admin@spotmystar.com'");
+    await pool.query(
+      'INSERT INTO users (email, name, password, role) VALUES ($1, $2, $3, $4)',
+      ['admin@spotmystar.com', 'Admin', hashedPassword, 'admin']
+    );
+    res.json({ message: '✅ Admin reset successfully', email: 'admin@spotmystar.com', password: 'admin123' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
