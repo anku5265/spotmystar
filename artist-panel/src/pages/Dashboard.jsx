@@ -16,6 +16,7 @@ import {
   Mic, Music, Laugh, Anchor, PersonStanding
 } from 'lucide-react';
 import api from '../config/api';
+import { supabase } from '../config/supabase';
 import Toast from '../components/Toast';
 import NotificationBell from '../components/NotificationBell';
 import { useAuth } from '../hooks/useAuth';
@@ -127,6 +128,8 @@ export default function ArtistDashboard() {
   const [activeSection, setActiveSection] = useState('home');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const profilePicInputRef = useRef(null);
+  const [profilePicUploading, setProfilePicUploading] = useState(false);
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
@@ -338,6 +341,58 @@ export default function ArtistDashboard() {
     } catch { setToast({ message: 'Update failed', type: 'error' }); }
   };
 
+  const handleProfilePicUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      setToast({ message: 'Image too large. Max 2MB allowed.', type: 'error' });
+      return;
+    }
+
+    // Validate type
+    if (!file.type.startsWith('image/')) {
+      setToast({ message: 'Please select an image file.', type: 'error' });
+      return;
+    }
+
+    setProfilePicUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const fileName = `artist_${artist.id}_${Date.now()}.${ext}`;
+      const filePath = `${fileName}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('artist-profiles')
+        .upload(filePath, file, { upsert: true, contentType: file.type });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('artist-profiles')
+        .getPublicUrl(filePath);
+
+      // Save URL to DB via backend
+      const token = localStorage.getItem('artistToken');
+      await api.patch(`/api/artists/${artist.id}/profile-image`,
+        { profileImage: publicUrl },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setArtist({ ...artist, profile_image: publicUrl });
+      setToast({ message: 'Profile picture updated!', type: 'success' });
+    } catch (err) {
+      console.error(err);
+      setToast({ message: 'Upload failed. Make sure Supabase bucket exists.', type: 'error' });
+    } finally {
+      setProfilePicUploading(false);
+      e.target.value = '';
+    }
+  };
+
   const addCalendarEvent = async () => {
     try {
       const ds = selectedDate.toISOString().split('T')[0];
@@ -477,8 +532,12 @@ export default function ArtistDashboard() {
           <div className="p-4 border-b border-gray-800/50">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-sm">
-                  {displayName.charAt(0).toUpperCase()}
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-sm overflow-hidden">
+                  {artist?.profile_image ? (
+                    <img src={artist.profile_image} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    displayName.charAt(0).toUpperCase()
+                  )}
                 </div>
                 <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-gray-900 ${isAvailable ? 'bg-green-400' : 'bg-red-400'}`} />
               </div>
@@ -919,10 +978,44 @@ export default function ArtistDashboard() {
                 <div className="px-6 pb-6">
                   <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-12">
                     <div className="relative">
-                      <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl border-4 border-gray-900 flex items-center justify-center text-white font-black text-3xl">
-                        {displayName.charAt(0).toUpperCase()}
-                      </div>
-                      <button className="absolute -bottom-1 -right-1 p-1.5 bg-purple-500 rounded-lg text-white hover:bg-purple-600 transition"><Camera size={12} /></button>
+                      {/* Hidden file input */}
+                      <input
+                        ref={profilePicInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleProfilePicUpload}
+                      />
+                      {/* Avatar — click to upload */}
+                      <button
+                        onClick={() => profilePicInputRef.current?.click()}
+                        disabled={profilePicUploading}
+                        className="relative w-24 h-24 rounded-2xl border-4 border-gray-900 overflow-hidden group focus:outline-none"
+                        title="Click to change profile picture"
+                      >
+                        {artist?.profile_image ? (
+                          <img src={artist.profile_image} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-black text-3xl">
+                            {displayName.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        {/* Hover overlay */}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
+                          {profilePicUploading ? (
+                            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Camera size={20} className="text-white" />
+                          )}
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => profilePicInputRef.current?.click()}
+                        disabled={profilePicUploading}
+                        className="absolute -bottom-1 -right-1 p-1.5 bg-purple-500 rounded-lg text-white hover:bg-purple-600 transition disabled:opacity-50"
+                      >
+                        <Camera size={12} />
+                      </button>
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -930,6 +1023,7 @@ export default function ArtistDashboard() {
                         {artist?.is_verified && <span className="flex items-center gap-1 text-xs bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full"><Shield size={10} /> Verified</span>}
                       </div>
                       <p className="text-gray-400 text-sm mt-1">{artist?.primary_city || 'Location not set'}</p>
+                      <p className="text-xs text-gray-500 mt-1">Click avatar to change profile picture (max 2MB)</p>
                     </div>
                     <button onClick={() => setActiveSection('settings')} className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-xl text-sm font-semibold hover:bg-purple-500/30 transition">
                       <Edit size={14} /> Edit Profile
