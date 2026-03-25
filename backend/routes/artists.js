@@ -2,7 +2,7 @@ import express from 'express';
 import pool from '../config/db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { generateArtistId } from '../utils/idGenerator.js';
+import { verifyToken, requireArtist } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -177,8 +177,52 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Update artist profile image
-router.patch('/:id/profile-image', async (req, res) => {
+// Update artist profile (general) - ARTIST ONLY, must own the profile
+router.patch('/:id', verifyToken, requireArtist, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Ownership check - artist can only update their own profile
+    if (req.user.id !== parseInt(id)) {
+      return res.status(403).json({ message: 'Access denied. You can only update your own profile.' });
+    }
+
+    const allowed = ['bio', 'city', 'price_min', 'price_max', 'whatsapp', 'instagram', 'availability', 'is_available'];
+    const updates = [];
+    const values = [];
+    let idx = 1;
+
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) {
+        updates.push(`${key} = $${idx}`);
+        values.push(req.body[key]);
+        idx++;
+      }
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ message: 'No valid fields to update' });
+    }
+
+    values.push(id);
+    const result = await pool.query(
+      `UPDATE artists SET ${updates.join(', ')}, updated_at = NOW() WHERE id = $${idx} RETURNING id, full_name, stage_name, email, city, price_min, price_max, bio, is_available`,
+      values
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Artist not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error updating artist profile:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update artist profile image - ARTIST ONLY
+router.patch('/:id/profile-image', verifyToken, requireArtist, async (req, res) => {
   try {
     const { id } = req.params;
     const { profileImage } = req.body;

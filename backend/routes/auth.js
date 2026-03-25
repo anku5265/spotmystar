@@ -2,8 +2,43 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
+import { verifyToken } from '../middleware/auth.js';
 
 const router = express.Router();
+
+// Verify current token and return role + user info
+router.get('/me', verifyToken, async (req, res) => {
+  try {
+    const { id, role } = req.user;
+
+    if (role === 'artist') {
+      const result = await pool.query(
+        'SELECT id, full_name, stage_name, email, status, is_verified FROM artists WHERE id = $1',
+        [id]
+      );
+      if (result.rows.length === 0) return res.status(404).json({ message: 'Artist not found' });
+      const a = result.rows[0];
+      if (a.status === 'pending' || a.status === 'rejected' || a.status === 'inactive') {
+        return res.status(403).json({ message: 'Account not active', status: a.status });
+      }
+      return res.json({ role: 'artist', user: { id: a.id, fullName: a.full_name, stageName: a.stage_name, email: a.email, status: a.status, isVerified: a.is_verified, role: 'artist' } });
+    }
+
+    if (role === 'user') {
+      const result = await pool.query(
+        'SELECT id, name, email, phone FROM users WHERE id = $1 AND role = $2',
+        [id, 'user']
+      );
+      if (result.rows.length === 0) return res.status(404).json({ message: 'User not found' });
+      const u = result.rows[0];
+      return res.json({ role: 'user', user: { id: u.id, name: u.name, email: u.email, phone: u.phone, role: 'user' } });
+    }
+
+    return res.status(403).json({ message: 'Invalid role' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 // Artist login
 router.post('/artist/login', async (req, res) => {
@@ -22,7 +57,19 @@ router.post('/artist/login', async (req, res) => {
     }
 
     // Check artist status
-    if (artist.status === 'rejected' || artist.status === 'inactive') {
+    if (artist.status === 'pending') {
+      return res.status(403).json({ 
+        message: 'Your account is under review. Please wait for admin approval.'
+      });
+    }
+
+    if (artist.status === 'rejected') {
+      return res.status(403).json({ 
+        message: 'Your account has been rejected. Please contact support.'
+      });
+    }
+
+    if (artist.status === 'inactive') {
       return res.status(403).json({ 
         message: 'Your account is not active. Please contact support.'
       });
@@ -32,6 +79,7 @@ router.post('/artist/login', async (req, res) => {
 
     res.json({
       token,
+      role: 'artist',
       artist: {
         id: artist.id,
         fullName: artist.full_name,
@@ -39,7 +87,8 @@ router.post('/artist/login', async (req, res) => {
         email: artist.email,
         isVerified: artist.is_verified,
         status: artist.status,
-        views: artist.views
+        views: artist.views,
+        role: 'artist'
       }
     });
   } catch (error) {
@@ -99,11 +148,13 @@ router.post('/user/register', async (req, res) => {
 
     res.status(201).json({
       token,
+      role: 'user',
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
-        phone: user.phone
+        phone: user.phone,
+        role: 'user'
       }
     });
   } catch (error) {
@@ -131,11 +182,13 @@ router.post('/user/login', async (req, res) => {
 
     res.json({
       token,
+      role: 'user',
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
-        phone: user.phone
+        phone: user.phone,
+        role: 'user'
       }
     });
   } catch (error) {

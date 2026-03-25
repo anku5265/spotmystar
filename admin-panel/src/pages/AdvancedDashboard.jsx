@@ -35,7 +35,6 @@ export default function AdvancedDashboard() {
       setAdminInfo(JSON.parse(storedInfo));
     }
     
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     fetchDashboardData();
 
     const handleClickOutside = (event) => {

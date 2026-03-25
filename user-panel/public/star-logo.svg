@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <polygon points="100,20 120,80 180,80 135,115 155,175 100,140 45,175 65,115 20,80 80,80" 
+           fill="none" 
+           stroke="white" 
+           stroke-width="3"/>
+</svg>

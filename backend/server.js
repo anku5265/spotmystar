@@ -16,7 +16,21 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:5173',  // user frontend dev
+    'http://localhost:5175',  // artist panel dev
+    'http://localhost:5174',  // admin panel dev
+    process.env.FRONTEND_URL,
+    process.env.ARTIST_PANEL_URL,
+    process.env.ADMIN_PANEL_URL,
+    // Production Vercel URLs
+    'https://spotmystar.vercel.app',
+    'https://artist-spotmystar.vercel.app',
+    'https://admin-spotmystar.vercel.app',
+  ].filter(Boolean),
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

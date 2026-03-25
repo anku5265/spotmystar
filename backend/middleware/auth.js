@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import pool from '../config/db.js';
 
 // Verify JWT token
 export const verifyToken = async (req, res, next) => {

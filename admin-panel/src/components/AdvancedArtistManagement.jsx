@@ -93,14 +93,20 @@ export default function AdvancedArtistManagement() {
       case 'pending': 
       case 'submitted': return 'text-yellow-400 bg-yellow-500/20';
       case 'rejected': return 'text-red-400 bg-red-500/20';
-      case 'suspended': return 'text-orange-400 bg-orange-500/20';
+      case 'suspended': 
+      case 'inactive': return 'text-orange-400 bg-orange-500/20';
       default: return 'text-gray-400 bg-gray-500/20';
     }
   };
 
+  const displayStatus = (status) => {
+    const map = { active: 'Approved', inactive: 'Suspended' };
+    return map[status] || status;
+  };
+
   const ArtistEditModal = ({ artist, onClose, onSubmit }) => {
     const [formData, setFormData] = useState({
-      status: artist.status,
+      status: artist.status === 'active' ? 'approved' : artist.status === 'inactive' ? 'suspended' : artist.status,
       verified: artist.is_verified,
       featured: artist.featured || false,
       featuredUntil: artist.featured_until ? new Date(artist.featured_until).toISOString().slice(0, 16) : '',
@@ -121,12 +127,55 @@ export default function AdvancedArtistManagement() {
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div className="bg-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden border border-gray-700 shadow-2xl">
           <div className="p-6 border-b border-gray-700">
-            <h3 className="text-xl font-bold text-white">
-              Edit Artist: {artist.full_name}
-            </h3>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-bold text-white">Edit Artist: {artist.full_name}</h3>
+                <p className="text-sm text-gray-400 mt-1">{artist.email} • {artist.city}</p>
+              </div>
+              <button type="button" onClick={onClose} className="text-gray-400 hover:text-white p-1">✕</button>
+            </div>
+            {/* Quick Action Buttons - one click status change */}
+            <div className="flex flex-wrap gap-2 mt-4">
+              <span className="text-xs text-gray-400 self-center mr-1">Quick:</span>
+              <button
+                type="button"
+                onClick={() => { onSubmit(artist.id, { ...formData, status: 'approved', reason: 'Approved by admin' }); }}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${formData.status === 'approved' ? 'bg-green-500 border-green-500 text-white' : 'border-green-500/50 text-green-400 hover:bg-green-500 hover:text-white'}`}
+              >
+                ✓ Approve
+              </button>
+              <button
+                type="button"
+                onClick={() => { onSubmit(artist.id, { ...formData, status: 'rejected', reason: 'Rejected by admin' }); }}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${formData.status === 'rejected' ? 'bg-red-500 border-red-500 text-white' : 'border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white'}`}
+              >
+                ✕ Reject
+              </button>
+              <button
+                type="button"
+                onClick={() => { onSubmit(artist.id, { ...formData, status: 'pending', reason: 'Reset to pending' }); }}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${formData.status === 'pending' ? 'bg-yellow-500 border-yellow-500 text-white' : 'border-yellow-500/50 text-yellow-400 hover:bg-yellow-500 hover:text-white'}`}
+              >
+                ⏳ Pending
+              </button>
+              <button
+                type="button"
+                onClick={() => { onSubmit(artist.id, { ...formData, status: 'suspended', reason: 'Suspended by admin' }); }}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${formData.status === 'suspended' ? 'bg-orange-500 border-orange-500 text-white' : 'border-orange-500/50 text-orange-400 hover:bg-orange-500 hover:text-white'}`}
+              >
+                ⊘ Suspend
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, verified: !prev.verified }))}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${formData.verified ? 'bg-blue-500 border-blue-500 text-white' : 'border-blue-500/50 text-blue-400 hover:bg-blue-500 hover:text-white'}`}
+              >
+                {formData.verified ? '✓ Verified' : '◯ Unverified'}
+              </button>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+          <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-200px)]">
             {/* Status & Verification */}
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -342,7 +391,7 @@ export default function AdvancedArtistManagement() {
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400">Status:</span>
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(artist.status)}`}>
-                    {artist.status}
+                    {displayStatus(artist.status)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -603,7 +652,7 @@ export default function AdvancedArtistManagement() {
                     <td className="px-6 py-4">
                       <div className="space-y-2">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(artist.status)}`}>
-                          {artist.status}
+                          {displayStatus(artist.status)}
                         </span>
                         <div className="flex items-center gap-1">
                           <span className={`px-2 py-1 rounded text-xs font-semibold ${getRiskLevelColor(artist.risk_score)}`}>

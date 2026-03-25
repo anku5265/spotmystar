@@ -3,12 +3,12 @@ node_modules/
 package-lock.json
 yarn.lock
 
-# Environment (keeping .env for team sharing)
-# .env
+# Environment - never commit real secrets
+.env
 .env.local
 .env.production
 
-# Build
+# Build output
 dist/
 build/
 

@@ -1,6 +1,6 @@
 import express from 'express';
 import pool from '../config/db.js';
-import { verifyToken, requireUser } from '../middleware/auth.js';
+import { verifyToken, requireUser, requireArtist } from '../middleware/auth.js';
 import { generateBookingId } from '../utils/idGenerator.js';
 
 const router = express.Router();
@@ -64,8 +64,8 @@ router.post('/', verifyToken, requireUser, async (req, res) => {
   }
 });
 
-// Get bookings for logged-in user
-router.get('/my-bookings', verifyToken, async (req, res) => {
+// Get bookings for logged-in user - USER ONLY
+router.get('/my-bookings', verifyToken, requireUser, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT b.*, 
@@ -84,9 +84,12 @@ router.get('/my-bookings', verifyToken, async (req, res) => {
   }
 });
 
-// Get bookings for artist
-router.get('/artist/:artistId', verifyToken, async (req, res) => {
+// Get bookings for artist - ARTIST ONLY, must own the data
+router.get('/artist/:artistId', verifyToken, requireArtist, async (req, res) => {
   try {
+    if (req.user.id !== parseInt(req.params.artistId)) {
+      return res.status(403).json({ message: 'Access denied. You can only view your own bookings.' });
+    }
     const result = await pool.query(
       'SELECT * FROM bookings WHERE artist_id = $1 ORDER BY created_at DESC',
       [req.params.artistId]
@@ -97,10 +100,24 @@ router.get('/artist/:artistId', verifyToken, async (req, res) => {
   }
 });
 
-// Update booking status
-router.patch('/:id/status', verifyToken, async (req, res) => {
+// Update booking status - ARTIST ONLY (accept/reject their own bookings)
+router.patch('/:id/status', verifyToken, requireArtist, async (req, res) => {
   try {
     const { status } = req.body;
+    const validStatuses = ['accepted', 'rejected', 'pending'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value' });
+    }
+
+    // Verify this booking belongs to this artist
+    const booking = await pool.query('SELECT artist_id FROM bookings WHERE id = $1', [req.params.id]);
+    if (booking.rows.length === 0) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+    if (booking.rows[0].artist_id !== req.user.id) {
+      return res.status(403).json({ message: 'Access denied. This booking does not belong to you.' });
+    }
+
     const result = await pool.query(
       'UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *',
       [status, req.params.id]
