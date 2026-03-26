@@ -223,20 +223,17 @@ export default function ArtistDashboard() {
     if (!isAuthenticated) return;
 
     // Get artist ID from authUser or directly from localStorage
-    const artistId = authUser?.id || (() => {
-      try {
-        return JSON.parse(localStorage.getItem('artistData') || '{}').id;
-      } catch { return null; }
-    })();
-
-    if (!artistId) {
-      setLoading(false);
-      return;
-    }
-
+    const artistData = authUser || JSON.parse(localStorage.getItem('artistData') || '{}');
+    const artistId = artistData?.id;
     const token = localStorage.getItem('artistToken');
-    const timeout = setTimeout(() => setLoading(false), 10000);
-    fetchAllData(token, artistId).finally(() => clearTimeout(timeout));
+
+    if (artistId && token) {
+      const timeout = setTimeout(() => setLoading(false), 10000);
+      fetchAllData(token, artistId).finally(() => clearTimeout(timeout));
+    } else {
+      // No ID found — force loading off
+      setLoading(false);
+    }
   }, [isLoading, isAuthenticated, authUser]);
 
   useEffect(() => {
