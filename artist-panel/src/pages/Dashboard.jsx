@@ -220,14 +220,24 @@ export default function ArtistDashboard() {
   // ── Fetch ──
   useEffect(() => {
     if (isLoading) return;
-    if (!isAuthenticated || userRole !== 'artist') return;
-    if (authUser?.id) {
-      // Safety timeout — force loading false after 10s no matter what
-      const timeout = setTimeout(() => setLoading(false), 10000);
-      fetchAllData(localStorage.getItem('artistToken'), authUser.id)
-        .finally(() => clearTimeout(timeout));
+    if (!isAuthenticated) return;
+
+    // Get artist ID from authUser or directly from localStorage
+    const artistId = authUser?.id || (() => {
+      try {
+        return JSON.parse(localStorage.getItem('artistData') || '{}').id;
+      } catch { return null; }
+    })();
+
+    if (!artistId) {
+      setLoading(false);
+      return;
     }
-  }, [isLoading, isAuthenticated, userRole, authUser]);
+
+    const token = localStorage.getItem('artistToken');
+    const timeout = setTimeout(() => setLoading(false), 10000);
+    fetchAllData(token, artistId).finally(() => clearTimeout(timeout));
+  }, [isLoading, isAuthenticated, authUser]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
