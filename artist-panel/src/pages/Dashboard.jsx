@@ -789,10 +789,11 @@ export default function ArtistDashboard() {
 
         {/* Artist Profile — bottom of sidebar */}
         {!sidebarCollapsed && (
-          <div className="p-4 border-t border-gray-800/50 relative" ref={profileDropdownRef}>
+          <div className="p-4 border-t border-gray-800/50" ref={profileDropdownRef}>
+            {/* Click → go to profile page */}
             <button
-              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-              className="w-full flex items-center gap-3 hover:bg-gray-800/50 rounded-xl p-2 -m-2 transition-all"
+              onClick={() => { setActiveSection('profile'); setSidebarOpen(false); }}
+              className="w-full flex items-center gap-3 hover:bg-gray-800/50 rounded-xl p-2 -m-2 transition-all group"
             >
               <div className="relative flex-shrink-0">
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-sm overflow-hidden">
@@ -805,10 +806,9 @@ export default function ArtistDashboard() {
                 <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-gray-900 ${isAvailable ? 'bg-green-400' : 'bg-red-400'}`} />
               </div>
               <div className="flex-1 min-w-0 text-left">
-                <p className="font-semibold text-sm text-white truncate">{displayName}</p>
+                <p className="font-semibold text-sm text-white truncate group-hover:text-purple-400 transition">{displayName}</p>
                 <p className="text-xs text-gray-400 truncate">{artist?.primary_city || 'Artist'}</p>
               </div>
-              <ChevronDown size={14} className={`text-gray-400 transition-transform flex-shrink-0 ${showProfileDropdown ? 'rotate-180' : ''}`} />
             </button>
 
             {/* Availability Toggle */}
@@ -816,25 +816,6 @@ export default function ArtistDashboard() {
               <div className={`w-2 h-2 rounded-full ${isAvailable ? 'bg-green-400' : 'bg-red-400'}`} />
               {isAvailable ? 'Available' : 'Unavailable'}
             </button>
-
-            {/* Profile Dropdown — opens upward */}
-            {showProfileDropdown && (
-              <div className="absolute left-3 right-3 bottom-full mb-2 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden">
-                <button onClick={() => { setActiveSection('profile'); setShowProfileDropdown(false); setSidebarOpen(false); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700/50 transition text-gray-200 text-sm">
-                  <User size={16} className="text-purple-400" /> My Profile
-                </button>
-                <button onClick={() => { setActiveSection('settings'); setShowProfileDropdown(false); setSidebarOpen(false); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700/50 transition text-gray-200 text-sm">
-                  <Settings size={16} className="text-gray-400" /> Settings
-                </button>
-                <div className="border-t border-gray-700" />
-                <button onClick={logout}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-500/10 transition text-red-400 text-sm">
-                  <LogOut size={16} /> Logout
-                </button>
-              </div>
-            )}
           </div>
         )}
       </aside>
@@ -1280,6 +1261,18 @@ export default function ArtistDashboard() {
           {/* ══ PROFILE ══════════════════════════════════════════════════ */}
           {activeSection === 'profile' && (
             <div className="space-y-6 max-w-4xl">
+              {/* Profile Header Actions */}
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-white">My Profile</h2>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setActiveSection('settings')} className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-sm font-medium transition">
+                    <Settings size={15} /> Settings
+                  </button>
+                  <button onClick={logout} className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-sm font-medium transition">
+                    <LogOut size={15} /> Logout
+                  </button>
+                </div>
+              </div>
               {/* Cover + Avatar */}
               <GlassCard className="overflow-hidden">
                 <div className="h-40 bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 relative">
