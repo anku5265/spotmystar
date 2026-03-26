@@ -759,56 +759,7 @@ export default function ArtistDashboard() {
           </button>
         </div>
 
-        {/* Artist Mini Profile — clickable dropdown */}
-        {!sidebarCollapsed && (
-          <div className="p-4 border-b border-gray-800/50 relative" ref={profileDropdownRef}>
-            <button
-              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-              className="w-full flex items-center gap-3 hover:bg-gray-800/50 rounded-xl p-2 -m-2 transition-all"
-            >
-              <div className="relative flex-shrink-0">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-sm overflow-hidden">
-                  {artist?.profile_image ? (
-                    <img src={artist.profile_image} alt="Profile" className="w-full h-full object-cover" />
-                  ) : (
-                    displayName.charAt(0).toUpperCase()
-                  )}
-                </div>
-                <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-gray-900 ${isAvailable ? 'bg-green-400' : 'bg-red-400'}`} />
-              </div>
-              <div className="flex-1 min-w-0 text-left">
-                <p className="font-semibold text-sm text-white truncate">{displayName}</p>
-                <p className="text-xs text-gray-400 truncate">{artist?.primary_city || 'Artist'}</p>
-              </div>
-              <ChevronDown size={14} className={`text-gray-400 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`} />
-            </button>
-
-            {/* Profile Dropdown */}
-            {showProfileDropdown && (
-              <div className="absolute left-3 right-3 top-full mt-1 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden">
-                <button onClick={() => { setActiveSection('profile'); setShowProfileDropdown(false); setSidebarOpen(false); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700/50 transition text-gray-200 text-sm">
-                  <User size={16} className="text-purple-400" /> My Profile
-                </button>
-                <button onClick={() => { setActiveSection('settings'); setShowProfileDropdown(false); setSidebarOpen(false); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700/50 transition text-gray-200 text-sm">
-                  <Settings size={16} className="text-gray-400" /> Settings
-                </button>
-                <div className="border-t border-gray-700" />
-                <button onClick={logout}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-500/10 transition text-red-400 text-sm">
-                  <LogOut size={16} /> Logout
-                </button>
-              </div>
-            )}
-
-            {/* Availability Toggle */}
-            <button onClick={toggleAvailability} className={`mt-3 w-full flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-semibold transition-all ${isAvailable ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'}`}>
-              <div className={`w-2 h-2 rounded-full ${isAvailable ? 'bg-green-400' : 'bg-red-400'}`} />
-              {isAvailable ? 'Available' : 'Unavailable'}
-            </button>
-          </div>
-        )}
+        {/* Artist Mini Profile — clickable dropdown — BOTTOM */}
 
         {/* Nav */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
@@ -836,6 +787,56 @@ export default function ArtistDashboard() {
           ))}
         </nav>
 
+        {/* Artist Profile — bottom of sidebar */}
+        {!sidebarCollapsed && (
+          <div className="p-4 border-t border-gray-800/50 relative" ref={profileDropdownRef}>
+            <button
+              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+              className="w-full flex items-center gap-3 hover:bg-gray-800/50 rounded-xl p-2 -m-2 transition-all"
+            >
+              <div className="relative flex-shrink-0">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-sm overflow-hidden">
+                  {artist?.profile_image ? (
+                    <img src={artist.profile_image} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    displayName.charAt(0).toUpperCase()
+                  )}
+                </div>
+                <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-gray-900 ${isAvailable ? 'bg-green-400' : 'bg-red-400'}`} />
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <p className="font-semibold text-sm text-white truncate">{displayName}</p>
+                <p className="text-xs text-gray-400 truncate">{artist?.primary_city || 'Artist'}</p>
+              </div>
+              <ChevronDown size={14} className={`text-gray-400 transition-transform flex-shrink-0 ${showProfileDropdown ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* Availability Toggle */}
+            <button onClick={toggleAvailability} className={`mt-3 w-full flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-semibold transition-all ${isAvailable ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'}`}>
+              <div className={`w-2 h-2 rounded-full ${isAvailable ? 'bg-green-400' : 'bg-red-400'}`} />
+              {isAvailable ? 'Available' : 'Unavailable'}
+            </button>
+
+            {/* Profile Dropdown — opens upward */}
+            {showProfileDropdown && (
+              <div className="absolute left-3 right-3 bottom-full mb-2 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden">
+                <button onClick={() => { setActiveSection('profile'); setShowProfileDropdown(false); setSidebarOpen(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700/50 transition text-gray-200 text-sm">
+                  <User size={16} className="text-purple-400" /> My Profile
+                </button>
+                <button onClick={() => { setActiveSection('settings'); setShowProfileDropdown(false); setSidebarOpen(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700/50 transition text-gray-200 text-sm">
+                  <Settings size={16} className="text-gray-400" /> Settings
+                </button>
+                <div className="border-t border-gray-700" />
+                <button onClick={logout}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-500/10 transition text-red-400 text-sm">
+                  <LogOut size={16} /> Logout
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </aside>
 
       {/* ══════════════════════════════════════════════════════════════
