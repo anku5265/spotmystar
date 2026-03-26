@@ -133,6 +133,8 @@ export default function ArtistDashboard() {
   const [showCongratsPopup, setShowCongratsPopup] = useState(false);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const notifDropdownRef = useRef(null);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const profileDropdownRef = useRef(null);
 
   // Close notification dropdown on outside click
   useEffect(() => {
@@ -146,6 +148,19 @@ export default function ArtistDashboard() {
     }
     return () => document.removeEventListener('mousedown', handleOutside);
   }, [showNotifDropdown]);
+
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    const handleOutside = (e) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(e.target)) {
+        setShowProfileDropdown(false);
+      }
+    };
+    if (showProfileDropdown) {
+      document.addEventListener('mousedown', handleOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, [showProfileDropdown]);
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
@@ -521,12 +536,10 @@ export default function ArtistDashboard() {
     { id: 'home',          icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'bookings',      icon: CalendarDays,    label: 'Bookings',   badge: pendingRequests.length },
     { id: 'messages',      icon: MessageSquare,   label: 'Messages',   badge: conversations.reduce((a, c) => a + c.unread, 0) },
-    { id: 'profile',       icon: User,            label: 'Profile' },
     { id: 'content',       icon: Video,           label: 'Content' },
     { id: 'schedule',      icon: Calendar,        label: 'Schedule' },
     { id: 'analytics',     icon: BarChart3,       label: 'Analytics' },
     { id: 'collaborate',   icon: Handshake,       label: 'Collaborate' },
-    { id: 'settings',      icon: Settings,        label: 'Settings' },
   ];
 
   // ── Loading Screen ──
@@ -746,11 +759,14 @@ export default function ArtistDashboard() {
           </button>
         </div>
 
-        {/* Artist Mini Profile */}
+        {/* Artist Mini Profile — clickable dropdown */}
         {!sidebarCollapsed && (
-          <div className="p-4 border-b border-gray-800/50">
-            <div className="flex items-center gap-3">
-              <div className="relative">
+          <div className="p-4 border-b border-gray-800/50 relative" ref={profileDropdownRef}>
+            <button
+              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+              className="w-full flex items-center gap-3 hover:bg-gray-800/50 rounded-xl p-2 -m-2 transition-all"
+            >
+              <div className="relative flex-shrink-0">
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-sm overflow-hidden">
                   {artist?.profile_image ? (
                     <img src={artist.profile_image} alt="Profile" className="w-full h-full object-cover" />
@@ -760,11 +776,32 @@ export default function ArtistDashboard() {
                 </div>
                 <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-gray-900 ${isAvailable ? 'bg-green-400' : 'bg-red-400'}`} />
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 text-left">
                 <p className="font-semibold text-sm text-white truncate">{displayName}</p>
                 <p className="text-xs text-gray-400 truncate">{artist?.primary_city || 'Artist'}</p>
               </div>
-            </div>
+              <ChevronDown size={14} className={`text-gray-400 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* Profile Dropdown */}
+            {showProfileDropdown && (
+              <div className="absolute left-3 right-3 top-full mt-1 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden">
+                <button onClick={() => { setActiveSection('profile'); setShowProfileDropdown(false); setSidebarOpen(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700/50 transition text-gray-200 text-sm">
+                  <User size={16} className="text-purple-400" /> My Profile
+                </button>
+                <button onClick={() => { setActiveSection('settings'); setShowProfileDropdown(false); setSidebarOpen(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700/50 transition text-gray-200 text-sm">
+                  <Settings size={16} className="text-gray-400" /> Settings
+                </button>
+                <div className="border-t border-gray-700" />
+                <button onClick={logout}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-500/10 transition text-red-400 text-sm">
+                  <LogOut size={16} /> Logout
+                </button>
+              </div>
+            )}
+
             {/* Availability Toggle */}
             <button onClick={toggleAvailability} className={`mt-3 w-full flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-semibold transition-all ${isAvailable ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'}`}>
               <div className={`w-2 h-2 rounded-full ${isAvailable ? 'bg-green-400' : 'bg-red-400'}`} />
@@ -799,13 +836,6 @@ export default function ArtistDashboard() {
           ))}
         </nav>
 
-        {/* Logout */}
-        <div className="p-3 border-t border-gray-800/50">
-          <button onClick={logout} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400 hover:bg-red-500/10 transition-all ${sidebarCollapsed ? 'justify-center' : ''}`}>
-            <LogOut size={18} />
-            {!sidebarCollapsed && <span className="text-sm font-medium">Logout</span>}
-          </button>
-        </div>
       </aside>
 
       {/* ══════════════════════════════════════════════════════════════
