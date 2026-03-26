@@ -133,6 +133,19 @@ export default function ArtistDashboard() {
   const [showCongratsPopup, setShowCongratsPopup] = useState(false);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const notifDropdownRef = useRef(null);
+
+  // Close notification dropdown on outside click
+  useEffect(() => {
+    const handleOutside = (e) => {
+      if (notifDropdownRef.current && !notifDropdownRef.current.contains(e.target)) {
+        setShowNotifDropdown(false);
+      }
+    };
+    if (showNotifDropdown) {
+      document.addEventListener('mousedown', handleOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, [showNotifDropdown]);
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
@@ -824,9 +837,7 @@ export default function ArtistDashboard() {
               </button>
 
               {showNotifDropdown && (
-                <>
-                  <div className="fixed inset-0 z-[9998]" onClick={() => setShowNotifDropdown(false)} />
-                  <div className="fixed right-4 top-16 w-96 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-[9999] overflow-hidden animate-slide-in-right">
+                <div className="fixed right-4 top-16 w-96 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-[9999] overflow-hidden animate-slide-in-right">
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-purple-500/20 to-blue-500/20 border-b border-gray-700">
                       <div className="flex items-center gap-2">
@@ -883,7 +894,6 @@ export default function ArtistDashboard() {
                       ))}
                     </div>
                   </div>
-                </>
               )}
             </div>
             {/* Availability */}
