@@ -844,7 +844,7 @@ export default function ArtistDashboard() {
                       </div>
                     </div>
                     {/* List */}
-                    <div className="max-h-96 overflow-y-auto">
+                    <div className="max-h-96 overflow-y-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                       {notifications.length === 0 ? (
                         <div className="p-8 text-center text-gray-500">
                           <Bell size={32} className="mx-auto mb-2 opacity-30" />
