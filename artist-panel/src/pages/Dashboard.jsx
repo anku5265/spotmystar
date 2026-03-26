@@ -760,7 +760,7 @@ export default function ArtistDashboard() {
         )}
 
         {/* Nav */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {navItems.map(({ id, icon: Icon, label, badge }) => (
             <button
               key={id}

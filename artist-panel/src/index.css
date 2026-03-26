@@ -47,4 +47,9 @@
   .animate-bounce-in {
     animation: bounce-in 0.5s ease-out;
   }
+
+  /* Hide scrollbar everywhere */
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }
