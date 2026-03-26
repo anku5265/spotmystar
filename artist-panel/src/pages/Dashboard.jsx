@@ -131,6 +131,8 @@ export default function ArtistDashboard() {
   const profilePicInputRef = useRef(null);
   const [profilePicUploading, setProfilePicUploading] = useState(false);
   const [showCongratsPopup, setShowCongratsPopup] = useState(false);
+  const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+  const notifDropdownRef = useRef(null);
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
@@ -510,7 +512,6 @@ export default function ArtistDashboard() {
     { id: 'content',       icon: Video,           label: 'Content' },
     { id: 'schedule',      icon: Calendar,        label: 'Schedule' },
     { id: 'analytics',     icon: BarChart3,       label: 'Analytics' },
-    { id: 'notifications', icon: Bell,            label: 'Alerts',     badge: notifications.filter(n => !n.read).length },
     { id: 'collaborate',   icon: Handshake,       label: 'Collaborate' },
     { id: 'settings',      icon: Settings,        label: 'Settings' },
   ];
@@ -815,12 +816,75 @@ export default function ArtistDashboard() {
             <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition text-sm">
               {darkMode ? '☀️' : '🌙'}
             </button>
-            {/* Notification Bell */}
-            <div className="relative">
-              <button onClick={() => setActiveSection('notifications')} className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition relative">
+            {/* Notification Bell — dropdown */}
+            <div className="relative" ref={notifDropdownRef}>
+              <button onClick={() => setShowNotifDropdown(!showNotifDropdown)} className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition relative">
                 <Bell size={20} />
-                {unreadNotifs > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />}
+                {unreadNotifs > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />}
               </button>
+
+              {showNotifDropdown && (
+                <>
+                  <div className="fixed inset-0 z-[9998]" onClick={() => setShowNotifDropdown(false)} />
+                  <div className="fixed right-4 top-16 w-96 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-[9999] overflow-hidden animate-slide-in-right">
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-purple-500/20 to-blue-500/20 border-b border-gray-700">
+                      <div className="flex items-center gap-2">
+                        <Bell size={16} className="text-purple-400" />
+                        <span className="font-semibold text-white text-sm">Notifications</span>
+                        {unreadNotifs > 0 && <span className="bg-purple-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{unreadNotifs}</span>}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {unreadNotifs > 0 && (
+                          <button onClick={markAllRead} className="text-xs text-purple-400 hover:text-purple-300 transition font-medium">Mark all read</button>
+                        )}
+                        <button onClick={() => setShowNotifDropdown(false)} className="text-gray-400 hover:text-white transition p-1 rounded-lg hover:bg-gray-700">
+                          <X size={16} />
+                        </button>
+                      </div>
+                    </div>
+                    {/* List */}
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-8 text-center text-gray-500">
+                          <Bell size={32} className="mx-auto mb-2 opacity-30" />
+                          <p className="text-sm">No notifications</p>
+                        </div>
+                      ) : notifications.map(notif => (
+                        <div
+                          key={notif.id}
+                          onClick={() => { markNotificationRead(notif.id); setShowNotifDropdown(false); }}
+                          className={`flex items-start gap-3 p-4 border-b border-gray-800/50 hover:bg-gray-800/50 cursor-pointer transition ${
+                            notif.isCongrats ? 'bg-gradient-to-r from-yellow-500/10 to-purple-500/10' :
+                            !notif.read ? 'bg-purple-500/5' : ''
+                          }`}
+                        >
+                          <div className={`p-2 rounded-xl flex-shrink-0 ${
+                            notif.type === 'booking' ? 'bg-blue-500/20 text-blue-400' :
+                            notif.type === 'message' ? 'bg-green-500/20 text-green-400' :
+                            notif.type === 'event' ? 'bg-purple-500/20 text-purple-400' :
+                            notif.isCongrats ? 'bg-yellow-500/20 text-yellow-400' :
+                            'bg-gray-700/50 text-gray-400'
+                          }`}>
+                            {notif.type === 'booking' ? <CalendarDays size={14} /> :
+                             notif.type === 'message' ? <MessageSquare size={14} /> :
+                             notif.type === 'event' ? <Zap size={14} /> :
+                             <Bell size={14} />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="font-semibold text-white text-xs truncate">{notif.title}</p>
+                              {!notif.read && <div className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0" />}
+                            </div>
+                            <p className="text-gray-400 text-xs mt-0.5 line-clamp-2">{notif.message}</p>
+                            <p className="text-gray-600 text-xs mt-1">{notif.time}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
             {/* Availability */}
             <button onClick={toggleAvailability} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${isAvailable ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'}`}>
