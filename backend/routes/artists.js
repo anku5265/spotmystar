@@ -25,25 +25,21 @@ router.get('/search', async (req, res) => {
       params.push(`%${city}%`);
       paramCount++;
     }
-
     if (category) {
       query += ` AND a.category_id = $${paramCount}`;
       params.push(category);
       paramCount++;
     }
-
     if (minPrice) {
       query += ` AND a.price_min >= $${paramCount}`;
       params.push(parseInt(minPrice));
       paramCount++;
     }
-
     if (maxPrice) {
       query += ` AND a.price_max <= $${paramCount}`;
       params.push(parseInt(maxPrice));
       paramCount++;
     }
-
     if (search) {
       query += ` AND (LOWER(a.full_name) LIKE LOWER($${paramCount}) OR LOWER(a.stage_name) LIKE LOWER($${paramCount}))`;
       params.push(`%${search}%`);
@@ -51,7 +47,6 @@ router.get('/search', async (req, res) => {
     }
 
     query += ' ORDER BY a.rating DESC, a.total_bookings DESC';
-
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (error) {
@@ -76,11 +71,11 @@ router.get('/featured', async (req, res) => {
   }
 });
 
-// Get artist by stage name or ID (public - increments views)
+// Get artist by stage name or ID
 router.get('/:identifier', async (req, res) => {
   try {
     const { identifier } = req.params;
-    const { skipViewCount } = req.query; // Add query parameter to skip view increment
+    const { skipViewCount } = req.query;
     
     const result = await pool.query(`
       SELECT a.*, c.name as category_name 
@@ -93,7 +88,6 @@ router.get('/:identifier', async (req, res) => {
       return res.status(404).json({ message: 'Artist not found' });
     }
 
-    // Increment views only if skipViewCount is not true
     if (skipViewCount !== 'true') {
       await pool.query('UPDATE artists SET views = views + 1 WHERE id = $1', [result.rows[0].id]);
     }
@@ -104,13 +98,12 @@ router.get('/:identifier', async (req, res) => {
   }
 });
 
-// Artist registration (supports both old and new multi-category format)
+// Artist registration
 router.post('/register', async (req, res) => {
   try {
     const {
       fullName, stageName, category, bio, city, priceMin, priceMax,
       email, whatsapp, instagram, password,
-      // New format fields
       phone, categories, primaryCategory, shortBio, primaryCity,
       pricingModel, youtube, facebook, twitter, linkedin, website,
     } = req.body;
@@ -119,7 +112,6 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Please provide all required fields' });
     }
 
-    // Check if artist exists
     const existing = await pool.query(
       'SELECT * FROM artists WHERE email = $1 OR stage_name = $2',
       [email, stageName]
@@ -129,11 +121,7 @@ router.post('/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Determine category_id - use first selected category or single category
     const categoryId = (categories && categories.length > 0) ? categories[0] : category || null;
-
-    // Use schema-compatible columns only
     const contactPhone = phone || whatsapp || '';
     const artistBio = shortBio || bio || '';
     const artistCity = primaryCity || city || '';
@@ -177,36 +165,36 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Update artist profile (general) - ARTIST ONLY, must own the profile
+// Update artist profile — ARTIST ONLY
 router.patch('/:id', verifyToken, requireArtist, async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Ownership check - artist can only update their own profile
+    // UUID-safe ownership check
     if (String(req.user.id) !== String(id)) {
       return res.status(403).json({ message: 'Access denied. You can only update your own profile.' });
     }
 
     const allowed = ['bio', 'short_bio', 'city', 'price_min', 'price_max', 'whatsapp', 'instagram', 'availability', 'is_available'];
-    const updates = [];
+    const setClauses = [];
     const values = [];
     let idx = 1;
 
     for (const key of allowed) {
       if (req.body[key] !== undefined) {
-        updates.push(`${key} = $${idx}`);
+        setClauses.push(`${key} = $${idx}`);
         values.push(req.body[key]);
         idx++;
       }
     }
 
-    if (updates.length === 0) {
+    if (setClauses.length === 0) {
       return res.status(400).json({ message: 'No valid fields to update' });
     }
 
     values.push(id);
     const result = await pool.query(
-      `UPDATE artists SET ${updates.join(', ')}, updated_at = NOW() WHERE id = $${idx} RETURNING id, full_name, stage_name, email, city, price_min, price_max, bio, is_available`,
+      `UPDATE artists SET ${setClauses.join(', ')}, updated_at = NOW() WHERE id = $${idx} RETURNING id, full_name, stage_name, email, city, price_min, price_max, bio, is_available`,
       values
     );
 
@@ -221,7 +209,7 @@ router.patch('/:id', verifyToken, requireArtist, async (req, res) => {
   }
 });
 
-// Update artist profile image - ARTIST ONLY
+// Update artist profile image — ARTIST ONLY
 router.patch('/:id/profile-image', verifyToken, requireArtist, async (req, res) => {
   try {
     const { id } = req.params;
