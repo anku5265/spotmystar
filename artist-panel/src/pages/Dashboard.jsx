@@ -358,13 +358,21 @@ export default function ArtistDashboard() {
   };
 
   const toggleAvailability = async () => {
+    const next = !isAvailable;
+    // Optimistic update — UI turant change ho
+    setIsAvailable(next);
+    setToast({ message: `Status: ${next ? 'Available ✅' : 'Unavailable 🔴'}`, type: 'success' });
     try {
       const token = localStorage.getItem('artistToken');
-      const next = !isAvailable;
-      await api.patch(`/api/artist-analytics/availability/${artist.id}`, { isAvailable: next }, { headers: { Authorization: `Bearer ${token}` } });
-      setIsAvailable(next);
-      setToast({ message: `Status: ${next ? 'Available ✅' : 'Unavailable 🔴'}`, type: 'success' });
-    } catch { setToast({ message: 'Update failed', type: 'error' }); }
+      const artistData = JSON.parse(localStorage.getItem('artistData') || '{}');
+      const id = artist?.id || artistData?.id;
+      if (!id) return;
+      await api.patch(`/api/artists/${id}`, { is_available: next }, { headers: { Authorization: `Bearer ${token}` } });
+    } catch {
+      // Revert on failure
+      setIsAvailable(!next);
+      setToast({ message: 'Update failed', type: 'error' });
+    }
   };
 
   const handleBookingAction = async (bookingId, action) => {

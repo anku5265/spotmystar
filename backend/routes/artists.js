@@ -183,11 +183,11 @@ router.patch('/:id', verifyToken, requireArtist, async (req, res) => {
     const { id } = req.params;
 
     // Ownership check - artist can only update their own profile
-    if (req.user.id !== parseInt(id)) {
+    if (String(req.user.id) !== String(id)) {
       return res.status(403).json({ message: 'Access denied. You can only update your own profile.' });
     }
 
-    const allowed = ['bio', 'city', 'price_min', 'price_max', 'whatsapp', 'instagram', 'availability', 'is_available'];
+    const allowed = ['bio', 'short_bio', 'city', 'price_min', 'price_max', 'whatsapp', 'instagram', 'availability', 'is_available'];
     const updates = [];
     const values = [];
     let idx = 1;
