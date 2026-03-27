@@ -553,10 +553,40 @@ export default function ArtistDashboard() {
   // ── Loading Screen ──
   if (isLoading || loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-400 text-lg">Loading your dashboard...</p>
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center overflow-hidden relative">
+        {/* Background glow effects */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+
+        <div className="relative text-center z-10">
+          {/* Logo */}
+          <div className="flex items-center justify-center gap-3 mb-10">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/30">
+              <Star size={24} className="text-white" />
+            </div>
+            <span className="text-2xl font-black bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+              SpotMyStar
+            </span>
+          </div>
+
+          {/* Animated rings */}
+          <div className="relative inline-flex items-center justify-center mb-8">
+            <div className="absolute w-24 h-24 rounded-full border border-purple-500/20 animate-ping" />
+            <div className="absolute w-20 h-20 rounded-full border-2 border-purple-500/30 animate-spin" style={{ animationDuration: '3s' }} />
+            <div className="absolute w-16 h-16 rounded-full border-2 border-blue-500/40 animate-spin" style={{ animationDuration: '2s', animationDirection: 'reverse' }} />
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-xl shadow-purple-500/40">
+              <div className="w-4 h-4 bg-white rounded-full animate-pulse" />
+            </div>
+          </div>
+
+          {/* Text */}
+          <p className="text-white font-semibold text-lg mb-2">Setting up your dashboard</p>
+          <p className="text-gray-500 text-sm mb-8">Fetching your profile & bookings...</p>
+
+          {/* Loading bar */}
+          <div className="w-48 h-1 bg-gray-800 rounded-full mx-auto overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full animate-loading-bar" />
+          </div>
         </div>
       </div>
     );
