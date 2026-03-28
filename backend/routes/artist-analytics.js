@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../config/db.js';
 import { verifyToken, requireArtist } from '../middleware/auth.js';
+import { requirePermission } from '../middleware/permissions.js';
 
 const router = express.Router();
 
@@ -8,7 +9,7 @@ const router = express.Router();
 const ownsResource = (req, artistId) => String(req.user.id) === String(artistId);
 
 // Get artist analytics stats
-router.get('/stats/:artistId', verifyToken, requireArtist, async (req, res) => {
+router.get('/stats/:artistId', verifyToken, requireArtist, requirePermission('view_analytics'), async (req, res) => {
   try {
     const { artistId } = req.params;
     const { filter = 'monthly' } = req.query;
@@ -62,7 +63,7 @@ router.get('/stats/:artistId', verifyToken, requireArtist, async (req, res) => {
 });
 
 // Get pending booking requests
-router.get('/pending-requests/:artistId', verifyToken, requireArtist, async (req, res) => {
+router.get('/pending-requests/:artistId', verifyToken, requireArtist, requirePermission('manage_bookings'), async (req, res) => {
   try {
     const { artistId } = req.params;
     if (!ownsResource(req, artistId)) return res.status(403).json({ message: 'Access denied' });
@@ -81,7 +82,7 @@ router.get('/pending-requests/:artistId', verifyToken, requireArtist, async (req
 });
 
 // Get recent enquiries
-router.get('/recent-enquiries/:artistId', verifyToken, requireArtist, async (req, res) => {
+router.get('/recent-enquiries/:artistId', verifyToken, requireArtist, requirePermission('manage_bookings'), async (req, res) => {
   try {
     const { artistId } = req.params;
     const { limit = 5 } = req.query;
@@ -100,7 +101,7 @@ router.get('/recent-enquiries/:artistId', verifyToken, requireArtist, async (req
 });
 
 // Get upcoming events
-router.get('/upcoming-events/:artistId', verifyToken, requireArtist, async (req, res) => {
+router.get('/upcoming-events/:artistId', verifyToken, requireArtist, requirePermission('manage_schedule'), async (req, res) => {
   try {
     const { artistId } = req.params;
     if (!ownsResource(req, artistId)) return res.status(403).json({ message: 'Access denied' });
@@ -119,7 +120,7 @@ router.get('/upcoming-events/:artistId', verifyToken, requireArtist, async (req,
 });
 
 // Update availability
-router.patch('/availability/:artistId', verifyToken, requireArtist, async (req, res) => {
+router.patch('/availability/:artistId', verifyToken, requireArtist, requirePermission('manage_profile'), async (req, res) => {
   try {
     const { artistId } = req.params;
     const { isAvailable } = req.body;

@@ -3,10 +3,11 @@ import pool from '../config/db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { verifyToken, requireArtist } from '../middleware/auth.js';
+import { requirePermission } from '../middleware/permissions.js';
 
 const router = express.Router();
 
-// Search artists with filters
+// Search artists — public
 router.get('/search', async (req, res) => {
   try {
     const { city, category, minPrice, maxPrice, search } = req.query;
@@ -26,7 +27,7 @@ router.get('/search', async (req, res) => {
   }
 });
 
-// Get featured artists
+// Featured artists — public
 router.get('/featured', async (req, res) => {
   try {
     const result = await pool.query(`SELECT a.*, c.name as category_name FROM artists a LEFT JOIN categories c ON a.category_id = c.id WHERE (a.status = 'active' OR a.status = 'approved') AND a.is_verified = true ORDER BY a.rating DESC, a.total_bookings DESC LIMIT 6`);
@@ -36,7 +37,7 @@ router.get('/featured', async (req, res) => {
   }
 });
 
-// Get artist by stage name or ID
+// Get artist by ID or stage name — public
 router.get('/:identifier', async (req, res) => {
   try {
     const { identifier } = req.params;
@@ -52,10 +53,10 @@ router.get('/:identifier', async (req, res) => {
   }
 });
 
-// Artist registration
+// Artist registration — public
 router.post('/register', async (req, res) => {
   try {
-    const { fullName, stageName, category, bio, city, priceMin, priceMax, email, whatsapp, instagram, password, phone, categories, primaryCategory, shortBio, primaryCity } = req.body;
+    const { fullName, stageName, category, bio, city, priceMin, priceMax, email, whatsapp, instagram, password, phone, categories, shortBio, primaryCity } = req.body;
     if (!fullName || !stageName || !email || !password) return res.status(400).json({ message: 'Please provide all required fields' });
     const existing = await pool.query('SELECT * FROM artists WHERE email = $1 OR stage_name = $2', [email, stageName]);
     if (existing.rows.length > 0) return res.status(400).json({ message: 'Artist already exists with this email or stage name' });
@@ -74,8 +75,8 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Update artist profile — ARTIST ONLY
-router.patch('/:id', verifyToken, requireArtist, async (req, res) => {
+// Update artist profile — requires manage_profile permission
+router.patch('/:id', verifyToken, requireArtist, requirePermission('manage_profile'), async (req, res) => {
   try {
     const { id } = req.params;
     if (String(req.user.id) !== String(id)) {
@@ -104,8 +105,8 @@ router.patch('/:id', verifyToken, requireArtist, async (req, res) => {
   }
 });
 
-// Update artist profile image — ARTIST ONLY
-router.patch('/:id/profile-image', verifyToken, requireArtist, async (req, res) => {
+// Update profile image — requires manage_profile permission
+router.patch('/:id/profile-image', verifyToken, requireArtist, requirePermission('manage_profile'), async (req, res) => {
   try {
     const { id } = req.params;
     const { profileImage } = req.body;
@@ -114,7 +115,6 @@ router.patch('/:id/profile-image', verifyToken, requireArtist, async (req, res) 
     if (result.rows.length === 0) return res.status(404).json({ message: 'Artist not found' });
     res.json({ profileImage: result.rows[0].profile_image });
   } catch (error) {
-    console.error('Error updating profile image:', error);
     res.status(500).json({ message: error.message });
   }
 });

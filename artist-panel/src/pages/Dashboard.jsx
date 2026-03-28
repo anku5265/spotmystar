@@ -20,6 +20,7 @@ import { supabase } from '../config/supabase';
 import Toast from '../components/Toast';
 import NotificationBell from '../components/NotificationBell';
 import { useAuth } from '../hooks/useAuth';
+import { usePermissions } from '../hooks/usePermissions';
 
 // ─── Glass Card ────────────────────────────────────────────────────────────
 const GlassCard = ({ children, className = '', hover = true, glow = false }) => (
@@ -123,6 +124,7 @@ const LeadScore = ({ score }) => {
 export default function ArtistDashboard() {
   const navigate = useNavigate();
   const { isAuthenticated, userRole, user: authUser, isLoading, logout } = useAuth('artist');
+  const { hasPermission } = usePermissions('artist');
 
   // ── UI State ──
   const [activeSection, setActiveSection] = useState('home');
@@ -540,15 +542,17 @@ export default function ArtistDashboard() {
   });
 
   // ── Nav Items ──
-  const navItems = [
-    { id: 'home',          icon: LayoutDashboard, label: 'Dashboard' },
-    { id: 'bookings',      icon: CalendarDays,    label: 'Bookings',   badge: pendingRequests.length },
-    { id: 'messages',      icon: MessageSquare,   label: 'Messages',   badge: conversations.reduce((a, c) => a + c.unread, 0) },
-    { id: 'content',       icon: Video,           label: 'Content' },
-    { id: 'schedule',      icon: Calendar,        label: 'Schedule' },
-    { id: 'analytics',     icon: BarChart3,       label: 'Analytics' },
-    { id: 'collaborate',   icon: Handshake,       label: 'Collaborate' },
+  // Nav items — filtered by permissions from DB
+  const allNavItems = [
+    { id: 'home',        icon: LayoutDashboard, label: 'Dashboard',   permission: 'view_artist_dashboard' },
+    { id: 'bookings',    icon: CalendarDays,    label: 'Bookings',    permission: 'manage_bookings',  badge: pendingRequests.length },
+    { id: 'messages',    icon: MessageSquare,   label: 'Messages',    permission: 'view_artist_dashboard', badge: conversations.reduce((a, c) => a + c.unread, 0) },
+    { id: 'content',     icon: Video,           label: 'Content',     permission: 'manage_content' },
+    { id: 'schedule',    icon: Calendar,        label: 'Schedule',    permission: 'manage_schedule' },
+    { id: 'analytics',   icon: BarChart3,       label: 'Analytics',   permission: 'view_analytics' },
+    { id: 'collaborate', icon: Handshake,       label: 'Collaborate', permission: 'view_artist_dashboard' },
   ];
+  const navItems = allNavItems.filter(item => hasPermission(item.permission));
 
   // ── Loading Screen ──
   if (isLoading || loading) {

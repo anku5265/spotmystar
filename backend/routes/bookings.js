@@ -2,11 +2,12 @@ import express from 'express';
 import pool from '../config/db.js';
 import { verifyToken, requireUser, requireArtist } from '../middleware/auth.js';
 import { generateBookingId } from '../utils/idGenerator.js';
+import { requirePermission } from '../middleware/permissions.js';
 
 const router = express.Router();
 
 // Create booking request - USER ONLY
-router.post('/', verifyToken, requireUser, async (req, res) => {
+router.post('/', verifyToken, requireUser, requirePermission('book_artist'), async (req, res) => {
   try {
     const { artistId, userName, phone, email, eventDate, eventLocation, budget, message } = req.body;
 

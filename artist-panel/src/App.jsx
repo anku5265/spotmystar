@@ -14,6 +14,7 @@ function AccountStatusChecker() {
   const location = useLocation();
 
   useEffect(() => {
+    // Get excluded paths from routes_config or use defaults
     const excludedPaths = ['/login', '/register', '/account-blocked', '/account-reactivated'];
     if (excludedPaths.some(path => location.pathname.startsWith(path))) return;
 
@@ -50,7 +51,7 @@ function App() {
     <BrowserRouter>
       <AccountStatusChecker />
       <Routes>
-        {/* Public only (redirect to dashboard if logged in) */}
+        {/* Public only — redirect to dashboard if logged in */}
         <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
         <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
 
@@ -58,19 +59,19 @@ function App() {
         <Route path="/account-blocked" element={<AccountBlocked />} />
         <Route path="/account-reactivated" element={<AccountReactivated />} />
 
-        {/* Protected */}
+        {/* Protected — requires valid artist token */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
-        {/* Default: redirect to login */}
+        {/* Default */}
         <Route path="/" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
 
         {/* 404 */}
         <Route path="*" element={
-          <div className="min-h-screen flex items-center justify-center">
+          <div className="min-h-screen bg-gray-950 flex items-center justify-center">
             <div className="text-center">
               <h1 className="text-6xl font-bold text-gray-300 mb-4">404</h1>
               <p className="text-gray-500 mb-6">Page not found</p>
-              <a href="/dashboard" className="text-primary hover:underline">Go to Dashboard</a>
+              <a href="/dashboard" className="text-purple-400 hover:underline">Go to Dashboard</a>
             </div>
           </div>
         } />
