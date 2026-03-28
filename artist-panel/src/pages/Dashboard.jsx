@@ -946,11 +946,6 @@ export default function ArtistDashboard() {
                   </div>
               )}
             </div>
-            {/* Availability */}
-            <button onClick={toggleAvailability} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${isAvailable ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'}`}>
-              <div className={`w-1.5 h-1.5 rounded-full ${isAvailable ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
-              {isAvailable ? 'Available' : 'Busy'}
-            </button>
           </div>
         </header>
 
