@@ -852,12 +852,6 @@ export default function ArtistDashboard() {
                 <p className="text-xs text-gray-400 truncate">{artist?.primary_city || 'Artist'}</p>
               </div>
             </button>
-
-            {/* Availability Toggle */}
-            <button onClick={toggleAvailability} className={`mt-3 w-full flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-semibold transition-all ${isAvailable ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'}`}>
-              <div className={`w-2 h-2 rounded-full ${isAvailable ? 'bg-green-400' : 'bg-red-400'}`} />
-              {isAvailable ? 'Available' : 'Unavailable'}
-            </button>
           </div>
         )}
       </aside>
