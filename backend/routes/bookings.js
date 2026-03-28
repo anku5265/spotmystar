@@ -87,7 +87,7 @@ router.get('/my-bookings', verifyToken, requireUser, async (req, res) => {
 // Get bookings for artist - ARTIST ONLY, must own the data
 router.get('/artist/:artistId', verifyToken, requireArtist, async (req, res) => {
   try {
-    if (req.user.id !== parseInt(req.params.artistId)) {
+    if (String(req.user.id) !== String(req.params.artistId)) {
       return res.status(403).json({ message: 'Access denied. You can only view your own bookings.' });
     }
     const result = await pool.query(
@@ -114,7 +114,7 @@ router.patch('/:id/status', verifyToken, requireArtist, async (req, res) => {
     if (booking.rows.length === 0) {
       return res.status(404).json({ message: 'Booking not found' });
     }
-    if (booking.rows[0].artist_id !== req.user.id) {
+    if (String(booking.rows[0].artist_id) !== String(req.user.id)) {
       return res.status(403).json({ message: 'Access denied. This booking does not belong to you.' });
     }
 

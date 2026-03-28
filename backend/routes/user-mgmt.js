@@ -9,7 +9,7 @@ const router = express.Router();
 router.get('/check-status/user/:id', verifyToken, async (req, res) => {
   try {
     // Users can only check their own status
-    if (req.user.role === 'user' && req.user.id !== parseInt(req.params.id)) {
+    if (req.user.role === 'user' && String(req.user.id) !== String(req.params.id)) {
       return res.status(403).json({ message: 'Access denied' });
     }
     const result = await pool.query(
@@ -27,7 +27,7 @@ router.get('/check-status/user/:id', verifyToken, async (req, res) => {
 
 router.get('/check-status/artist/:id', verifyToken, async (req, res) => {
   try {
-    if (req.user.role === 'artist' && req.user.id !== parseInt(req.params.id)) {
+    if (req.user.role === 'artist' && String(req.user.id) !== String(req.params.id)) {
       return res.status(403).json({ message: 'Access denied' });
     }
     const result = await pool.query(
