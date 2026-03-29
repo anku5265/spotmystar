@@ -14,11 +14,11 @@ router.get('/search', async (req, res) => {
     let query = `SELECT a.*, c.name as category_name FROM artists a LEFT JOIN categories c ON a.category_id = c.id WHERE (a.status = 'active' OR a.status = 'approved') AND a.is_verified = true`;
     const params = [];
     let p = 1;
-    if (city) { query += ` AND LOWER(a.city) LIKE LOWER($${p})`; params.push(`%${city}%`); p++; }
-    if (category) { query += ` AND a.category_id = $${p}`; params.push(category); p++; }
-    if (minPrice) { query += ` AND a.price_min >= $${p}`; params.push(parseInt(minPrice)); p++; }
-    if (maxPrice) { query += ` AND a.price_max <= $${p}`; params.push(parseInt(maxPrice)); p++; }
-    if (search) { query += ` AND (LOWER(a.full_name) LIKE LOWER($${p}) OR LOWER(a.stage_name) LIKE LOWER($${p}))`; params.push(`%${search}%`); p++; }
+    if (city) { query += ' AND LOWER(a.city) LIKE LOWER($' + p + ')'; params.push('%' + city + '%'); p++; }
+    if (category) { query += ' AND a.category_id = $' + p; params.push(category); p++; }
+    if (minPrice) { query += ' AND a.price_min >= $' + p; params.push(parseInt(minPrice)); p++; }
+    if (maxPrice) { query += ' AND a.price_max <= $' + p; params.push(parseInt(maxPrice)); p++; }
+    if (search) { query += ' AND (LOWER(a.full_name) LIKE LOWER($' + p + ') OR LOWER(a.stage_name) LIKE LOWER($' + p + '))'; params.push('%' + search + '%'); p++; }
     query += ' ORDER BY a.rating DESC, a.total_bookings DESC';
     const result = await pool.query(query, params);
     res.json(result.rows);

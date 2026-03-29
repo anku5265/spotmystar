@@ -494,14 +494,9 @@ export default function ArtistDashboard() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!supabase) {
-      setToast({ message: 'Storage not configured. Add Supabase env vars in Vercel.', type: 'error' });
-      return;
-    }
-
-    // Validate size (2MB max)
-    if (file.size > 2 * 1024 * 1024) {
-      setToast({ message: 'Image too large. Max 2MB allowed.', type: 'error' });
+    // Validate size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setToast({ message: 'Image too large. Max 5MB allowed.', type: 'error' });
       return;
     }
 
@@ -513,24 +508,38 @@ export default function ArtistDashboard() {
 
     setProfilePicUploading(true);
     try {
-      const ext = file.name.split('.').pop();
-      const fileName = `artist_${artist.id}_${Date.now()}.${ext}`;
-      const filePath = `${fileName}`;
-
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('artist-profiles')
-        .upload(filePath, file, { upsert: true, contentType: file.type });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('artist-profiles')
-        .getPublicUrl(filePath);
-
-      // Save URL to DB via backend
       const token = localStorage.getItem('artistToken');
+      let publicUrl = null;
+
+      // Try Supabase direct upload first (if configured)
+      if (supabase) {
+        const ext = file.name.split('.').pop() || 'jpg';
+        const fileName = `artist_${artist.id}_${Date.now()}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from('artist-profiles')
+          .upload(fileName, file, { upsert: true, contentType: file.type });
+
+        if (!uploadError) {
+          const { data: { publicUrl: url } } = supabase.storage
+            .from('artist-profiles')
+            .getPublicUrl(fileName);
+          publicUrl = url;
+        }
+      }
+
+      // Fallback: use backend upload API
+      if (!publicUrl) {
+        const formData = new FormData();
+        formData.append('image', file);
+        const { data } = await api.post('/api/upload/image?folder=profiles', formData, {
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+        });
+        publicUrl = data.url;
+      }
+
+      if (!publicUrl) throw new Error('Upload failed — no URL returned');
+
+      // Save URL to DB
       await api.patch(`/api/artists/${artist.id}/profile-image`,
         { profileImage: publicUrl },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -539,8 +548,8 @@ export default function ArtistDashboard() {
       setArtist({ ...artist, profile_image: publicUrl });
       setToast({ message: 'Profile picture updated!', type: 'success' });
     } catch (err) {
-      console.error(err);
-      setToast({ message: 'Upload failed. Make sure Supabase bucket exists.', type: 'error' });
+      console.error('Upload error:', err);
+      setToast({ message: err.response?.data?.message || 'Upload failed. Please try again.', type: 'error' });
     } finally {
       setProfilePicUploading(false);
       e.target.value = '';
