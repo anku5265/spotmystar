@@ -212,32 +212,33 @@ export default function Search() {
                   <Heart size={20} />
                 </button>
 
-                <Link to={`/${artist.stageName || artist.stage_name}`}>
+                <Link to={`/artist/${artist.id}`}>
                   <div className="relative h-48 -m-6 mb-4 overflow-hidden rounded-t-xl">
                     <img
-                      src={artist.profileImage || artist.profile_image}
-                      alt={artist.stageName || artist.stage_name}
+                      src={artist.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.stage_name || 'A')}&background=8B5CF6&color=fff&size=400`}
+                      alt={artist.stage_name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.stage_name || 'A')}&background=8B5CF6&color=fff&size=400`; }}
                     />
-                    {artist.isVerified && (
+                    {artist.is_verified && (
                       <div className="absolute top-4 left-4 bg-primary px-3 py-1 rounded-full text-sm">
                         ✓ Verified
                       </div>
                     )}
                   </div>
 
-                  <h3 className="text-xl font-bold mb-2">{artist.stageName || artist.stage_name}</h3>
-                  <p className="text-gray-400 mb-2">{artist.category?.name || artist.category_name} • {artist.city}</p>
+                  <h3 className="text-xl font-bold mb-2">{artist.stage_name}</h3>
+                  <p className="text-gray-400 mb-2">{artist.category_name} • {artist.city}</p>
                 </Link>
                 <div className="flex items-center justify-between mt-3">
                   <div>
                     <p className="text-primary font-semibold">
-                      ₹{(artist.priceMin || artist.price_min || 0).toLocaleString()} - ₹{(artist.priceMax || artist.price_max || 0).toLocaleString()}
+                      ₹{(artist.price_min || 0).toLocaleString()} - ₹{(artist.price_max || 0).toLocaleString()}
                     </p>
                     <div className="flex items-center gap-2 mt-1 text-sm text-gray-400">
                       <span>⭐ {artist.rating || 'New'}</span>
                       <span>•</span>
-                      <span>{artist.totalBookings || 0} bookings</span>
+                      <span>{artist.total_bookings || 0} bookings</span>
                     </div>
                   </div>
                   <button

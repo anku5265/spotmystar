@@ -95,23 +95,14 @@ export default function Home() {
 
   const handleBookingSubmit = async (formData) => {
     try {
-      const token = localStorage.getItem('token');
-      let userId = null;
-      
-      if (token) {
-        try {
-          const decoded = JSON.parse(atob(token.split('.')[1]));
-          userId = decoded.id;
-        } catch (e) {
-          console.log('Token decode failed, booking as guest');
-        }
-      }
+      const token = localStorage.getItem('userToken');
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
 
       await api.post('/api/bookings', {
         artistId: selectedArtist.id,
-        userId,
+        userId: userInfo.id || null,
         ...formData
-      });
+      }, { headers: { Authorization: `Bearer ${token}` } });
 
       setToast({ message: 'Booking request sent successfully! Artist will contact you soon.', type: 'success' });
       setShowBookingModal(false);
@@ -200,25 +191,25 @@ export default function Home() {
               key={artist.id}
               className="card group overflow-hidden"
             >
-              <Link to={`/${artist.stageName || artist.stage_name}`}>
+              <Link to={`/artist/${artist.id}`}>
                 <div className="relative h-64 -m-6 mb-4 overflow-hidden">
                   <img
-                    src={artist.profileImage || artist.profile_image || 'https://via.placeholder.com/400x300/1a1a2e/ffffff?text=Artist'}
-                    alt={artist.stageName || artist.stage_name}
+                    src={artist.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.stage_name || 'A')}&background=8B5CF6&color=fff&size=400`}
+                    alt={artist.stage_name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/400x300/1a1a2e/ffffff?text=Artist';
+                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.stage_name || 'A')}&background=8B5CF6&color=fff&size=400`;
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-darker to-transparent"></div>
-                  {artist.isVerified && (
+                  {artist.is_verified && (
                     <div className="absolute top-4 right-4 bg-primary px-3 py-1 rounded-full text-sm">
                       ✓ Verified
                     </div>
                   )}
                 </div>
-                <h3 className="text-xl font-bold mb-2">{artist.stageName || artist.stage_name}</h3>
-                <p className="text-gray-400 mb-2">{artist.category?.name || artist.category_name} • {artist.city}</p>
+                <h3 className="text-xl font-bold mb-2">{artist.stage_name}</h3>
+                <p className="text-gray-400 mb-2">{artist.category_name} • {artist.city}</p>
               </Link>
               <div className="flex items-center justify-between mt-3">
                 <p className="text-primary font-semibold">
