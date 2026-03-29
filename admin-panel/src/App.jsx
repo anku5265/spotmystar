@@ -1,6 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login.jsx';
-import Dashboard from './pages/Dashboard.jsx';
 import AdvancedDashboard from './pages/AdvancedDashboard.jsx';
 
 function App() {
@@ -8,8 +7,9 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/advanced" element={<AdvancedDashboard />} />
+        <Route path="/dashboard" element={<AdvancedDashboard />} />
+        <Route path="/advanced" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

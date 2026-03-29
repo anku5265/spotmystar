@@ -95,16 +95,14 @@ export default function UserDashboard() {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'pending':
-        return <Clock className="text-yellow-500" size={20} />;
+      case 'pending': return <Clock className="text-yellow-500" size={20} />;
       case 'accepted':
-        return <CheckCircle className="text-green-500" size={20} />;
+      case 'confirmed': return <CheckCircle className="text-green-500" size={20} />;
       case 'rejected':
-        return <XCircle className="text-red-500" size={20} />;
-      case 'completed':
-        return <CheckCircle className="text-blue-500" size={20} />;
-      default:
-        return <Clock className="text-gray-500" size={20} />;
+      case 'cancelled': return <XCircle className="text-red-500" size={20} />;
+      case 'completed': return <CheckCircle className="text-blue-500" size={20} />;
+      case 'negotiation': return <Clock className="text-blue-400" size={20} />;
+      default: return <Clock className="text-gray-500" size={20} />;
     }
   };
 
@@ -237,21 +235,23 @@ export default function UserDashboard() {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-4">
                     <img
-                      src={booking.artist?.profile_image || 'https://via.placeholder.com/80'}
-                      alt={booking.artist?.stage_name}
+                      src={booking.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.stage_name || 'A')}&background=8B5CF6&color=fff&size=80`}
+                      alt={booking.stage_name}
                       className="w-16 h-16 rounded-lg object-cover"
+                      onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.stage_name || 'A')}&background=8B5CF6&color=fff&size=80`; }}
                     />
                     <div>
-                      <h3 className="text-xl font-bold">{booking.artist?.stage_name}</h3>
-                      <p className="text-gray-400">{booking.artist?.category_name}</p>
+                      <h3 className="text-xl font-bold">{booking.stage_name || 'Artist'}</h3>
+                      <p className="text-gray-400">{booking.category_name}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     {getStatusIcon(booking.status)}
                     <span className={`px-3 py-1 rounded-full text-sm ${
                       booking.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' :
-                      booking.status === 'accepted' ? 'bg-green-500/20 text-green-500' :
-                      booking.status === 'rejected' ? 'bg-red-500/20 text-red-500' :
+                      booking.status === 'accepted' || booking.status === 'confirmed' ? 'bg-green-500/20 text-green-500' :
+                      booking.status === 'rejected' || booking.status === 'cancelled' ? 'bg-red-500/20 text-red-500' :
+                      booking.status === 'negotiation' ? 'bg-blue-400/20 text-blue-400' :
                       'bg-blue-500/20 text-blue-500'
                     }`}>
                       {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
@@ -293,23 +293,15 @@ export default function UserDashboard() {
                   </div>
                 )}
 
-                {booking.status === 'accepted' && (
+                {(booking.status === 'accepted' || booking.status === 'confirmed') && (
                   <div className="mt-4 flex gap-2">
-                    <a
-                      href={`https://wa.me/${booking.artist?.whatsapp}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-primary text-sm"
-                    >
-                      Contact on WhatsApp
-                    </a>
-                    {booking.artist?.instagram && (
-                      <a
-                        href={`https://instagram.com/${booking.artist?.instagram}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="glass px-4 py-2 rounded-lg text-sm hover:bg-white/10 transition"
-                      >
+                    {booking.whatsapp && (
+                      <a href={`https://wa.me/${booking.whatsapp}`} target="_blank" rel="noopener noreferrer" className="btn-primary text-sm">
+                        Contact on WhatsApp
+                      </a>
+                    )}
+                    {booking.instagram && (
+                      <a href={`https://instagram.com/${booking.instagram}`} target="_blank" rel="noopener noreferrer" className="glass px-4 py-2 rounded-lg text-sm hover:bg-white/10 transition">
                         Instagram
                       </a>
                     )}

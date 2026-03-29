@@ -65,7 +65,7 @@ export default function Search() {
     setShowBookingModal(true);
   };
 
-  const handleWishlist = (artist, e) => {
+  const handleWishlist = async (artist, e) => {
     e.preventDefault();
     e.stopPropagation();
     if (!currentRole) {
@@ -76,8 +76,23 @@ export default function Search() {
       setToast({ message: 'Wishlist is a user-only feature.', type: 'error' });
       return;
     }
-    // TODO: actual wishlist API call
-    setToast({ message: `${artist.stage_name || artist.stageName} added to wishlist!`, type: 'success' });
+    try {
+      const token = localStorage.getItem('userToken');
+      await api.post('/api/wishlist', { artistId: artist.id }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setToast({ message: `${artist.stage_name || artist.stageName} added to wishlist!`, type: 'success' });
+    } catch (error) {
+      if (error.response?.status === 409) {
+        // Already in wishlist — remove it
+        await api.delete(`/api/wishlist/${artist.id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('userToken')}` }
+        });
+        setToast({ message: 'Removed from wishlist', type: 'success' });
+      } else {
+        setToast({ message: 'Failed to update wishlist', type: 'error' });
+      }
+    }
   };
 
   const handleBookingSubmit = async (formData) => {

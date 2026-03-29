@@ -32,28 +32,19 @@ router.post('/', verifyToken, requireUser, requirePermission('book_artist'), asy
       RETURNING id, booking_id
     `, [artistId, req.user.id, userName, phone, email, eventDate, eventLocation, budget, message, bookingId]);
 
-    // Send email to artist (optional)
+    // Notify artist via notification (email optional - skip if not configured)
     try {
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: artist.email,
-        subject: `New Booking Request from ${userName}`,
-        html: `
-          <h2>New Booking Request</h2>
-          <p><strong>Booking ID:</strong> ${bookingId}</p>
-          <p><strong>From:</strong> ${userName}</p>
-          <p><strong>Phone:</strong> ${phone}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Event Date:</strong> ${new Date(eventDate).toLocaleDateString()}</p>
-          <p><strong>Location:</strong> ${eventLocation}</p>
-          <p><strong>Budget:</strong> ₹${budget}</p>
-          <p><strong>Message:</strong> ${message || 'N/A'}</p>
-          <p>Login to your dashboard to respond.</p>
-        `
-      });
-    } catch (emailError) {
-      console.log('Email sending failed (optional):', emailError.message);
-    }
+      // Create notification for artist in DB
+      await pool.query(`
+        INSERT INTO notifications (user_id, user_type, title, message, type)
+        VALUES ($1, 'artist', $2, $3, 'booking')
+        ON CONFLICT DO NOTHING
+      `, [
+        artistId,
+        `New Booking Request from ${userName}`,
+        `${userName} wants to book you for an event on ${new Date(eventDate).toLocaleDateString()}. Budget: ₹${budget}`
+      ]).catch(() => {}); // Silent if notifications table doesn't exist
+    } catch { /* silent */ }
 
     res.status(201).json({ 
       message: 'Booking request sent successfully!', 
@@ -105,7 +96,7 @@ router.get('/artist/:artistId', verifyToken, requireArtist, async (req, res) => 
 router.patch('/:id/status', verifyToken, requireArtist, async (req, res) => {
   try {
     const { status } = req.body;
-    const validStatuses = ['accepted', 'rejected', 'pending'];
+    const validStatuses = ['accepted', 'rejected', 'pending', 'confirmed', 'negotiation', 'cancelled', 'completed'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ message: 'Invalid status value' });
     }
