@@ -202,19 +202,11 @@ export default function ArtistDashboard() {
   const [activeChat, setActiveChat] = useState(null);
   const [chatInput, setChatInput] = useState('');
   const [chatSearch, setChatSearch] = useState('');
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatLoading, setChatLoading] = useState(false);
   const chatEndRef = useRef(null);
-  const [conversations, setConversations] = useState([
-    { id: 1, from: 'Rahul Sharma', avatar: 'R', time: '10:30 AM', preview: 'Hi! Are you available for a wedding on 15th April?', unread: 2, online: true, bookingLinked: true },
-    { id: 2, from: 'Priya Events Co.', avatar: 'P', time: '9:15 AM', preview: 'We loved your performance! Can we book you again?', unread: 1, online: false, bookingLinked: true },
-    { id: 3, from: 'DJ Night Club', avatar: 'D', time: 'Yesterday', preview: 'Please confirm the set list for Saturday.', unread: 0, online: true, bookingLinked: false },
-    { id: 4, from: 'Meera Kapoor', avatar: 'M', time: 'Yesterday', preview: 'What is your availability in May?', unread: 0, online: false, bookingLinked: false },
-  ]);
-  const [chatHistory, setChatHistory] = useState([
-    { id: 1, sender: 'them', text: 'Hi! Are you available for a wedding on 15th April?', time: '10:28 AM' },
-    { id: 2, sender: 'me', text: 'Yes, I am available! What kind of performance are you looking for?', time: '10:30 AM' },
-    { id: 3, sender: 'them', text: 'We need a 2-hour live singing performance. Budget is around ₹40,000.', time: '10:32 AM' },
-    { id: 4, sender: 'me', text: 'That works! Let me send you my full package details.', time: '10:35 AM' },
-  ]);
+  const [conversations, setConversations] = useState([]);
+  const [convLoading, setConvLoading] = useState(false);
 
   // ── Content State ──
   const [contentFilter, setContentFilter] = useState('all');
@@ -270,7 +262,18 @@ export default function ArtistDashboard() {
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatHistory]);
+  }, [chatMessages]);
+
+  // Auto-refresh messages when chat is open
+  useEffect(() => {
+    if (activeSection !== 'messages') return;
+    fetchConversations();
+    const interval = setInterval(() => {
+      fetchConversations();
+      if (activeChat?.partnerId) fetchChatMessages(activeChat.partnerId);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [activeSection, activeChat?.partnerId]);
 
   const fetchAllData = async (token, artistId) => {
     try {
@@ -318,6 +321,7 @@ export default function ArtistDashboard() {
         fetchPendingRequests(artistId),
         fetchRecentEnquiries(artistId),
         fetchUpcomingEvents(artistId),
+        fetchConversations(),
       ]);
       setLoading(false);
     } catch (e) {
@@ -501,11 +505,55 @@ export default function ArtistDashboard() {
     } catch {}
   };
 
-  const sendMessage = () => {
-    if (!chatInput.trim()) return;
-    const msg = { id: Date.now(), sender: 'me', text: chatInput, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
-    setChatHistory(prev => [...prev, msg]);
+  const sendMessage = async () => {
+    if (!chatInput.trim() || !activeChat) return;
+    const text = chatInput.trim();
     setChatInput('');
+    // Optimistic update
+    const tempMsg = { id: 'temp_' + Date.now(), direction: 'me', message: text, created_at: new Date().toISOString() };
+    setChatMessages(prev => [...prev, tempMsg]);
+    try {
+      const token = localStorage.getItem('artistToken');
+      await api.post('/api/messages', {
+        receiverId: activeChat.partnerId,
+        receiverType: activeChat.partnerType || 'user',
+        message: text,
+        bookingId: activeChat.bookingId || null
+      }, { headers: { Authorization: `Bearer ${token}` } });
+      // Refresh conversations
+      fetchConversations();
+    } catch {
+      setToast({ message: 'Failed to send message', type: 'error' });
+    }
+  };
+
+  const fetchConversations = async () => {
+    try {
+      setConvLoading(true);
+      const token = localStorage.getItem('artistToken');
+      const { data } = await api.get('/api/messages/conversations', { headers: { Authorization: `Bearer ${token}` } });
+      setConversations(data);
+    } catch { /* silent */ } finally {
+      setConvLoading(false);
+    }
+  };
+
+  const fetchChatMessages = async (partnerId) => {
+    try {
+      setChatLoading(true);
+      const token = localStorage.getItem('artistToken');
+      const { data } = await api.get(`/api/messages/${partnerId}`, { headers: { Authorization: `Bearer ${token}` } });
+      setChatMessages(data);
+    } catch { /* silent */ } finally {
+      setChatLoading(false);
+    }
+  };
+
+  const openChat = (conv) => {
+    setActiveChat(conv);
+    fetchChatMessages(conv.partnerId);
+    // Update unread count locally
+    setConversations(prev => prev.map(c => c.partnerId === conv.partnerId ? { ...c, unreadCount: 0 } : c));
   };
 
   const markNotificationRead = (id) => {
@@ -546,7 +594,7 @@ export default function ArtistDashboard() {
   const allNavItems = [
     { id: 'home',        icon: LayoutDashboard, label: 'Dashboard',   permission: 'view_artist_dashboard' },
     { id: 'bookings',    icon: CalendarDays,    label: 'Bookings',    permission: 'manage_bookings',  badge: pendingRequests.length },
-    { id: 'messages',    icon: MessageSquare,   label: 'Messages',    permission: 'view_artist_dashboard', badge: conversations.reduce((a, c) => a + c.unread, 0) },
+    { id: 'messages',    icon: MessageSquare,   label: 'Messages',    permission: 'view_artist_dashboard', badge: conversations.reduce((a, c) => a + (c.unreadCount || 0), 0) },
     { id: 'content',     icon: Video,           label: 'Content',     permission: 'manage_content' },
     { id: 'schedule',    icon: Calendar,        label: 'Schedule',    permission: 'manage_schedule' },
     { id: 'analytics',   icon: BarChart3,       label: 'Analytics',   permission: 'view_analytics' },
@@ -1211,23 +1259,44 @@ export default function ArtistDashboard() {
                     <input value={chatSearch} onChange={e => setChatSearch(e.target.value)} placeholder="Search conversations..." className="w-full bg-gray-700/50 rounded-xl pl-8 pr-4 py-2 text-sm text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-purple-500/50" />
                   </div>
                 </div>
-                <div className="flex-1 overflow-y-auto">
-                  {conversations.filter(c => !chatSearch || c.from.toLowerCase().includes(chatSearch.toLowerCase())).map(conv => (
-                    <div key={conv.id} onClick={() => setActiveChat(conv)} className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-700/30 transition border-b border-gray-700/20 ${activeChat?.id === conv.id ? 'bg-purple-500/10 border-l-2 border-l-purple-500' : ''}`}>
+                <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+                  {convLoading && (
+                    <div className="p-8 text-center text-gray-500">
+                      <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                      <p className="text-sm">Loading...</p>
+                    </div>
+                  )}
+                  {!convLoading && conversations.length === 0 && (
+                    <div className="p-8 text-center text-gray-500">
+                      <MessageSquare size={32} className="mx-auto mb-2 opacity-30" />
+                      <p className="text-sm">No conversations yet</p>
+                      <p className="text-xs mt-1 text-gray-600">Messages from clients will appear here</p>
+                    </div>
+                  )}
+                  {conversations.filter(c => !chatSearch || c.partnerName?.toLowerCase().includes(chatSearch.toLowerCase())).map(conv => (
+                    <div key={conv.partnerId} onClick={() => openChat(conv)}
+                      className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-700/30 transition border-b border-gray-700/20 ${activeChat?.partnerId === conv.partnerId ? 'bg-purple-500/10 border-l-2 border-l-purple-500' : ''}`}>
                       <div className="relative flex-shrink-0">
-                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-sm">{conv.avatar}</div>
-                        {conv.online && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-gray-900" />}
+                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-sm">
+                          {(conv.partnerName || 'U').charAt(0).toUpperCase()}
+                        </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <p className="font-semibold text-sm text-white truncate">{conv.from}</p>
-                          <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{conv.time}</span>
+                          <p className="font-semibold text-sm text-white truncate">{conv.partnerName || 'Unknown'}</p>
+                          <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
+                            {conv.lastMessageTime ? new Date(conv.lastMessageTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                          </span>
                         </div>
                         <div className="flex items-center justify-between mt-0.5">
-                          <p className="text-xs text-gray-400 truncate flex-1">{conv.preview}</p>
-                          {conv.unread > 0 && <span className="ml-2 bg-purple-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0">{conv.unread}</span>}
+                          <p className="text-xs text-gray-400 truncate flex-1">
+                            {conv.isOwn ? 'You: ' : ''}{conv.lastMessage}
+                          </p>
+                          {conv.unreadCount > 0 && (
+                            <span className="ml-2 bg-purple-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0">{conv.unreadCount}</span>
+                          )}
                         </div>
-                        {conv.bookingLinked && <span className="text-xs text-blue-400 mt-0.5 flex items-center gap-1"><CalendarDays size={10} />Booking linked</span>}
+                        {conv.bookingId && <span className="text-xs text-blue-400 mt-0.5 flex items-center gap-1"><CalendarDays size={10} />Booking linked</span>}
                       </div>
                     </div>
                   ))}
@@ -1240,22 +1309,35 @@ export default function ArtistDashboard() {
                   {/* Chat Header */}
                   <div className="flex items-center gap-3 p-4 border-b border-gray-700/50">
                     <button onClick={() => setActiveChat(null)} className="sm:hidden text-gray-400 hover:text-white mr-1"><ChevronLeft size={20} /></button>
-                    <div className="relative">
-                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold">{activeChat.avatar}</div>
-                      {activeChat.online && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-gray-900" />}
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold">
+                      {(activeChat.partnerName || 'U').charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <p className="font-bold text-white">{activeChat.from}</p>
-                      <p className="text-xs text-gray-400">{activeChat.online ? '🟢 Online' : '⚫ Offline'}</p>
+                      <p className="font-bold text-white">{activeChat.partnerName || 'Unknown'}</p>
+                      <p className="text-xs text-gray-400 capitalize">{activeChat.partnerType || 'user'}</p>
                     </div>
                   </div>
                   {/* Messages */}
-                  <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                    {chatHistory.map(msg => (
-                      <div key={msg.id} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${msg.sender === 'me' ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-br-sm' : 'bg-gray-700/60 text-gray-200 rounded-bl-sm'}`}>
-                          <p>{msg.text}</p>
-                          <p className={`text-xs mt-1 ${msg.sender === 'me' ? 'text-purple-200' : 'text-gray-500'}`}>{msg.time}</p>
+                  <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ scrollbarWidth: 'none' }}>
+                    {chatLoading && (
+                      <div className="flex justify-center py-8">
+                        <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                    {!chatLoading && chatMessages.length === 0 && (
+                      <div className="text-center py-12 text-gray-500">
+                        <MessageSquare size={32} className="mx-auto mb-2 opacity-30" />
+                        <p className="text-sm">No messages yet. Say hello!</p>
+                      </div>
+                    )}
+                    {chatMessages.map(msg => (
+                      <div key={msg.id} className={`flex ${msg.direction === 'me' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${msg.direction === 'me' ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-br-sm' : 'bg-gray-700/60 text-gray-200 rounded-bl-sm'}`}>
+                          <p>{msg.message}</p>
+                          <p className={`text-xs mt-1 ${msg.direction === 'me' ? 'text-purple-200' : 'text-gray-500'}`}>
+                            {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {msg.direction === 'me' && msg.is_read && ' ✓✓'}
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -1264,14 +1346,14 @@ export default function ArtistDashboard() {
                   {/* Quick Replies */}
                   <div className="px-4 py-2 flex gap-2 flex-wrap border-t border-gray-700/30">
                     {['Available ✅', 'Not available ❌', "Let's discuss 💬", 'Send my rates 💰'].map(r => (
-                      <button key={r} onClick={() => { setChatInput(r); }} className="px-3 py-1 bg-gray-700/50 text-gray-300 text-xs rounded-full hover:bg-purple-500/20 hover:text-purple-300 transition">{r}</button>
+                      <button key={r} onClick={() => setChatInput(r)} className="px-3 py-1 bg-gray-700/50 text-gray-300 text-xs rounded-full hover:bg-purple-500/20 hover:text-purple-300 transition">{r}</button>
                     ))}
                   </div>
                   {/* Input */}
                   <div className="p-4 border-t border-gray-700/50">
                     <div className="flex gap-3">
                       <input value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} placeholder="Type a message..." className="flex-1 bg-gray-700/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-purple-500/50" />
-                      <button onClick={sendMessage} className="p-2.5 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl text-white hover:opacity-90 transition">
+                      <button onClick={sendMessage} disabled={!chatInput.trim()} className="p-2.5 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl text-white hover:opacity-90 transition disabled:opacity-40">
                         <Send size={18} />
                       </button>
                     </div>
