@@ -155,7 +155,7 @@ router.get('/dashboard/:artistId', verifyToken, requireArtist, async (req, res) 
       pool.query("SELECT COUNT(*) as total FROM bookings WHERE artist_id = $1 AND status = 'completed'", [artistId]),
       pool.query("SELECT COUNT(*) as total FROM bookings WHERE artist_id = $1 AND status IN ('accepted','confirmed') AND event_date >= NOW()", [artistId]),
       pool.query('SELECT COUNT(*) as total FROM messages WHERE receiver_id = $1 AND is_read = false', [artistId]),
-      pool.query(`SELECT id, user_name, event_type, budget, status, created_at FROM bookings WHERE artist_id = $1 ORDER BY created_at DESC LIMIT 5`, [artistId]),
+      pool.query(`SELECT id, user_name, budget, status, created_at FROM bookings WHERE artist_id = $1 ORDER BY created_at DESC LIMIT 5`, [artistId]),
     ]);
 
     const get = (r) => r.status === 'fulfilled' ? r.value.rows[0] : null;
