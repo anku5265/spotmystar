@@ -197,6 +197,8 @@ export default function ArtistDashboard() {
   const [priceData, setPriceData] = useState({ min: 0, max: 0 });
   const [editingBio, setEditingBio] = useState(false);
   const [bioText, setBioText] = useState('');
+  const [settingsForm, setSettingsForm] = useState({ full_name: '', stage_name: '', phone: '', city: '' });
+  const [settingsSaving, setSettingsSaving] = useState(false);
 
   // ── Chat State ──
   const [activeChat, setActiveChat] = useState(null);
@@ -288,6 +290,13 @@ export default function ArtistDashboard() {
       setIsAvailable(d.is_available !== false);
       setPriceData({ min: d.price_min || 0, max: d.price_max || 0 });
       setBioText(d.short_bio || d.detailed_description || '');
+      // Populate settings form with real data
+      setSettingsForm({
+        full_name: d.full_name || '',
+        stage_name: d.stage_name || '',
+        phone: d.phone || d.whatsapp || '',
+        city: d.city || d.primary_city || '',
+      });
       if (d.availability) {
         try {
           const av = JSON.parse(d.availability);
@@ -527,6 +536,52 @@ export default function ArtistDashboard() {
       setEditingBio(false);
       setToast({ message: 'Bio updated!', type: 'success' });
     } catch { setToast({ message: 'Update failed', type: 'error' }); }
+  };
+
+  const saveSettings = async () => {
+    if (!settingsForm.full_name?.trim() && !settingsForm.stage_name?.trim()) {
+      setToast({ message: 'Name cannot be empty', type: 'error' });
+      return;
+    }
+    setSettingsSaving(true);
+    try {
+      const token = localStorage.getItem('artistToken');
+      const artistData = JSON.parse(localStorage.getItem('artistData') || '{}');
+      const id = artist?.id || artistData?.id;
+
+      // Update allowed fields via PATCH /api/artists/:id
+      await api.patch(`/api/artists/${id}`, {
+        full_name: settingsForm.full_name,
+        stage_name: settingsForm.stage_name,
+        city: settingsForm.city,
+        whatsapp: settingsForm.phone,
+        phone: settingsForm.phone,
+      }, { headers: { Authorization: `Bearer ${token}` } });
+
+      // Update artist state locally
+      setArtist(prev => ({
+        ...prev,
+        full_name: settingsForm.full_name || prev.full_name,
+        stage_name: settingsForm.stage_name || prev.stage_name,
+        city: settingsForm.city || prev.city,
+        phone: settingsForm.phone || prev.phone,
+        whatsapp: settingsForm.phone || prev.whatsapp,
+      }));
+
+      // Update localStorage
+      const updatedArtistData = {
+        ...artistData,
+        fullName: settingsForm.full_name || artistData.fullName,
+        stageName: settingsForm.stage_name || artistData.stageName,
+      };
+      localStorage.setItem('artistData', JSON.stringify(updatedArtistData));
+
+      setToast({ message: 'Settings saved successfully! ✅', type: 'success' });
+    } catch (err) {
+      setToast({ message: err.response?.data?.message || 'Failed to save settings', type: 'error' });
+    } finally {
+      setSettingsSaving(false);
+    }
   };
 
   const handleProfilePicUpload = async (e) => {
@@ -2086,18 +2141,51 @@ export default function ArtistDashboard() {
               <GlassCard className="p-5">
                 <SectionHeader icon={Settings} title="Account Settings" />
                 <div className="space-y-4">
-                  {[
-                    { label: 'Full Name', value: artist?.full_name || '', placeholder: 'Your full name' },
-                    { label: 'Stage Name', value: artist?.stage_name || '', placeholder: 'Your stage/brand name' },
-                    { label: 'Phone', value: artist?.phone || '', placeholder: 'Phone number' },
-                    { label: 'Primary City', value: artist?.primary_city || '', placeholder: 'Your city' },
-                  ].map(field => (
-                    <div key={field.label}>
-                      <label className="text-xs text-gray-400 mb-1 block">{field.label}</label>
-                      <input defaultValue={field.value} placeholder={field.placeholder} className="w-full bg-gray-700/50 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-purple-500/50" />
-                    </div>
-                  ))}
-                  <button className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-semibold hover:opacity-90 transition">Save Changes</button>
+                  <div>
+                    <label className="text-xs text-gray-400 mb-1 block">Full Name</label>
+                    <input
+                      value={settingsForm.full_name}
+                      onChange={e => setSettingsForm(prev => ({ ...prev, full_name: e.target.value }))}
+                      placeholder="Your full name"
+                      className="w-full bg-gray-700/50 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-purple-500/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-400 mb-1 block">Stage Name</label>
+                    <input
+                      value={settingsForm.stage_name}
+                      onChange={e => setSettingsForm(prev => ({ ...prev, stage_name: e.target.value }))}
+                      placeholder="Your stage/brand name"
+                      className="w-full bg-gray-700/50 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-purple-500/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-400 mb-1 block">Phone / WhatsApp</label>
+                    <input
+                      value={settingsForm.phone}
+                      onChange={e => setSettingsForm(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="Phone number"
+                      className="w-full bg-gray-700/50 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-purple-500/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-400 mb-1 block">Primary City</label>
+                    <input
+                      value={settingsForm.city}
+                      onChange={e => setSettingsForm(prev => ({ ...prev, city: e.target.value }))}
+                      placeholder="Your city"
+                      className="w-full bg-gray-700/50 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-purple-500/50"
+                    />
+                  </div>
+                  <button
+                    onClick={saveSettings}
+                    disabled={settingsSaving}
+                    className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {settingsSaving ? (
+                      <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Saving...</>
+                    ) : 'Save Changes'}
+                  </button>
                 </div>
               </GlassCard>
 

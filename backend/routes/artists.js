@@ -82,7 +82,7 @@ router.patch('/:id', verifyToken, requireArtist, requirePermission('manage_profi
     if (String(req.user.id) !== String(id)) {
       return res.status(403).json({ message: 'Access denied. You can only update your own profile.' });
     }
-    const allowed = ['bio', 'short_bio', 'city', 'price_min', 'price_max', 'whatsapp', 'instagram', 'availability', 'is_available'];
+    const allowed = ['bio', 'short_bio', 'city', 'price_min', 'price_max', 'whatsapp', 'instagram', 'availability', 'is_available', 'full_name', 'stage_name', 'phone'];
     const setClauses = [];
     const values = [];
     let idx = 1;
