@@ -86,7 +86,7 @@ router.get('/artist/:artistId', verifyToken, requireArtist, async (req, res) => 
 });
 
 // Update booking status - ARTIST ONLY
-router.patch('/:id/status', verifyToken, requireArtist, async (req, res) => {
+router.patch('/:id/status', verifyToken, requireArtist, requirePermission('manage_bookings'), async (req, res) => {
   try {
     const { status, counterOffer } = req.body;
     const validStatuses = ['accepted', 'rejected', 'pending', 'confirmed', 'negotiation', 'cancelled', 'completed'];
@@ -94,16 +94,49 @@ router.patch('/:id/status', verifyToken, requireArtist, async (req, res) => {
       return res.status(400).json({ message: 'Invalid status value' });
     }
 
-    const booking = await pool.query('SELECT artist_id FROM bookings WHERE id = $1', [req.params.id]);
+    const booking = await pool.query('SELECT artist_id, user_id FROM bookings WHERE id = $1', [req.params.id]);
     if (booking.rows.length === 0) return res.status(404).json({ message: 'Booking not found' });
     if (String(booking.rows[0].artist_id) !== String(req.user.id)) {
+      return res.status(403).json({ message: 'Access denied. This booking does not belong to you.' });
+    }
+
+    let result;
+    if (counterOffer && status === 'negotiation') {
+      // Save counter offer price
+      result = await pool.query(
+        'UPDATE bookings SET status = $1, counter_price = $2, updated_at = NOW() WHERE id = $3 RETURNING *',
+        [status, parseInt(counterOffer), req.params.id]
+      );
+    } else {
+      result = await pool.query(
+        'UPDATE bookings SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+        [status, req.params.id]
+      );
+    }
+
+    res.json({ success: true, booking: result.rows[0] });
+  } catch (error) {
+    console.error('Booking status update error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET single booking details - ARTIST ONLY
+router.get('/:id', verifyToken, requireArtist, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT b.*, 
+             u.name as user_full_name, u.phone as user_phone_detail
+      FROM bookings b
+      LEFT JOIN users u ON b.user_id = u.id
+      WHERE b.id = $1
+    `, [req.params.id]);
+
+    if (result.rows.length === 0) return res.status(404).json({ message: 'Booking not found' });
+    if (String(result.rows[0].artist_id) !== String(req.user.id)) {
       return res.status(403).json({ message: 'Access denied.' });
     }
 
-    const result = await pool.query(
-      'UPDATE bookings SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
-      [status, req.params.id]
-    );
     res.json(result.rows[0]);
   } catch (error) {
     res.status(500).json({ message: error.message });

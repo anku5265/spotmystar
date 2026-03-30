@@ -448,26 +448,65 @@ export default function ArtistDashboard() {
   };
 
   const handleBookingAction = async (bookingId, action) => {
+    // Optimistic update — UI turant change karo
+    setPendingRequests(prev => prev.map(r =>
+      r.id === bookingId ? { ...r, status: action } : r
+    ));
+    setRecentEnquiries(prev => prev.map(r =>
+      r.id === bookingId ? { ...r, status: action } : r
+    ));
     try {
       const token = localStorage.getItem('artistToken');
-      await api.patch(`/api/bookings/${bookingId}/status`, { status: action }, { headers: { Authorization: `Bearer ${token}` } });
-      setToast({ message: `Booking ${action}!`, type: 'success' });
+      const { data } = await api.patch(
+        `/api/bookings/${bookingId}/status`,
+        { status: action },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setToast({ message: `Booking ${action}! ✅`, type: 'success' });
       setSelectedRequest(null);
-      await Promise.all([fetchPendingRequests(artist.id), fetchAnalytics(artist.id, filter), fetchRecentEnquiries(artist.id), fetchUpcomingEvents(artist.id)]);
-    } catch { setToast({ message: 'Action failed', type: 'error' }); }
+      // Refresh all data
+      const artistData = JSON.parse(localStorage.getItem('artistData') || '{}');
+      const id = artist?.id || artistData?.id;
+      if (id) {
+        await Promise.allSettled([
+          fetchPendingRequests(id),
+          fetchAnalytics(id, filter),
+          fetchRecentEnquiries(id),
+          fetchUpcomingEvents(id),
+        ]);
+      }
+    } catch (err) {
+      // Revert optimistic update on failure
+      const artistData = JSON.parse(localStorage.getItem('artistData') || '{}');
+      const id = artist?.id || artistData?.id;
+      if (id) fetchPendingRequests(id);
+      setToast({ message: err.response?.data?.message || 'Action failed', type: 'error' });
+    }
   };
 
   const handleCounterOffer = async (bookingId) => {
     if (!counterOfferAmount) return;
     try {
       const token = localStorage.getItem('artistToken');
-      await api.patch(`/api/bookings/${bookingId}/status`, { status: 'negotiation', counterOffer: counterOfferAmount }, { headers: { Authorization: `Bearer ${token}` } });
-      setToast({ message: 'Counter offer sent!', type: 'success' });
+      await api.patch(
+        `/api/bookings/${bookingId}/status`,
+        { status: 'negotiation', counterOffer: counterOfferAmount },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setToast({ message: 'Counter offer sent! 💬', type: 'success' });
       setShowCounterModal(false);
       setCounterOfferAmount('');
       setSelectedRequest(null);
-      fetchPendingRequests(artist.id);
-    } catch { setToast({ message: 'Failed to send counter offer', type: 'error' }); }
+      // Optimistic update
+      setPendingRequests(prev => prev.map(r =>
+        r.id === bookingId ? { ...r, status: 'negotiation' } : r
+      ));
+      const artistData = JSON.parse(localStorage.getItem('artistData') || '{}');
+      const id = artist?.id || artistData?.id;
+      if (id) fetchPendingRequests(id);
+    } catch (err) {
+      setToast({ message: err.response?.data?.message || 'Failed to send counter offer', type: 'error' });
+    }
   };
 
   const updatePrice = async () => {
