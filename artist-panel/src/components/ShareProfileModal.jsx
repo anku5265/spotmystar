@@ -16,7 +16,8 @@ export default function ShareProfileModal({ artist, onClose }) {
   const [generating, setGenerating] = useState(false);
 
   const USER_PANEL_URL = import.meta.env.VITE_USER_PANEL_URL || 'https://spotmystar-user.vercel.app';
-  const profileUrl = `${USER_PANEL_URL}/artist/${artist?.stage_name || artist?.id}`;
+  const profileSlug = (artist?.stage_name || artist?.id || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  const profileUrl = `${USER_PANEL_URL}/artist/${profileSlug || artist?.id}`;
   const displayName = artist?.stage_name || artist?.full_name || 'Artist';
   const category = artist?.category_name || 'Artist';
   const city = artist?.primary_city || artist?.city || '';

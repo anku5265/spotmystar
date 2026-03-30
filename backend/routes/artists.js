@@ -42,8 +42,19 @@ router.get('/:identifier', async (req, res) => {
   try {
     const { identifier } = req.params;
     const { skipViewCount } = req.query;
-    const result = await pool.query(`SELECT a.*, c.name as category_name FROM artists a LEFT JOIN categories c ON a.category_id = c.id WHERE a.stage_name = $1 OR a.id::text = $1`, [identifier]);
+    const decoded = decodeURIComponent(identifier).trim();
+
+    const result = await pool.query(
+      `SELECT a.*, c.name as category_name
+       FROM artists a
+       LEFT JOIN categories c ON a.category_id = c.id
+       WHERE LOWER(a.stage_name) = LOWER($1)
+          OR a.id::text = $1`,
+      [decoded]
+    );
+
     if (result.rows.length === 0) return res.status(404).json({ message: 'Artist not found' });
+
     if (skipViewCount !== 'true') {
       await pool.query('UPDATE artists SET views = views + 1 WHERE id = $1', [result.rows[0].id]);
     }

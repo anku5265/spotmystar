@@ -29,7 +29,8 @@ export default function ArtistProfile() {
 
   const fetchArtist = async () => {
     try {
-      const { data } = await api.get(`/api/artists/${identifier}`);
+      const decoded = decodeURIComponent(identifier).trim();
+      const { data } = await api.get(`/api/artists/${encodeURIComponent(decoded)}`);
       setArtist(data);
     } catch (error) {
       console.error('Error fetching artist:', error);
