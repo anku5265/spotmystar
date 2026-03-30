@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { verifyToken, requireArtist } from '../middleware/auth.js';
 import { requirePermission } from '../middleware/permissions.js';
+import { generateArtistCode, formatArtistCode } from '../utils/idGenerator.js';
 
 const router = express.Router();
 
@@ -73,13 +74,32 @@ router.post('/register', async (req, res) => {
     if (existing.rows.length > 0) return res.status(400).json({ message: 'Artist already exists with this email or stage name' });
     const hashedPassword = await bcrypt.hash(password, 10);
     const categoryId = (categories && categories.length > 0) ? categories[0] : category || null;
+
+    // Generate unique artist code
+    let artistCode = null;
+    try { artistCode = await generateArtistCode(); } catch { /* non-blocking */ }
+
     const result = await pool.query(
-      `INSERT INTO artists (full_name, stage_name, category_id, bio, city, price_min, price_max, email, whatsapp, instagram, password, status, is_verified) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'pending',false) RETURNING id, full_name, stage_name, email, status, is_verified`,
-      [fullName, stageName, categoryId, shortBio || bio || '', primaryCity || city || '', parseInt(priceMin) || 0, parseInt(priceMax) || 0, email, phone || whatsapp || '', instagram || '', hashedPassword]
+      `INSERT INTO artists (full_name, stage_name, category_id, bio, city, price_min, price_max, email, whatsapp, instagram, password, status, is_verified, artist_code)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'pending',false,$12)
+       RETURNING id, full_name, stage_name, email, status, is_verified, artist_code`,
+      [fullName, stageName, categoryId, shortBio || bio || '', primaryCity || city || '', parseInt(priceMin) || 0, parseInt(priceMax) || 0, email, phone || whatsapp || '', instagram || '', hashedPassword, artistCode]
     );
     const artist = result.rows[0];
     const token = jwt.sign({ id: artist.id, role: 'artist' }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.status(201).json({ message: 'Registration successful! Your profile is under review.', token, artist: { id: artist.id, fullName: artist.full_name, stageName: artist.stage_name, email: artist.email, status: artist.status, isVerified: artist.is_verified } });
+    res.status(201).json({
+      message: 'Registration successful! Your profile is under review.',
+      token,
+      artist: {
+        id: artist.id,
+        fullName: artist.full_name,
+        stageName: artist.stage_name,
+        email: artist.email,
+        status: artist.status,
+        isVerified: artist.is_verified,
+        artistCode: formatArtistCode(artist.artist_code),
+      }
+    });
   } catch (error) {
     console.error('Artist registration error:', error);
     res.status(500).json({ message: error.message });

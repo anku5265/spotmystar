@@ -1640,6 +1640,7 @@ export default function ArtistDashboard() {
                       { icon: MapPin, label: 'City', value: artist?.primary_city },
                       { icon: Globe, label: 'Languages', value: artist?.languages?.join(', ') || 'Not specified' },
                       { icon: Star, label: 'Experience', value: artist?.years_of_experience ? `${artist.years_of_experience} years` : 'Not specified' },
+                      { icon: Shield, label: 'Artist ID', value: artist?.artist_code ? `A${artist.artist_code}` : null },
                     ].map(({ icon: Icon, label, value }) => (
                       <div key={label} className="flex items-center gap-3">
                         <div className="p-2 bg-gray-700/50 rounded-lg"><Icon size={14} className="text-gray-400" /></div>

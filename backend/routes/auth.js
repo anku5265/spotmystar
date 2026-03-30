@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
 import { verifyToken } from '../middleware/auth.js';
+import { generateUserCode, formatUserCode } from '../utils/idGenerator.js';
 
 const router = express.Router();
 
@@ -137,10 +138,14 @@ router.post('/user/register', async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Generate unique user code
+    let userCode = null;
+    try { userCode = await generateUserCode(); } catch { /* non-blocking */ }
+
     // Create user
     const result = await pool.query(
-      'INSERT INTO users (name, email, phone, password, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, phone',
-      [name, email, phone, hashedPassword, 'user']
+      'INSERT INTO users (name, email, phone, password, role, user_code) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, email, phone, user_code',
+      [name, email, phone, hashedPassword, 'user', userCode]
     );
 
     const user = result.rows[0];
@@ -154,6 +159,7 @@ router.post('/user/register', async (req, res) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        userCode: formatUserCode(user.user_code),
         role: 'user'
       }
     });

@@ -2,6 +2,7 @@ import express from 'express';
 import pool from '../config/db.js';
 import { verifyToken, requireUser, requireArtist } from '../middleware/auth.js';
 import { requirePermission } from '../middleware/permissions.js';
+import { generateBookingCode, formatBookingCode } from '../utils/idGenerator.js';
 
 const router = express.Router();
 
@@ -25,12 +26,15 @@ router.post('/', verifyToken, requireUser, requirePermission('book_artist'), asy
       return res.status(404).json({ message: 'Artist not found or not available for booking' });
     }
 
-    // Insert booking — no booking_id column needed, id (UUID) is the primary key
+    // Insert booking with unique booking_code
+    let bookingCode = null;
+    try { bookingCode = await generateBookingCode(); } catch { /* non-blocking */ }
+
     const result = await pool.query(`
-      INSERT INTO bookings (artist_id, user_id, user_name, phone, email, event_date, event_location, budget, message, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending')
-      RETURNING id, status, created_at
-    `, [artistId, req.user.id, userName, phone, email, eventDate, eventLocation, parseInt(budget), message || '']);
+      INSERT INTO bookings (artist_id, user_id, user_name, phone, email, event_date, event_location, budget, message, status, booking_code)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending', $10)
+      RETURNING id, status, created_at, booking_code
+    `, [artistId, req.user.id, userName, phone, email, eventDate, eventLocation, parseInt(budget), message || '', bookingCode]);
 
     const booking = result.rows[0];
 
@@ -40,7 +44,8 @@ router.post('/', verifyToken, requireUser, requirePermission('book_artist'), asy
       booking: {
         id: booking.id,
         status: booking.status,
-        createdAt: booking.created_at
+        createdAt: booking.created_at,
+        bookingCode: formatBookingCode(booking.booking_code),
       }
     });
   } catch (error) {
