@@ -776,26 +776,11 @@ export default function ArtistDashboard() {
   // ── Loading Screen ──
   if (isLoading || loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center gap-6">
-        {/* Logo */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
-            <Star size={18} className="text-white" />
-          </div>
-          <span className="text-lg font-bold text-white tracking-wide">SpotMyStar</span>
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading dashboard...</p>
         </div>
-
-        {/* Skeleton cards */}
-        <div className="w-80 space-y-3">
-          <div className="h-24 bg-gray-800/60 rounded-2xl animate-pulse" />
-          <div className="grid grid-cols-2 gap-3">
-            <div className="h-16 bg-gray-800/60 rounded-xl animate-pulse" />
-            <div className="h-16 bg-gray-800/60 rounded-xl animate-pulse" style={{ animationDelay: '0.15s' }} />
-          </div>
-          <div className="h-12 bg-gray-800/40 rounded-xl animate-pulse" style={{ animationDelay: '0.3s' }} />
-        </div>
-
-        <p className="text-gray-500 text-sm">Loading your dashboard...</p>
       </div>
     );
   }
