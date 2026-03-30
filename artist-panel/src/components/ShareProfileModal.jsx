@@ -15,7 +15,7 @@ export default function ShareProfileModal({ artist, onClose }) {
   const [copied, setCopied] = useState(false);
   const [generating, setGenerating] = useState(false);
 
-  const profileUrl = `https://spotmystar.vercel.app/artist/${artist?.stage_name || artist?.id}`;
+  const profileUrl = `https://spotmystar-user.vercel.app/artist/${artist?.stage_name || artist?.id}`;
   const displayName = artist?.stage_name || artist?.full_name || 'Artist';
   const category = artist?.category_name || 'Artist';
   const city = artist?.primary_city || artist?.city || '';
@@ -188,7 +188,7 @@ export default function ShareProfileModal({ artist, onClose }) {
     ctx.fillRect(0, H - 60, W, 60);
     ctx.fillStyle = theme.text;
     ctx.font = 'bold 24px sans-serif';
-    ctx.fillText('spotmystar.vercel.app  •  Discover & Book Artists', W / 2, H - 22);
+    ctx.fillText('spotmystar-user.vercel.app  •  Discover & Book Artists', W / 2, H - 22);
   };
 
   // Helper: rounded rect fill
