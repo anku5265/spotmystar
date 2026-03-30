@@ -71,7 +71,7 @@ router.get('/pending-requests/:artistId', verifyToken, requireArtist, requirePer
     const result = await pool.query(
       `SELECT id, user_name, phone, email, event_date, event_location,
               budget as offered_price, message, status, created_at
-       FROM bookings WHERE artist_id = $1 AND status IN ('pending','negotiation')
+       FROM bookings WHERE artist_id = $1 AND status IN ('pending','countered')
        ORDER BY created_at DESC`,
       [artistId]
     );

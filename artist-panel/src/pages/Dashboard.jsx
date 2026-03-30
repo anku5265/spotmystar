@@ -94,8 +94,8 @@ const MiniBarChart = ({ data, color = 'purple' }) => {
 const StatusBadge = ({ status }) => {
   const map = {
     pending:     'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-    negotiation: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    confirmed:   'bg-green-500/20 text-green-400 border-green-500/30',
+    countered:   'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    accepted:    'bg-green-500/20 text-green-400 border-green-500/30',
     completed:   'bg-purple-500/20 text-purple-400 border-purple-500/30',
     cancelled:   'bg-red-500/20 text-red-400 border-red-500/30',
     rejected:    'bg-red-500/20 text-red-400 border-red-500/30',
@@ -499,7 +499,7 @@ export default function ArtistDashboard() {
       const token = localStorage.getItem('artistToken');
       await api.patch(
         `/api/bookings/${bookingId}/status`,
-        { status: 'negotiation', counterOffer: counterOfferAmount },
+        { status: 'countered', counterOffer: counterOfferAmount },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setToast({ message: 'Counter offer sent! 💬', type: 'success' });
@@ -508,7 +508,7 @@ export default function ArtistDashboard() {
       setSelectedRequest(null);
       // Optimistic update
       setPendingRequests(prev => prev.map(r =>
-        r.id === bookingId ? { ...r, status: 'negotiation' } : r
+        r.id === bookingId ? { ...r, status: 'countered' } : r
       ));
       const artistData = JSON.parse(localStorage.getItem('artistData') || '{}');
       const id = artist?.id || artistData?.id;
@@ -1323,7 +1323,7 @@ export default function ArtistDashboard() {
                     <input value={bookingSearch} onChange={e => setBookingSearch(e.target.value)} placeholder="Search by client or event type..." className="w-full bg-gray-700/50 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-purple-500/50" />
                   </div>
                   <div className="flex gap-2 flex-wrap">
-                    {['all','pending','negotiation','confirmed','completed','cancelled'].map(f => (
+                    {['all','pending','countered','accepted','completed','cancelled'].map(f => (
                       <button key={f} onClick={() => setBookingFilter(f)} className={`px-3 py-2 rounded-lg text-xs font-semibold capitalize transition-all ${bookingFilter === f ? 'bg-purple-500 text-white' : 'bg-gray-700/50 text-gray-400 hover:text-white'}`}>{f}</button>
                     ))}
                   </div>
@@ -1338,11 +1338,11 @@ export default function ArtistDashboard() {
               {/* Booking Pipeline Stats */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 {[
-                  { label: 'Pending', count: [...pendingRequests, ...recentEnquiries].filter(r => r.status === 'pending').length, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
-                  { label: 'Negotiation', count: [...pendingRequests, ...recentEnquiries].filter(r => r.status === 'negotiation').length, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
-                  { label: 'Confirmed', count: [...pendingRequests, ...recentEnquiries].filter(r => r.status === 'confirmed').length, color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
-                  { label: 'Completed', count: [...pendingRequests, ...recentEnquiries].filter(r => r.status === 'completed').length, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
-                  { label: 'Cancelled', count: [...pendingRequests, ...recentEnquiries].filter(r => r.status === 'cancelled').length, color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' },
+                  { label: 'Pending',    count: [...pendingRequests, ...recentEnquiries].filter(r => r.status === 'pending').length,    color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
+                  { label: 'Countered',  count: [...pendingRequests, ...recentEnquiries].filter(r => r.status === 'countered').length,  color: 'text-blue-400',   bg: 'bg-blue-500/10 border-blue-500/20' },
+                  { label: 'Accepted',   count: [...pendingRequests, ...recentEnquiries].filter(r => r.status === 'accepted').length,   color: 'text-green-400',  bg: 'bg-green-500/10 border-green-500/20' },
+                  { label: 'Completed',  count: [...pendingRequests, ...recentEnquiries].filter(r => r.status === 'completed').length,  color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
+                  { label: 'Cancelled',  count: [...pendingRequests, ...recentEnquiries].filter(r => r.status === 'cancelled').length,  color: 'text-red-400',    bg: 'bg-red-500/10 border-red-500/20' },
                 ].map((s, i) => (
                   <div key={i} className={`p-3 rounded-xl border text-center ${s.bg}`}>
                     <p className={`text-2xl font-black ${s.color}`}>{s.count}</p>
@@ -1386,9 +1386,9 @@ export default function ArtistDashboard() {
                           </div>
                         </div>
                         {/* Actions */}
-                        {(req.status === 'pending' || req.status === 'negotiation') && (
+                        {(req.status === 'pending' || req.status === 'countered') && (
                           <div className="flex gap-2 flex-wrap sm:flex-nowrap">
-                            <button onClick={() => handleBookingAction(req.id, 'confirmed')} className="flex items-center gap-1.5 px-4 py-2 bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl text-sm font-semibold hover:bg-green-500/30 transition">
+                            <button onClick={() => handleBookingAction(req.id, 'accepted')} className="flex items-center gap-1.5 px-4 py-2 bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl text-sm font-semibold hover:bg-green-500/30 transition">
                               <CheckCircle size={14} /> Accept
                             </button>
                             <button onClick={() => { setSelectedRequest(req); setShowCounterModal(true); }} className="flex items-center gap-1.5 px-4 py-2 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-sm font-semibold hover:bg-blue-500/30 transition">
@@ -1575,11 +1575,11 @@ export default function ArtistDashboard() {
               </div>
               {/* Cover + Avatar */}
               <GlassCard className="overflow-hidden">
-                <div className="h-40 bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 relative">
+                <div className="h-56 bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 relative">
                   <button className="absolute top-3 right-3 p-2 bg-black/30 rounded-lg text-white hover:bg-black/50 transition"><Camera size={16} /></button>
                 </div>
                 <div className="px-6 pb-6">
-                  <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-12">
+                  <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-16">
                     <div className="relative">
                       {/* Hidden file input */}
                       <input
@@ -1593,13 +1593,13 @@ export default function ArtistDashboard() {
                       <button
                         onClick={() => profilePicInputRef.current?.click()}
                         disabled={profilePicUploading}
-                        className="relative w-24 h-24 rounded-2xl border-4 border-gray-900 overflow-hidden group focus:outline-none"
+                        className="relative w-32 h-32 rounded-2xl border-4 border-gray-900 overflow-hidden group focus:outline-none shadow-2xl"
                         title="Click to change profile picture"
                       >
                         {artist?.profile_image ? (
                           <img src={artist.profile_image} alt="Profile" className="w-full h-full object-cover" />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-black text-3xl">
+                          <div className="w-full h-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-black text-4xl">
                             {displayName.charAt(0).toUpperCase()}
                           </div>
                         )}

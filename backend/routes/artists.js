@@ -95,7 +95,7 @@ router.patch('/:id', verifyToken, requireArtist, requirePermission('manage_profi
     }
     if (setClauses.length === 0) return res.status(400).json({ message: 'No valid fields to update' });
     values.push(id);
-    const sql = 'UPDATE artists SET ' + setClauses.join(', ') + ', updated_at = NOW() WHERE id = $' + idx + ' RETURNING id, full_name, stage_name, email, city, price_min, price_max, bio, is_available';
+    const sql = 'UPDATE artists SET ' + setClauses.join(', ') + ', updated_at = NOW() WHERE id = $' + idx + ' RETURNING id, full_name, stage_name, email, city, price_min, price_max, bio, short_bio, phone, whatsapp, is_available';
     const result = await pool.query(sql, values);
     if (result.rows.length === 0) return res.status(404).json({ message: 'Artist not found' });
     res.json(result.rows[0]);

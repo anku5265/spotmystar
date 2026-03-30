@@ -101,6 +101,7 @@ export default function UserDashboard() {
       case 'rejected':
       case 'cancelled': return <XCircle className="text-red-500" size={20} />;
       case 'completed': return <CheckCircle className="text-blue-500" size={20} />;
+      case 'countered':
       case 'negotiation': return <Clock className="text-blue-400" size={20} />;
       default: return <Clock className="text-gray-500" size={20} />;
     }
@@ -251,7 +252,7 @@ export default function UserDashboard() {
                       booking.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' :
                       booking.status === 'accepted' || booking.status === 'confirmed' ? 'bg-green-500/20 text-green-500' :
                       booking.status === 'rejected' || booking.status === 'cancelled' ? 'bg-red-500/20 text-red-500' :
-                      booking.status === 'negotiation' ? 'bg-blue-400/20 text-blue-400' :
+                      booking.status === 'countered' || booking.status === 'negotiation' ? 'bg-blue-400/20 text-blue-400' :
                       'bg-blue-500/20 text-blue-500'
                     }`}>
                       {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}

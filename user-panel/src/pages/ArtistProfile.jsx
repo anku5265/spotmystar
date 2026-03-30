@@ -126,8 +126,8 @@ export default function ArtistProfile() {
                 <img
                   src={profileImage}
                   alt={artist.stage_name}
-                  className="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-primary object-cover"
-                  onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.stage_name || 'A')}&background=8B5CF6&color=fff&size=128`; }}
+                  className="w-40 h-40 rounded-2xl mx-auto mb-4 border-4 border-primary object-cover shadow-2xl shadow-primary/30"
+                  onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.stage_name || 'A')}&background=8B5CF6&color=fff&size=160`; }}
                 />
                 <h1 className="text-2xl font-bold">{artist.stage_name}</h1>
                 <p className="text-gray-400 text-sm">{artist.full_name}</p>

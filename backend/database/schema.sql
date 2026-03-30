@@ -30,6 +30,7 @@ CREATE TABLE artists (
   gallery TEXT[], -- Array of image URLs
   videos TEXT[], -- Array of video URLs
   is_verified BOOLEAN DEFAULT FALSE,
+  is_available BOOLEAN DEFAULT TRUE,
   status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'inactive')),
   rating DECIMAL(2,1) DEFAULT 0,
   total_bookings INTEGER DEFAULT 0,
@@ -63,7 +64,7 @@ CREATE TABLE bookings (
   event_location VARCHAR(255) NOT NULL,
   budget INTEGER NOT NULL,
   message TEXT,
-  status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected', 'completed')),
+  status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected', 'countered', 'completed', 'cancelled')),
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );

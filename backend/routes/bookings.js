@@ -88,10 +88,20 @@ router.get('/artist/:artistId', verifyToken, requireArtist, async (req, res) => 
 // Update booking status - ARTIST ONLY
 router.patch('/:id/status', verifyToken, requireArtist, requirePermission('manage_bookings'), async (req, res) => {
   try {
-    const { status, counterOffer } = req.body;
-    const validStatuses = ['accepted', 'rejected', 'pending', 'confirmed', 'negotiation', 'cancelled', 'completed'];
+    let { status, counterOffer } = req.body;
+
+    // Normalize: map old/alternate values to DB-allowed values
+    const statusMap = {
+      'negotiation': 'countered',
+      'confirmed':   'accepted',
+      'approve':     'accepted',
+      'decline':     'rejected',
+    };
+    if (statusMap[status]) status = statusMap[status];
+
+    const validStatuses = ['pending', 'accepted', 'rejected', 'countered', 'completed', 'cancelled'];
     if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: 'Invalid status value' });
+      return res.status(400).json({ message: `Invalid status. Allowed: ${validStatuses.join(', ')}` });
     }
 
     const booking = await pool.query('SELECT artist_id, user_id FROM bookings WHERE id = $1', [req.params.id]);
@@ -101,8 +111,7 @@ router.patch('/:id/status', verifyToken, requireArtist, requirePermission('manag
     }
 
     let result;
-    if (counterOffer && status === 'negotiation') {
-      // Save counter offer price
+    if (counterOffer && status === 'countered') {
       result = await pool.query(
         'UPDATE bookings SET status = $1, counter_price = $2, updated_at = NOW() WHERE id = $3 RETURNING *',
         [status, parseInt(counterOffer), req.params.id]
