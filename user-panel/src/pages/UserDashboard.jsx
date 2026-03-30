@@ -138,6 +138,9 @@ export default function UserDashboard() {
               <h1 className="text-2xl font-bold">{user?.name}</h1>
               <p className="text-gray-400">{user?.email}</p>
               <p className="text-gray-400">{user?.phone}</p>
+              {user?.user_code && (
+                <p className="text-xs text-primary/70 font-mono mt-1">ID: U{user.user_code}</p>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -244,6 +247,9 @@ export default function UserDashboard() {
                     <div>
                       <h3 className="text-xl font-bold">{booking.stage_name || 'Artist'}</h3>
                       <p className="text-gray-400">{booking.category_name}</p>
+                      {booking.booking_code && (
+                        <p className="text-xs font-mono text-primary/70 mt-0.5">Booking ID: B{booking.booking_code}</p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

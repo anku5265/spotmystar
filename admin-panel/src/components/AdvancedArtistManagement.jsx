@@ -626,6 +626,9 @@ export default function AdvancedArtistManagement() {
                         <div>
                           <p className="font-medium text-white">{artist.full_name}</p>
                           <p className="text-sm text-gray-400">{artist.stage_name}</p>
+                          {artist.artist_code && (
+                            <p className="text-xs font-mono text-purple-400/70 mt-0.5">A{artist.artist_code}</p>
+                          )}
                           <div className="flex items-center gap-2 mt-1">
                             {artist.is_verified && (
                               <CheckCircle size={14} className="text-green-400" />

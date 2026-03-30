@@ -451,7 +451,9 @@ export default function AdvancedUserManagement() {
                         </div>
                         <div>
                           <p className="font-medium text-white">{user.name}</p>
-                          <p className="text-sm text-gray-400">ID: {user.user_id || user.id}</p>
+                          <p className="text-sm font-mono text-blue-400/70">
+                            {user.user_code ? `U${user.user_code}` : '—'}
+                          </p>
                         </div>
                       </div>
                     </td>

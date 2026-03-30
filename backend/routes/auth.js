@@ -89,6 +89,7 @@ router.post('/artist/login', async (req, res) => {
         isVerified: artist.is_verified,
         status: artist.status,
         views: artist.views,
+        artist_code: artist.artist_code,
         role: 'artist'
       }
     });
@@ -194,6 +195,7 @@ router.post('/user/login', async (req, res) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        user_code: user.user_code,
         role: 'user'
       }
     });
