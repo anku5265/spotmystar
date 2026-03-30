@@ -21,6 +21,7 @@ import Toast from '../components/Toast';
 import NotificationBell from '../components/NotificationBell';
 import { useAuth } from '../hooks/useAuth';
 import { usePermissions } from '../hooks/usePermissions';
+import ShareProfileModal from '../components/ShareProfileModal';
 
 // ─── Glass Card ────────────────────────────────────────────────────────────
 const GlassCard = ({ children, className = '', hover = true, glow = false }) => (
@@ -199,6 +200,7 @@ export default function ArtistDashboard() {
   const [bioText, setBioText] = useState('');
   const [settingsForm, setSettingsForm] = useState({ full_name: '', stage_name: '', phone: '', city: '' });
   const [settingsSaving, setSettingsSaving] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // ── Chat State ──
   const [activeChat, setActiveChat] = useState(null);
@@ -1565,6 +1567,9 @@ export default function ArtistDashboard() {
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-white">My Profile</h2>
                 <div className="flex items-center gap-2">
+                  <button onClick={() => setShowShareModal(true)} className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 rounded-xl text-sm font-medium transition">
+                    <Share2 size={15} /> Share Profile
+                  </button>
                   <button onClick={() => setActiveSection('settings')} className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-sm font-medium transition">
                     <Settings size={15} /> Settings
                   </button>
@@ -2235,6 +2240,14 @@ export default function ArtistDashboard() {
           ))}
         </div>
       </nav>
+
+      {/* ── Share Profile Modal ── */}
+      {showShareModal && (
+        <ShareProfileModal
+          artist={artist}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
     </div>
   );
 }
