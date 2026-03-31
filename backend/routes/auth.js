@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
 import { verifyToken } from '../middleware/auth.js';
-import { generateUserCode, formatUserCode } from '../utils/idGenerator.js';
+import { generateUserCode, formatUserCode, formatArtistCode } from '../utils/idGenerator.js';
 
 const router = express.Router();
 
@@ -14,7 +14,7 @@ router.get('/me', verifyToken, async (req, res) => {
 
     if (role === 'artist') {
       const result = await pool.query(
-        'SELECT id, full_name, stage_name, email, status, is_verified FROM artists WHERE id = $1',
+        'SELECT id, full_name, stage_name, email, status, is_verified, artist_code FROM artists WHERE id = $1',
         [id]
       );
       if (result.rows.length === 0) return res.status(404).json({ message: 'Artist not found' });
@@ -22,17 +22,17 @@ router.get('/me', verifyToken, async (req, res) => {
       if (a.status === 'pending' || a.status === 'rejected' || a.status === 'inactive') {
         return res.status(403).json({ message: 'Account not active', status: a.status });
       }
-      return res.json({ role: 'artist', user: { id: a.id, fullName: a.full_name, stageName: a.stage_name, email: a.email, status: a.status, isVerified: a.is_verified, role: 'artist' } });
+      return res.json({ role: 'artist', user: { id: a.id, fullName: a.full_name, stageName: a.stage_name, email: a.email, status: a.status, isVerified: a.is_verified, artist_code: a.artist_code, artistCode: formatArtistCode(a.artist_code), role: 'artist' } });
     }
 
     if (role === 'user') {
       const result = await pool.query(
-        'SELECT id, name, email, phone FROM users WHERE id = $1 AND role = $2',
+        'SELECT id, name, email, phone, user_code FROM users WHERE id = $1 AND role = $2',
         [id, 'user']
       );
       if (result.rows.length === 0) return res.status(404).json({ message: 'User not found' });
       const u = result.rows[0];
-      return res.json({ role: 'user', user: { id: u.id, name: u.name, email: u.email, phone: u.phone, role: 'user' } });
+      return res.json({ role: 'user', user: { id: u.id, name: u.name, email: u.email, phone: u.phone, user_code: u.user_code, userCode: formatUserCode(u.user_code), role: 'user' } });
     }
 
     return res.status(403).json({ message: 'Invalid role' });
@@ -90,6 +90,7 @@ router.post('/artist/login', async (req, res) => {
         status: artist.status,
         views: artist.views,
         artist_code: artist.artist_code,
+        artistCode: formatArtistCode(artist.artist_code),
         role: 'artist'
       }
     });
@@ -196,6 +197,7 @@ router.post('/user/login', async (req, res) => {
         email: user.email,
         phone: user.phone,
         user_code: user.user_code,
+        userCode: formatUserCode(user.user_code),
         role: 'user'
       }
     });
