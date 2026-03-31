@@ -38,19 +38,21 @@ router.get('/featured', async (req, res) => {
   }
 });
 
-// Get artist by ID or stage name — public
+// Get artist by ID, artist_code, or stage name — public
 router.get('/:identifier', async (req, res) => {
   try {
     const { identifier } = req.params;
     const { skipViewCount } = req.query;
     const decoded = decodeURIComponent(identifier).trim();
 
+    // Match priority: artist_code (A1234) → UUID → stage_name
     const result = await pool.query(
       `SELECT a.*, c.name as category_name
        FROM artists a
        LEFT JOIN categories c ON a.category_id = c.id
-       WHERE LOWER(a.stage_name) = LOWER($1)
-          OR a.id::text = $1`,
+       WHERE a.artist_code::text = $1
+          OR a.id::text = $1
+          OR LOWER(a.stage_name) = LOWER($1)`,
       [decoded]
     );
 
