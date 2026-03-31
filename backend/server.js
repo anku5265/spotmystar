@@ -23,26 +23,13 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:5175',
-    'http://localhost:5174',
-    'http://localhost:5176',
-    process.env.FRONTEND_URL,
-    process.env.ARTIST_PANEL_URL,
-    process.env.ADMIN_PANEL_URL,
-    // Production Vercel URLs
-    'https://spotmystar-user.vercel.app',
-    'https://spotmystar-artist.vercel.app',
-    'https://spotmystar-admin.vercel.app',
-    'https://spotmystar.vercel.app',
-    'https://artist-spotmystar.vercel.app',
-    'https://admin-spotmystar.vercel.app',
-    'https://spotmystar-brand.vercel.app',
-  ].filter(Boolean),
+  origin: function(origin, callback) {
+    // Allow all origins — Vercel handles CORS headers via vercel.json
+    callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
 
 // Handle preflight requests explicitly
