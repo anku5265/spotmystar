@@ -5,6 +5,7 @@ import api from '../config/api';
 import { getCurrentRole } from '../hooks/useAuth';
 import BookingModal from '../components/BookingModal';
 import Toast from '../components/Toast';
+import ReviewSection from '../components/ReviewSection';
 
 export default function ArtistProfile() {
   const { identifier } = useParams();
@@ -231,6 +232,9 @@ export default function ArtistProfile() {
               </div>
               <p className="text-gray-500 text-xs mt-2">* Final price depends on event type, duration, and location</p>
             </div>
+
+            {/* Reviews */}
+            <ReviewSection artistId={artist.id} />
           </div>
         </div>
       </div>
