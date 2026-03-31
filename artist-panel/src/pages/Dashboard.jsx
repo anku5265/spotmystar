@@ -344,8 +344,7 @@ export default function ArtistDashboard() {
       ]);
       setLoading(false);
     } catch (e) {
-      console.error(e);
-      setToast({ message: 'Dashboard load failed', type: 'error' });
+      console.error('Dashboard fetch error:', e);
       setLoading(false);
     }
   };

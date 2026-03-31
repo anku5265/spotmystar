@@ -37,6 +37,7 @@ app.use(cors({
     'https://spotmystar.vercel.app',
     'https://artist-spotmystar.vercel.app',
     'https://admin-spotmystar.vercel.app',
+    'https://spotmystar-brand.vercel.app',
   ].filter(Boolean),
   credentials: true
 }));
