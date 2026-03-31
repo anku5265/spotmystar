@@ -14,7 +14,7 @@ router.get('/me', verifyToken, async (req, res) => {
 
     if (role === 'artist') {
       const result = await pool.query(
-        'SELECT id, full_name, stage_name, email, status, is_verified, artist_code FROM artists WHERE id = $1',
+        'SELECT id, full_name, stage_name, email, status, is_verified, artist_code, profile_image, city, primary_city, views FROM artists WHERE id = $1',
         [id]
       );
       if (result.rows.length === 0) return res.status(404).json({ message: 'Artist not found' });
@@ -22,7 +22,7 @@ router.get('/me', verifyToken, async (req, res) => {
       if (a.status === 'pending' || a.status === 'rejected' || a.status === 'inactive') {
         return res.status(403).json({ message: 'Account not active', status: a.status });
       }
-      return res.json({ role: 'artist', user: { id: a.id, fullName: a.full_name, stageName: a.stage_name, email: a.email, status: a.status, isVerified: a.is_verified, artist_code: a.artist_code, artistCode: formatArtistCode(a.artist_code), role: 'artist' } });
+      return res.json({ role: 'artist', user: { id: a.id, fullName: a.full_name, stageName: a.stage_name, email: a.email, status: a.status, isVerified: a.is_verified, artist_code: a.artist_code, artistCode: formatArtistCode(a.artist_code), profile_image: a.profile_image, city: a.city || a.primary_city, views: a.views, role: 'artist' } });
     }
 
     if (role === 'user') {
@@ -91,6 +91,8 @@ router.post('/artist/login', async (req, res) => {
         views: artist.views,
         artist_code: artist.artist_code,
         artistCode: formatArtistCode(artist.artist_code),
+        profile_image: artist.profile_image,
+        city: artist.city || artist.primary_city,
         role: 'artist'
       }
     });
