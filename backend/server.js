@@ -15,6 +15,7 @@ import messagesRoutes from './routes/messages.js';
 import wishlistRoutes from './routes/wishlist.js';
 import uploadRoutes from './routes/upload.js';
 import reviewRoutes from './routes/reviews.js';
+import brandRoutes from './routes/brands.js';
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ app.use('/api/messages', messagesRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/brands', brandRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'SpotMyStar API - Role-Based Access Control System' });

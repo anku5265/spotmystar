@@ -22,6 +22,7 @@ import NotificationBell from '../components/NotificationBell';
 import { useAuth } from '../hooks/useAuth';
 import { usePermissions } from '../hooks/usePermissions';
 import ShareProfileModal from '../components/ShareProfileModal';
+import OpportunitiesSection from '../components/OpportunitiesSection';
 
 // ─── Glass Card ────────────────────────────────────────────────────────────
 const GlassCard = ({ children, className = '', hover = true, glow = false }) => (
@@ -763,13 +764,14 @@ export default function ArtistDashboard() {
   // ── Nav Items ──
   // Nav items — filtered by permissions from DB
   const allNavItems = [
-    { id: 'home',        icon: LayoutDashboard, label: 'Dashboard',   permission: 'view_artist_dashboard' },
-    { id: 'bookings',    icon: CalendarDays,    label: 'Bookings',    permission: 'manage_bookings',  badge: pendingRequests.length },
-    { id: 'messages',    icon: MessageSquare,   label: 'Messages',    permission: 'view_artist_dashboard', badge: conversations.reduce((a, c) => a + (c.unreadCount || 0), 0) },
-    { id: 'content',     icon: Video,           label: 'Content',     permission: 'manage_content' },
-    { id: 'schedule',    icon: Calendar,        label: 'Schedule',    permission: 'manage_schedule' },
-    { id: 'analytics',   icon: BarChart3,       label: 'Analytics',   permission: 'view_analytics' },
-    { id: 'collaborate', icon: Handshake,       label: 'Collaborate', permission: 'view_artist_dashboard' },
+    { id: 'home',          icon: LayoutDashboard, label: 'Dashboard',    permission: 'view_artist_dashboard' },
+    { id: 'bookings',      icon: CalendarDays,    label: 'Bookings',     permission: 'manage_bookings',  badge: pendingRequests.length },
+    { id: 'opportunities', icon: Zap,             label: 'Opportunities',permission: 'view_artist_dashboard' },
+    { id: 'messages',      icon: MessageSquare,   label: 'Messages',     permission: 'view_artist_dashboard', badge: conversations.reduce((a, c) => a + (c.unreadCount || 0), 0) },
+    { id: 'content',       icon: Video,           label: 'Content',      permission: 'manage_content' },
+    { id: 'schedule',      icon: Calendar,        label: 'Schedule',     permission: 'manage_schedule' },
+    { id: 'analytics',     icon: BarChart3,       label: 'Analytics',    permission: 'view_analytics' },
+    { id: 'collaborate',   icon: Handshake,       label: 'Collaborate',  permission: 'view_artist_dashboard' },
   ];
   const navItems = allNavItems.filter(item => hasPermission(item.permission));
 
@@ -2194,6 +2196,11 @@ export default function ArtistDashboard() {
                 </button>
               </GlassCard>
             </div>
+          )}
+
+          {/* ══ OPPORTUNITIES ════════════════════════════════════════════ */}
+          {activeSection === 'opportunities' && (
+            <OpportunitiesSection token={localStorage.getItem('artistToken')} />
           )}
 
         </div>

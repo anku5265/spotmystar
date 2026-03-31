@@ -86,3 +86,8 @@ export const requireArtist = (req, res, next) => {
 export const requireAdmin = (req, res, next) => {
   return requireRole('admin')(req, res, next);
 };
+
+// Middleware for brand-only routes
+export const requireBrand = (req, res, next) => {
+  return requireRole('brand')(req, res, next);
+};

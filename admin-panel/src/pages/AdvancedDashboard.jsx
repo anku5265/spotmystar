@@ -4,12 +4,13 @@ import {
   Users, UserCheck, Clock, CheckCircle, XCircle, Eye, Calendar, 
   UserCircle, LogOut, ChevronDown, TrendingUp, Shield, Ban, UserX,
   AlertTriangle, Activity, BarChart3, Settings, Search, Filter,
-  Star, Edit3, FileText, Database, Zap
+  Star, Edit3, FileText, Database, Zap, Building2
 } from 'lucide-react';
 import api from '../config/api';
 import Toast from '../components/Toast';
 import AdvancedUserManagement from '../components/AdvancedUserManagement';
 import AdvancedArtistManagement from '../components/AdvancedArtistManagement';
+import BrandManagement from '../components/BrandManagement';
 
 export default function AdvancedDashboard() {
   const navigate = useNavigate();
@@ -274,6 +275,7 @@ export default function AdvancedDashboard() {
             { id: 'users', label: 'User Management', icon: Users },
             { id: 'artists', label: 'Artist Management', icon: UserCheck },
             { id: 'bookings', label: 'Booking Control', icon: Calendar },
+            { id: 'brands', label: 'Brands', icon: Building2 },
             { id: 'risk-management', label: 'Risk Management', icon: Shield },
             { id: 'analytics', label: 'Analytics', icon: TrendingUp },
             { id: 'audit-log', label: 'Audit Log', icon: FileText }
@@ -467,6 +469,8 @@ export default function AdvancedDashboard() {
             <p className="text-gray-400">Coming soon - Full activity tracking and audit trail</p>
           </div>
         )}
+
+        {activeTab === 'brands' && <BrandManagement />}
       </div>
     </div>
   );
