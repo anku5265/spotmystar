@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   LayoutDashboard, User, Video, CalendarDays, Zap,
   BarChart3, MessageSquare, Settings, LogOut, Menu, X,
@@ -125,13 +125,29 @@ const LeadScore = ({ score }) => {
 // ─── Main Dashboard Component ──────────────────────────────────────────────
 export default function ArtistDashboard() {
   const navigate = useNavigate();
+  const { section: urlSection } = useParams();
   const { isAuthenticated, userRole, user: authUser, isLoading, logout } = useAuth('artist');
   const { hasPermission } = usePermissions('artist');
 
   // ── UI State ──
-  const [activeSection, setActiveSection] = useState('home');
+  const [activeSection, setActiveSectionState] = useState(urlSection || 'home');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Sync URL when section changes
+  const setActiveSection = (section) => {
+    setActiveSectionState(section);
+    navigate(section === 'home' ? '/dashboard' : `/dashboard/${section}`, { replace: true });
+  };
+
+  // Sync section from URL on mount/back-forward
+  useEffect(() => {
+    if (urlSection && urlSection !== activeSection) {
+      setActiveSectionState(urlSection);
+    } else if (!urlSection && activeSection !== 'home') {
+      setActiveSectionState('home');
+    }
+  }, [urlSection]);
   const profilePicInputRef = useRef(null);
   const [profilePicUploading, setProfilePicUploading] = useState(false);
   const [showCongratsPopup, setShowCongratsPopup] = useState(false);

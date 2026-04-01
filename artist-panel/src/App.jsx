@@ -61,6 +61,7 @@ function App() {
 
         {/* Protected — requires valid artist token */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/dashboard/:section" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
         {/* Default */}
         <Route path="/" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
