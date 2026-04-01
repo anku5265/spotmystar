@@ -191,22 +191,22 @@ export default function BrandDashboard() {
       )}
 
       {/* Header */}
-      <header className="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-bold text-white">{brand.companyName || 'Brand Dashboard'}</h1>
+      <header className="bg-gray-900 border-b border-gray-800 px-4 py-3 flex items-center justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-base font-bold text-white truncate">{brand.companyName || 'Brand Dashboard'}</h1>
           <p className="text-xs text-gray-400">SpotMyStar — Brand Panel</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <button onClick={() => { setShowForm(true); setEditingReq(null); setForm({ title: '', description: '', category: '', eventDate: '', eventTime: '', location: '', budgetRange: '', bannerImageUrl: '' }); }}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition">
-            <Plus size={16} /> Post Requirement
+            className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition whitespace-nowrap">
+            <Plus size={15} /> Post
           </button>
-          <button onClick={logout} className="p-2 text-gray-400 hover:text-white transition"><LogOut size={18} /></button>
+          <button onClick={logout} className="p-2 text-gray-400 hover:text-white transition flex-shrink-0"><LogOut size={18} /></button>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <h2 className="text-xl font-bold text-white mb-6">My Requirements</h2>
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6">
+        <h2 className="text-lg font-bold text-white mb-4">My Requirements</h2>
 
         {requirements.length === 0 ? (
           <div className="text-center py-20 text-gray-500">
@@ -219,16 +219,16 @@ export default function BrandDashboard() {
             {requirements.map(req => (
               <div key={req.id} className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
                 {/* Post Header */}
-                <div className="p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
+                <div className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <h3 className="font-bold text-white">{req.title}</h3>
+                        <h3 className="font-bold text-white text-sm sm:text-base">{req.title}</h3>
                         <StatusBadge status={req.status} />
                         <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">{req.category}</span>
                       </div>
-                      <p className="text-gray-400 text-sm line-clamp-2">{req.description}</p>
-                      <div className="flex flex-wrap gap-3 mt-2 text-xs text-gray-500">
+                      <p className="text-gray-400 text-xs sm:text-sm line-clamp-2 break-words">{req.description}</p>
+                      <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-500">
                         {req.location && <span>📍 {req.location}</span>}
                         {req.event_date && <span>📅 {new Date(req.event_date).toLocaleDateString('en-IN')}</span>}
                         {req.budget_range && <span>💰 {req.budget_range}</span>}
@@ -236,26 +236,19 @@ export default function BrandDashboard() {
                     </div>
 
                     {/* Action buttons */}
-                    <div className="flex gap-2 flex-shrink-0 flex-wrap justify-end">
-                      {/* View Responses toggle */}
+                    <div className="flex flex-col gap-1.5 flex-shrink-0">
                       <button
                         onClick={() => setExpandedReq(expandedReq === req.id ? null : req.id)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition border ${expandedReq === req.id ? 'bg-purple-500 text-white border-purple-500' : 'bg-purple-500/20 text-purple-400 border-purple-500/30 hover:bg-purple-500/30'}`}>
-                        <Users size={13} />
-                        {expandedReq === req.id ? 'Hide' : 'Responses'}
-                        {req.response_count > 0 && (
-                          <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs font-bold ${expandedReq === req.id ? 'bg-white/20' : 'bg-purple-500/30'}`}>
-                            {req.response_count}
-                          </span>
-                        )}
-                        {expandedReq === req.id ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                        className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition border ${expandedReq === req.id ? 'bg-purple-500 text-white border-purple-500' : 'bg-purple-500/20 text-purple-400 border-purple-500/30'}`}>
+                        <Users size={12} />
+                        {req.response_count > 0 && <span className="font-bold">{req.response_count}</span>}
+                        {expandedReq === req.id ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
                       </button>
-
                       {req.status === 'pending' && (
-                        <>
-                          <button onClick={() => startEdit(req)} className="p-1.5 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition"><Edit size={14} /></button>
-                          <button onClick={() => handleDelete(req.id)} className="p-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition"><Trash2 size={14} /></button>
-                        </>
+                        <div className="flex gap-1">
+                          <button onClick={() => startEdit(req)} className="p-1.5 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition"><Edit size={13} /></button>
+                          <button onClick={() => handleDelete(req.id)} className="p-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition"><Trash2 size={13} /></button>
+                        </div>
                       )}
                     </div>
                   </div>
