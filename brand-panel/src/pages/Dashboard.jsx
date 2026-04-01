@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, LogOut, Eye, Trash2, Edit, Users, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, LogOut, Eye, Trash2, Edit, Users, Star, MapPin, Phone, Mail, ExternalLink, Filter, ChevronDown } from 'lucide-react';
 import api from '../config/api';
 
 const CATEGORIES = ['DJ', 'Singer', 'Dancer', 'Comedian', 'Anchor', 'Band', 'Photographer', 'Videographer', 'Makeup Artist', 'Instagram Influencer', 'YouTube Creator', 'Content Creator', 'Model', 'Other'];
@@ -22,6 +22,9 @@ export default function BrandDashboard() {
   const [showForm, setShowForm] = useState(false);
   const [editingReq, setEditingReq] = useState(null);
   const [toast, setToast] = useState(null);
+  const [sortBy, setSortBy] = useState('newest');
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [shortlisted, setShortlisted] = useState(new Set());
   const [form, setForm] = useState({ title: '', description: '', category: '', eventDate: '', eventTime: '', location: '', budgetRange: '', bannerImageUrl: '' });
 
   useEffect(() => { fetchRequirements(); }, []);
@@ -161,28 +164,128 @@ export default function BrandDashboard() {
         {/* Responses Tab */}
         {tab === 'responses' && (
           <div className="space-y-4">
-            {responses.length === 0 ? (
-              <div className="text-center py-16 text-gray-500">
-                <Users size={40} className="mx-auto mb-3 opacity-30" />
-                <p>No responses yet. Select a post to view responses.</p>
-              </div>
-            ) : responses.map(r => (
-              <div key={r.id} className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex items-start gap-4">
-                <img src={r.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(r.stage_name || 'A')}&background=8B5CF6&color=fff&size=80`}
-                  alt={r.stage_name} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-bold text-white">{r.stage_name}</p>
-                    <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">{r.category_name}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${r.status === 'interested' ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>
-                      {r.status === 'interested' ? '👍 Interested' : '❌ Not Interested'}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-400 mt-0.5">📍 {r.city} · ⭐ {r.rating || 'New'} · ID: A{r.artist_code}</p>
-                  {r.message && <p className="text-sm text-gray-300 mt-2 bg-gray-800 rounded-lg px-3 py-2">"{r.message}"</p>}
+            {/* Filters & Sort */}
+            {responses.length > 0 && (
+              <div className="flex flex-wrap gap-3 items-center bg-gray-900 border border-gray-800 rounded-xl p-4">
+                <div className="flex items-center gap-2">
+                  <Filter size={14} className="text-gray-400" />
+                  <span className="text-xs text-gray-400">Filter:</span>
+                  <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}
+                    className="bg-gray-800 text-gray-300 text-xs rounded-lg px-2 py-1 outline-none border border-gray-700">
+                    <option value="all">All Categories</option>
+                    {[...new Set(responses.map(r => r.category_name).filter(Boolean))].map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
                 </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-400">Sort:</span>
+                  <select value={sortBy} onChange={e => setSortBy(e.target.value)}
+                    className="bg-gray-800 text-gray-300 text-xs rounded-lg px-2 py-1 outline-none border border-gray-700">
+                    <option value="newest">Newest First</option>
+                    <option value="rating">Best Rated</option>
+                  </select>
+                </div>
+                <span className="ml-auto text-xs text-gray-500">{responses.filter(r => r.status === 'interested').length} interested</span>
               </div>
-            ))}
+            )}
+
+            {responses.filter(r => r.status === 'interested').length === 0 ? (
+              <div className="text-center py-16 text-gray-500">
+                <Users size={48} className="mx-auto mb-4 opacity-20" />
+                <p className="text-lg font-medium text-gray-400">No artists have shown interest yet.</p>
+                <p className="text-sm mt-1">Once your requirement is approved, artists will start responding.</p>
+              </div>
+            ) : (
+              [...responses]
+                .filter(r => r.status === 'interested' && (filterCategory === 'all' || r.category_name === filterCategory))
+                .sort((a, b) => sortBy === 'rating' ? (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0) : new Date(b.created_at) - new Date(a.created_at))
+                .map(r => (
+                  <div key={r.id} className="bg-gray-900 border border-gray-800 rounded-2xl p-5 hover:border-purple-500/30 transition-all">
+                    <div className="flex items-start gap-4">
+                      {/* Profile Image */}
+                      <img
+                        src={r.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(r.stage_name || 'A')}&background=8B5CF6&color=fff&size=80`}
+                        alt={r.stage_name}
+                        className="w-16 h-16 rounded-2xl object-cover flex-shrink-0 border-2 border-purple-500/30"
+                      />
+
+                      {/* Main Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 flex-wrap">
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="font-bold text-white text-lg">{r.stage_name || r.full_name}</h3>
+                              <span className="text-xs bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-0.5 rounded-full font-semibold">✅ Interested</span>
+                              {shortlisted.has(r.artist_code) && (
+                                <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">⭐ Shortlisted</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3 mt-1 flex-wrap text-sm text-gray-400">
+                              {r.category_name && <span className="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full text-xs">{r.category_name}</span>}
+                              {r.city && <span className="flex items-center gap-1"><MapPin size={12} />{r.city}</span>}
+                              <span className="flex items-center gap-1 text-yellow-400">
+                                <Star size={12} className="fill-yellow-400" />
+                                {r.rating > 0 ? r.rating : 'New'}
+                              </span>
+                              {r.total_bookings > 0 && <span className="text-gray-500">{r.total_bookings} bookings</span>}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Artist Message */}
+                        {r.message && (
+                          <div className="mt-3 bg-purple-500/10 border border-purple-500/20 rounded-xl px-4 py-2.5">
+                            <p className="text-sm text-purple-200 italic">💬 "{r.message}"</p>
+                          </div>
+                        )}
+
+                        {/* Contact Info */}
+                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {r.whatsapp && (
+                            <a href={`https://wa.me/${r.whatsapp}`} target="_blank" rel="noopener noreferrer"
+                              className="flex items-center gap-2 text-sm text-gray-300 bg-gray-800 hover:bg-green-500/10 hover:text-green-400 rounded-lg px-3 py-2 transition">
+                              <Phone size={14} /> {r.whatsapp}
+                            </a>
+                          )}
+                          {r.email && (
+                            <a href={`mailto:${r.email}`}
+                              className="flex items-center gap-2 text-sm text-gray-300 bg-gray-800 hover:bg-blue-500/10 hover:text-blue-400 rounded-lg px-3 py-2 transition">
+                              <Mail size={14} /> {r.email}
+                            </a>
+                          )}
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="mt-3 flex gap-2 flex-wrap">
+                          {r.artist_code && (
+                            <a href={`https://spotmystar-user.vercel.app/artist/A${r.artist_code}`} target="_blank" rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg text-xs font-semibold hover:bg-purple-500/30 transition">
+                              <ExternalLink size={12} /> View Profile
+                            </a>
+                          )}
+                          {r.whatsapp && (
+                            <a href={`https://wa.me/${r.whatsapp}?text=${encodeURIComponent('Hi! I saw your interest in our requirement on SpotMyStar.')}`}
+                              target="_blank" rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/20 text-green-400 border border-green-500/30 rounded-lg text-xs font-semibold hover:bg-green-500/30 transition">
+                              💬 WhatsApp
+                            </a>
+                          )}
+                          <button
+                            onClick={() => setShortlisted(prev => {
+                              const next = new Set(prev);
+                              next.has(r.artist_code) ? next.delete(r.artist_code) : next.add(r.artist_code);
+                              return next;
+                            })}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition border ${shortlisted.has(r.artist_code) ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-gray-800 text-gray-400 border-gray-700 hover:border-yellow-500/30 hover:text-yellow-400'}`}>
+                            ⭐ {shortlisted.has(r.artist_code) ? 'Shortlisted' : 'Shortlist'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+            )}
           </div>
         )}
       </div>

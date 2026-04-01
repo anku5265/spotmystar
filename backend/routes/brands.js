@@ -132,7 +132,8 @@ router.delete('/requirements/:id', verifyToken, requireBrand, async (req, res) =
 router.get('/requirements/:id/responses', verifyToken, requireBrand, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT ar.*, a.stage_name, a.full_name, a.profile_image, a.city, a.category_id, a.rating, a.artist_code,
+      `SELECT ar.*, a.stage_name, a.full_name, a.profile_image, a.city, a.category_id,
+              a.rating, a.artist_code, a.whatsapp, a.email, a.total_bookings,
               c.name as category_name
        FROM artist_responses ar
        JOIN artists a ON ar.artist_id = a.id
