@@ -118,8 +118,8 @@ export default function ArtistProfile() {
         <div className="absolute inset-0 bg-gradient-to-t from-darker via-darker/60 to-transparent"></div>
       </div>
 
-      <div className="container mx-auto px-4 -mt-24 relative z-10">
-        <div className="flex flex-col md:flex-row gap-8">
+      <div className="container mx-auto px-3 sm:px-4 -mt-24 relative z-10">
+        <div className="flex flex-col md:flex-row gap-6 sm:gap-8">
 
           {/* Profile Card */}
           <div className="md:w-1/3">
