@@ -45,15 +45,19 @@ router.get('/:identifier', async (req, res) => {
     const { skipViewCount } = req.query;
     const decoded = decodeURIComponent(identifier).trim();
 
-    // Match priority: artist_code (A1234) → UUID → stage_name
+    // Strip 'A' prefix if present (e.g., A3527 → 3527)
+    const numericCode = decoded.toUpperCase().startsWith('A')
+      ? parseInt(decoded.slice(1), 10)
+      : null;
+
     const result = await pool.query(
       `SELECT a.*, c.name as category_name
        FROM artists a
        LEFT JOIN categories c ON a.category_id = c.id
-       WHERE a.artist_code::text = $1
-          OR a.id::text = $1
-          OR LOWER(a.stage_name) = LOWER($1)`,
-      [decoded]
+       WHERE ($1::integer IS NOT NULL AND a.artist_code = $1::integer)
+          OR a.id::text = $2
+          OR LOWER(a.stage_name) = LOWER($2)`,
+      [numericCode, decoded]
     );
 
     if (result.rows.length === 0) return res.status(404).json({ message: 'Artist not found' });
