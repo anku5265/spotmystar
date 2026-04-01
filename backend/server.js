@@ -22,9 +22,20 @@ dotenv.config();
 const app = express();
 
 // Middleware
+// ── CORS — must be first ──────────────────────────────────────────────────
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With');
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
+
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow all origins — Vercel handles CORS headers via vercel.json
     callback(null, true);
   },
   credentials: true,
@@ -33,8 +44,7 @@ app.use(cors({
 }));
 
 // Handle preflight requests explicitly
-app.options('*', cors());
-app.use(express.json());
+app.options('*', cors());app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
