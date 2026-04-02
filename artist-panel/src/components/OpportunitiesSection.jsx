@@ -61,28 +61,28 @@ export default function OpportunitiesSection({ token }) {
 
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="p-2.5 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl border border-yellow-500/20">
+        <div className="p-2.5 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl border border-yellow-500/20 flex-shrink-0">
           <Zap className="text-yellow-400" size={20} />
         </div>
-        <div>
+        <div className="min-w-0">
           <h2 className="text-xl font-bold text-white">Brand Opportunities</h2>
-          <p className="text-gray-400 text-sm">Requirements posted by brands — respond to get hired</p>
+          <p className="text-gray-400 text-sm truncate">Requirements posted by brands — respond to get hired</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="flex gap-2 flex-wrap">
+      <div className="space-y-2">
+        <div className="flex flex-wrap gap-1.5">
           {CATEGORIES.slice(0, 8).map(cat => (
             <button key={cat} onClick={() => setCategoryFilter(cat)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${categoryFilter === cat ? 'bg-purple-500 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}>
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${categoryFilter === cat ? 'bg-purple-500 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}>
               {cat}
             </button>
           ))}
         </div>
         <input value={locationFilter} onChange={e => setLocationFilter(e.target.value)}
           placeholder="Filter by city..."
-          className="bg-gray-800 border border-gray-700 rounded-xl px-3 py-1.5 text-sm text-white outline-none focus:ring-2 focus:ring-purple-500/50 w-full sm:w-40" />
+          className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-purple-500/50" />
       </div>
 
       {/* List */}
@@ -123,9 +123,9 @@ export default function OpportunitiesSection({ token }) {
                     <span className="text-xs bg-blue-500/20 text-blue-400 px-2.5 py-1 rounded-full font-semibold flex-shrink-0">{opp.category}</span>
                   </div>
 
-                  <p className="text-gray-300 text-sm leading-relaxed mb-3 line-clamp-3">{opp.description}</p>
+                  <p className="text-gray-300 text-sm leading-relaxed mb-3 line-clamp-2 break-words overflow-hidden">{opp.description}</p>
 
-                  <div className="flex flex-wrap gap-3 text-xs text-gray-400 mb-4">
+                  <div className="flex flex-wrap gap-2 text-xs text-gray-400 mb-4">
                     {opp.location && <span className="flex items-center gap-1"><MapPin size={12} />{opp.location}</span>}
                     {opp.event_date && (
                       <span className="flex items-center gap-1">
@@ -134,8 +134,8 @@ export default function OpportunitiesSection({ token }) {
                         {daysUntil !== null && daysUntil >= 0 && <span className="text-orange-400 ml-1">({daysUntil === 0 ? 'Today!' : `${daysUntil}d left`})</span>}
                       </span>
                     )}
-                    {opp.budget_range && <span className="flex items-center gap-1 text-green-400"><IndianRupee size={12} />{opp.budget_range}</span>}
-                    <span className="text-gray-500">{opp.response_count} responses</span>
+                    {opp.budget_range && <span className="flex items-center gap-1 text-green-400">₹ {opp.budget_range}</span>}
+                    {opp.response_count > 0 && <span className="text-gray-500">{opp.response_count} responses</span>}
                   </div>
 
                   {/* Actions */}
