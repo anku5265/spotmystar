@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, LogOut, Eye, Trash2, Edit, Users, Star, MapPin, Phone, Mail, ExternalLink, Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import api from '../config/api';
 
-const CATEGORIES = ['DJ', 'Singer', 'Dancer', 'Comedian', 'Anchor', 'Band', 'Photographer', 'Videographer', 'Makeup Artist', 'Instagram Influencer', 'YouTube Creator', 'Content Creator', 'Model', 'Other'];
+const CATEGORIES = ['Anchor / Host', 'Singer', 'DJ', 'Dancer', 'Band', 'Comedian', 'Model', 'Actor', 'Influencer / Content Creator', 'Photographer', 'Videographer', 'Makeup Artist', 'Choreographer'];
 
 function StatusBadge({ status }) {
   const map = { pending: 'bg-yellow-500/20 text-yellow-400', approved: 'bg-green-500/20 text-green-400', rejected: 'bg-red-500/20 text-red-400' };
@@ -309,3 +309,4 @@ export default function BrandDashboard() {
     </div>
   );
 }
+
