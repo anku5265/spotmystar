@@ -85,7 +85,7 @@ export default function Footer() {
             <div className="space-y-2">
               <Link to="/privacy-policy" className="block text-gray-400 hover:text-primary transition text-sm">Privacy Policy</Link>
               <Link to="/terms-conditions" className="block text-gray-400 hover:text-primary transition text-sm">Terms & Conditions</Link>
-              <Link to="/report-issue" className="block text-gray-400 hover:text-primary transition text-sm">Report an Issue</Link>
+              <a href="mailto:support@spotmystar.in?subject=Issue%20Report%20%E2%80%93%20SpotMyStar" className="block text-gray-400 hover:text-primary transition text-sm">Report an Issue</a>
               <Link to="/transparency" className="block text-gray-400 hover:text-primary transition text-sm">Transparency</Link>
             </div>
           </div>
