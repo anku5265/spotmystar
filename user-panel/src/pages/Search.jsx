@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Filter, Grid, List, Heart, Calendar } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import api from '../config/api';
 import Toast from '../components/Toast';
 import BookingModal from '../components/BookingModal';
@@ -114,6 +115,13 @@ export default function Search() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Helmet>
+        <title>{filters.city ? `Artists in ${filters.city}` : filters.search ? `Search: ${filters.search}` : 'Find Artists Near You'} - SpotMyStar</title>
+        <meta name="description" content={`Browse and book ${filters.city ? `artists in ${filters.city}` : 'artists across India'} — DJs, Singers, Anchors, Dancers & more on SpotMyStar.`} />
+        <link rel="canonical" href="https://spotmystar.in/search" />
+        <meta property="og:title" content="Find Artists Near You - SpotMyStar" />
+        <meta property="og:url" content="https://spotmystar.in/search" />
+      </Helmet>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       
       <div className="flex flex-col md:flex-row gap-8">

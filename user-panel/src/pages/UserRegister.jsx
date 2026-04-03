@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserPlus, Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import api from '../config/api';
 import Toast from '../components/Toast';
 
@@ -60,6 +61,12 @@ export default function UserRegister() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
+      <Helmet>
+        <title>Register - SpotMyStar</title>
+        <meta name="description" content="Create your SpotMyStar account to book artists for your events across India." />
+        <link rel="canonical" href="https://spotmystar.in/user/register" />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <div className="card max-w-md w-full">
         <div className="text-center mb-8">

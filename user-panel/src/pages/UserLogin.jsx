@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import api from '../config/api';
 
 export default function UserLogin() {
@@ -85,6 +86,12 @@ export default function UserLogin() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
+      <Helmet>
+        <title>Login - SpotMyStar</title>
+        <meta name="description" content="Login to SpotMyStar to book artists for your events." />
+        <link rel="canonical" href="https://spotmystar.in/user/login" />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="card max-w-md w-full">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/20 rounded-full mb-4">

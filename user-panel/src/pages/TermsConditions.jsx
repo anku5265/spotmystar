@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 export default function TermsConditions() {
   const effectiveDate = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -29,6 +30,11 @@ export default function TermsConditions() {
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
+      <Helmet>
+        <title>Terms & Conditions - SpotMyStar</title>
+        <meta name="description" content="Read SpotMyStar's terms and conditions for using our artist booking platform." />
+        <link rel="canonical" href="https://spotmystar.in/terms-conditions" />
+      </Helmet>
       <div className="card space-y-8">
 
         {/* Header */}

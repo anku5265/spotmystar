@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, Phone, Instagram, Star, Eye, Calendar, Heart, Share2 } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import api from '../config/api';
 import { getCurrentRole } from '../hooks/useAuth';
 import BookingModal from '../components/BookingModal';
@@ -108,8 +109,31 @@ export default function ArtistProfile() {
 
   const profileImage = artist.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.stage_name || 'A')}&background=8B5CF6&color=fff&size=400`;
 
+  const artistTitle = `Book ${artist.stage_name}${artist.city ? ` in ${artist.city}` : ''}${artist.category_name ? ` - ${artist.category_name}` : ''} | SpotMyStar`;
+  const artistDesc = `${artist.stage_name} is a ${artist.category_name || 'performer'}${artist.city ? ` based in ${artist.city}` : ''}. ${artist.bio ? artist.bio.slice(0, 120) + '...' : 'Book now on SpotMyStar.'}`;
+  const artistUrl = `https://spotmystar.in/artist/${artist.artist_code ? `A${artist.artist_code}` : artist.id}`;
+
   return (
     <div>
+      <Helmet>
+        <title>{artistTitle}</title>
+        <meta name="description" content={artistDesc} />
+        <link rel="canonical" href={artistUrl} />
+        <meta property="og:title" content={artistTitle} />
+        <meta property="og:description" content={artistDesc} />
+        <meta property="og:url" content={artistUrl} />
+        <meta property="og:image" content={artist.profile_image || 'https://spotmystar.in/star-logo.svg'} />
+        <meta property="og:type" content="profile" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Person",
+          "name": artist.stage_name,
+          "jobTitle": artist.category_name || "Performer",
+          "address": { "@type": "PostalAddress", "addressLocality": artist.city, "addressCountry": "IN" },
+          "url": artistUrl,
+          "image": artist.profile_image || undefined,
+        })}</script>
+      </Helmet>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       {/* Cover Banner */}

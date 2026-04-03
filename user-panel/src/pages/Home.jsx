@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, MapPin, Star, TrendingUp, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import api from '../config/api';
 import Toast from '../components/Toast';
 import BookingModal from '../components/BookingModal';
@@ -114,6 +115,14 @@ export default function Home() {
 
   return (
     <div>
+      <Helmet>
+        <title>SpotMyStar - Book Artists, DJs, Singers, Anchors & Performers in India</title>
+        <meta name="description" content="SpotMyStar is India's top artist booking platform. Find and book DJs, Singers, Anchors, Dancers, Comedians and more for your events." />
+        <link rel="canonical" href="https://spotmystar.in" />
+        <meta property="og:title" content="SpotMyStar - Book Artists & Performers in India" />
+        <meta property="og:description" content="Discover and book talented artists in your city — DJs, Singers, Anchors, Dancers & more." />
+        <meta property="og:url" content="https://spotmystar.in" />
+      </Helmet>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       
       {/* Hero Section */}

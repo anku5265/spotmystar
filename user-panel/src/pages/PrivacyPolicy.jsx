@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 
 export default function PrivacyPolicy() {
   const effectiveDate = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -9,6 +10,11 @@ export default function PrivacyPolicy() {
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
+      <Helmet>
+        <title>Privacy Policy - SpotMyStar</title>
+        <meta name="description" content="Read SpotMyStar's privacy policy to understand how we collect, use and protect your data." />
+        <link rel="canonical" href="https://spotmystar.in/privacy-policy" />
+      </Helmet>
       <div className="card space-y-8">
         {/* Header */}
         <div className="border-b border-white/10 pb-6">
@@ -22,7 +28,7 @@ export default function PrivacyPolicy() {
         <section>
           <p className="text-gray-300 leading-relaxed">
             SpotMyStar ("we", "our", "platform") respects your privacy and is committed to protecting your personal information.
-            This Privacy Policy explains how we collect, use, and safeguard your data when you use our platform — whether you are a
+            This Privacy Policy explains how we collect, use, and safeguard your data when you use our platform ï¿½ whether you are a
             user, artist, or brand/company.
           </p>
         </section>

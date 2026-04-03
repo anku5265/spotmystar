@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
+import { HelmetProvider } from 'react-helmet-async';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -57,6 +58,7 @@ function AccountStatusChecker() {
 
 function App() {
   return (
+    <HelmetProvider>
     <BrowserRouter>
       <div className="min-h-screen flex flex-col">
         <AccountStatusChecker />
@@ -98,6 +100,7 @@ function App() {
         <Footer />
       </div>
     </BrowserRouter>
+    </HelmetProvider>
   );
 }
 
