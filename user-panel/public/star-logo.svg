@@ -1,19 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <!-- 5-pointed star points (outer tips) -->
-  <!-- Top: (100, 10) -->
-  <!-- Upper-right: (190, 75) -->
-  <!-- Lower-right: (155, 175) -->
-  <!-- Lower-left: (45, 175) -->
-  <!-- Upper-left: (10, 75) -->
+  <!-- 
+    Analyzing the logo carefully:
+    - Tall narrow top point
+    - Wide left and right points (roughly at mid height)
+    - Two bottom points angled downward
+    - Inner lines create asymmetric sections (not a regular pentagram)
+    
+    Outer star points:
+    Top:         (100, 8)
+    Right:       (185, 105)
+    Lower-right: (148, 188)
+    Lower-left:  (52, 188)
+    Left:        (15, 105)
+  -->
 
-  <!-- Star outline: connect adjacent tips through inner intersections -->
-  <polygon points="100,10 122,76 190,75 136,117 157,183 100,143 43,183 64,117 10,75 78,76"
-           fill="none" stroke="white" stroke-width="3" stroke-linejoin="miter"/>
+  <!-- Outer star shape -->
+  <polygon points="100,8 185,105 148,188 52,188 15,105"
+           fill="none" stroke="white" stroke-width="3.5" stroke-linejoin="miter"/>
 
-  <!-- Inner crossing lines connecting opposite tips -->
-  <line x1="100" y1="10" x2="43" y2="183" stroke="white" stroke-width="2.2"/>
-  <line x1="100" y1="10" x2="157" y2="183" stroke="white" stroke-width="2.2"/>
-  <line x1="190" y1="75" x2="43" y2="183" stroke="white" stroke-width="2.2"/>
-  <line x1="10" y1="75" x2="157" y2="183" stroke="white" stroke-width="2.2"/>
-  <line x1="10" y1="75" x2="190" y2="75" stroke="white" stroke-width="2.2"/>
+  <!-- Inner diagonal lines - creating the asymmetric internal pattern -->
+  <!-- Top to lower-right -->
+  <line x1="100" y1="8" x2="148" y2="188" stroke="white" stroke-width="3"/>
+  <!-- Top to lower-left -->
+  <line x1="100" y1="8" x2="52" y2="188" stroke="white" stroke-width="3"/>
+  <!-- Left to right -->
+  <line x1="15" y1="105" x2="185" y2="105" stroke="white" stroke-width="3"/>
+  <!-- Left to lower-right -->
+  <line x1="15" y1="105" x2="148" y2="188" stroke="white" stroke-width="3"/>
+  <!-- Right to lower-left -->
+  <line x1="185" y1="105" x2="52" y2="188" stroke="white" stroke-width="3"/>
 </svg>
