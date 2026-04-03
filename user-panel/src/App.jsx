@@ -15,6 +15,7 @@ import AccountReactivated from './components/AccountReactivated';
 import ProtectedRoute, { PublicOnlyRoute, UserFacingRoute } from './components/ProtectedRoute';
 import { getCurrentRole } from './hooks/useAuth';
 import api from './config/api';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 function AccountStatusChecker() {
   const navigate = useNavigate();
@@ -69,6 +70,7 @@ function App() {
             {/* ── TRULY PUBLIC ROUTES (anyone can access) ── */}
             <Route path="/account-blocked" element={<AccountBlocked />} />
             <Route path="/account-reactivated" element={<AccountReactivated />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
             {/* ── AUTH ROUTES (redirect to dashboard if already logged in) ── */}
             <Route path="/user/login" element={<PublicOnlyRoute><UserLogin /></PublicOnlyRoute>} />
@@ -98,3 +100,5 @@ function App() {
 }
 
 export default App;
+
+
