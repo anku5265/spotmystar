@@ -1,20 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <!-- 5 star points: top, upper-right, lower-right, lower-left, upper-left -->
-  <!-- P1=top(100,12), P2=upper-right(172,68), P3=lower-right(144,152), P4=lower-left(56,152), P5=upper-left(28,68) -->
+  <!-- 5-pointed star points (outer tips) -->
+  <!-- Top: (100, 10) -->
+  <!-- Upper-right: (190, 75) -->
+  <!-- Lower-right: (155, 175) -->
+  <!-- Lower-left: (45, 175) -->
+  <!-- Upper-left: (10, 75) -->
 
-  <!-- Outer star boundary (connect adjacent points) -->
-  <polygon points="100,12 172,68 144,152 56,152 28,68"
+  <!-- Star outline: connect adjacent tips through inner intersections -->
+  <polygon points="100,10 122,76 190,75 136,117 157,183 100,143 43,183 64,117 10,75 78,76"
            fill="none" stroke="white" stroke-width="3" stroke-linejoin="miter"/>
 
-  <!-- Inner pentagram lines (connect every other point) -->
-  <!-- P1 to P3 -->
-  <line x1="100" y1="12" x2="144" y2="152" stroke="white" stroke-width="2.5"/>
-  <!-- P1 to P4 -->
-  <line x1="100" y1="12" x2="56" y2="152" stroke="white" stroke-width="2.5"/>
-  <!-- P2 to P4 -->
-  <line x1="172" y1="68" x2="56" y2="152" stroke="white" stroke-width="2.5"/>
-  <!-- P2 to P5 -->
-  <line x1="172" y1="68" x2="28" y2="68" stroke="white" stroke-width="2.5"/>
-  <!-- P3 to P5 -->
-  <line x1="144" y1="152" x2="28" y2="68" stroke="white" stroke-width="2.5"/>
+  <!-- Inner crossing lines connecting opposite tips -->
+  <line x1="100" y1="10" x2="43" y2="183" stroke="white" stroke-width="2.2"/>
+  <line x1="100" y1="10" x2="157" y2="183" stroke="white" stroke-width="2.2"/>
+  <line x1="190" y1="75" x2="43" y2="183" stroke="white" stroke-width="2.2"/>
+  <line x1="10" y1="75" x2="157" y2="183" stroke="white" stroke-width="2.2"/>
+  <line x1="10" y1="75" x2="190" y2="75" stroke="white" stroke-width="2.2"/>
 </svg>
