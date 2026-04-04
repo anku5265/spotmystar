@@ -164,6 +164,17 @@ export default function Home() {
                 Near Me
               </button>
             </form>
+
+            {/* Brand CTA */}
+            <div className="mt-6 flex flex-col items-center gap-2">
+              <a
+                href={`${import.meta.env.VITE_BRAND_PANEL_URL || 'http://localhost:5176'}/register`}
+                className="inline-flex items-center gap-2 border border-primary/60 text-primary hover:bg-primary/10 px-6 py-3 rounded-xl font-semibold transition-all hover:border-primary"
+              >
+                🏢 Join as Brand
+              </a>
+              <p className="text-sm text-gray-500">For brands &amp; companies looking to hire talent</p>
+            </div>
           </motion.div>
         </div>
       </section>

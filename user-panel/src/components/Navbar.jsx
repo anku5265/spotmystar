@@ -101,6 +101,9 @@ export default function Navbar() {
                 <a href={`${import.meta.env.VITE_ARTIST_PANEL_URL || 'http://localhost:5175'}/register`} className="bg-secondary hover:bg-secondary/80 text-white px-4 py-2 rounded-lg font-semibold transition">
                   Join as Artist
                 </a>
+                <a href={`${import.meta.env.VITE_BRAND_PANEL_URL || 'http://localhost:5176'}/register`} className="border border-primary text-primary hover:bg-primary/10 px-4 py-2 rounded-lg font-semibold transition">
+                  Join as Brand
+                </a>
                 <Link to="/user/login" className="text-gray-300 hover:text-white transition">Login</Link>
               </>
             )}
@@ -127,6 +130,7 @@ export default function Navbar() {
               <>
                 <Link to="/search" className="block py-2 hover:text-primary transition" onClick={() => setIsOpen(false)}>Explore Artists</Link>
                 <a href={`${import.meta.env.VITE_ARTIST_PANEL_URL || 'http://localhost:5175'}/register`} className="block bg-secondary text-white px-4 py-3 rounded-lg font-semibold text-center transition" onClick={() => setIsOpen(false)}>Join as Artist</a>
+                <a href={`${import.meta.env.VITE_BRAND_PANEL_URL || 'http://localhost:5176'}/register`} className="block border border-primary text-primary px-4 py-3 rounded-lg font-semibold text-center hover:bg-primary/10 transition" onClick={() => setIsOpen(false)}>Join as Brand</a>
                 <Link to="/user/login" className="block py-2 text-gray-300 hover:text-white transition" onClick={() => setIsOpen(false)}>Login</Link>
               </>
             )}
