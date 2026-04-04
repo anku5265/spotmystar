@@ -42,7 +42,7 @@ export default function Register() {
       const { data } = await api.get('/api/categories');
       setCategories(Array.isArray(data) ? data : []);
     } catch {
-      setToast({ message: 'Failed to load categories', type: 'error' });
+      // Silent fail on initial load - will retry when user reaches step 2
     }
   };
 
@@ -87,11 +87,14 @@ export default function Register() {
       if (formData.password.length < 6) {
         setToast({ message: 'Password must be at least 6 characters', type: 'error' }); return;
       }
+      // Retry fetching categories when moving to step 2
+      if (categories.length === 0) fetchCategories();
     }
     if (currentStep === 2) {
       if (selectedCategories.length === 0) { setToast({ message: 'Please select at least one category', type: 'error' }); return; }
       if (!primaryCategory) { setToast({ message: 'Please select a primary category', type: 'error' }); return; }
     }
+
     if (currentStep === 3) {
       if (!formData.primaryCity) { setToast({ message: 'Please enter your primary city', type: 'error' }); return; }
       if (!formData.shortBio) { setToast({ message: 'Please enter a short bio', type: 'error' }); return; }
@@ -222,7 +225,14 @@ export default function Register() {
             </div>
           ))}
         </div>
-        {categories.length === 0 && <p className="text-gray-400 text-center py-4">Loading categories...</p>}
+        {categories.length === 0 && (
+          <div className="text-center py-6">
+            <p className="text-gray-400 mb-3">Could not load categories.</p>
+            <button type="button" onClick={fetchCategories} className="px-4 py-2 bg-primary rounded-lg hover:bg-primary/80 text-sm">
+              Retry
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
