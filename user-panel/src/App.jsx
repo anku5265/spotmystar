@@ -19,6 +19,7 @@ import api from './config/api';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsConditions from './pages/TermsConditions';
 import About from './pages/About';
+import FAQ from './pages/FAQ';
 
 function AccountStatusChecker() {
   const navigate = useNavigate();
@@ -75,6 +76,7 @@ function App() {
             <Route path="/account-blocked" element={<AccountBlocked />} />
             <Route path="/account-reactivated" element={<AccountReactivated />} />
             <Route path="/about" element={<About />} />
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-conditions" element={<TermsConditions />} />
 
